@@ -1,19 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+namespace BlazorServer.Game;
 
-namespace BlazorServer.Game
+public record Board
 {
-    public record Board
-    {
-        // public string Question { get; set; }
-        // public List<string> Answers { get; set; }
-        // public List<int> AnswerPoints { get; set; }
+    // public string Question { get; set; }
+    // public List<string> Answers { get; set; }
+    // public List<int> AnswerPoints { get; set; }
 
-        // ^^ In a question class? ^^
-        public bool QuestionRevealed { get; set; } = false;
-        public List<bool> AnswersRevealed { get; set; } = [false, false, false, false, false];
-        
-    }
+    // ^^ In a question class? ^^
+    public bool QuestionRevealed { get; set; } = false;
+    public List<bool> AnswersRevealed { get; set; } = [false, false, false, false, false];
+    
 }
