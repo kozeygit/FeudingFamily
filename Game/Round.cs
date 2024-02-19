@@ -1,3 +1,5 @@
+using BlazorServer.Models;
+
 namespace BlazorServer.Game;
 
 public class Round

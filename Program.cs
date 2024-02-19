@@ -3,7 +3,9 @@ using BlazorServer.Components;
 using BlazorServer.Hubs;
 using Dapper;
 using BlazorServer.Game;
+using BlazorServer.Models;
 using Microsoft.Data.Sqlite;
+using BlazorServer.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,4 +80,10 @@ app.MapGet("questions", async (IConfiguration configuration) =>
 })
 .WithName("GetQuestions");
 
-app.Run();
+//build db
+DatabaseBuilder.CreateQuestionsTable();
+DatabaseBuilder.CreateAnswersTable();
+
+DatabaseBuilder.Test();
+
+// app.Run();

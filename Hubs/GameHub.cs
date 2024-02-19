@@ -1,4 +1,5 @@
 using BlazorServer.Game;
+using BlazorServer.Models;
 using Microsoft.AspNetCore.SignalR;
 
 namespace BlazorServer.Hubs;
