@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.ResponseCompression;
 using BlazorServer.Components;
 using BlazorServer.Hubs;
 using Dapper;
-using BlazorServer.Game;
 using BlazorServer.Models;
 using Microsoft.Data.Sqlite;
 using BlazorServer.Data;

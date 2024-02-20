@@ -1,16 +1,13 @@
-using System.Data.Common;
-using System.Runtime.CompilerServices;
 using BlazorServer.Models;
 using Microsoft.Data.Sqlite;
-using System.Text.Json.Nodes;
 using System.Text.Json;
-using Microsoft.VisualBasic;
+using Dapper;
 
 namespace BlazorServer.Data;
 
 static public class DatabaseBuilder
 {
-    private static readonly string connectionString = $"Data Source=Data/FamilyFeudDB.db;foreign keys=true;";
+    private static readonly string connectionString = $"Data Source=Data/FamilyFeudDB.db;Foreign Keys=true;";
     public static void CreateQuestionsTable()
     {
         using (var connection = new SqliteConnection(connectionString))
@@ -86,13 +83,75 @@ static public class DatabaseBuilder
 
     public static void Populate(string jsonFilePath)
     {
-        
+        var questions = ReadAndParseJsonFile(jsonFilePath);
+
+        // Console.WriteLine(questions[0]);
+        // questions[0].Answers.ForEach(a => Console.WriteLine(a));
+
+        foreach (var question in questions)
+        {
+            // Check if exact copy of question is in db already
+            if (CheckIfQuestionInDatabase(question))
+            {
+                Console.WriteLine("Question already in DB");
+                continue;
+            }
+
+            using var connection = new SqliteConnection(connectionString);
+            
+            // Insert Question
+            var questionSql = @"INSERT INTO Questions (Content) VALUES (@Content);";
+
+            var affectedRows = connection.Execute(questionSql, new { Content = question.Content });
+            if (affectedRows == 1)
+            {
+                Console.WriteLine($"success for {question.Content}");
+            }
+            else
+            {
+                Console.WriteLine($"\n\nFAIL!!!\n{question.Content}, {affectedRows}");
+            }
+
+            // Insert Answers with last id as question id
+            var lastInsertRowId = connection.ExecuteScalar("SELECT last_insert_rowid()");
+            var answerSql = @"
+                INSERT INTO Answers (Content, Points, Ranking, QuestionId)
+                VALUES (@Content, @Points, @Ranking, @QuestionId);";
+
+            foreach (var answer in question.Answers)
+            {
+                var dynamicParams = new DynamicParameters(answer);
+                dynamicParams.Add("@QuestionId", lastInsertRowId);
+                var affectedAnswerRows = connection.Execute(answerSql, dynamicParams);
+                Console.WriteLine(affectedAnswerRows);
+            }
+
+
+        }
+
     }
 
-    public static List<JsonQuestionModel> ReadAndParseJsonFile(string jsonFilePath)
+    public static bool CheckIfQuestionInDatabase(QuestionDto question)
+    {
+        using var connection = new SqliteConnection(connectionString);
+        var sql = @"
+        SELECT COUNT(*) FROM Questions
+        WHERE Content == @Content";
+
+        var rowsReturned = connection.ExecuteScalar<int>(sql, new { question.Content });
+        if (rowsReturned == 0)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    public static List<QuestionDto> ReadAndParseJsonFile(string jsonFilePath)
     {
         using Stream json = new StreamReader(jsonFilePath).BaseStream;
-        
+
         try
         {
             json.Seek(0, SeekOrigin.Begin);
@@ -102,39 +161,67 @@ static public class DatabaseBuilder
                 PropertyNameCaseInsensitive = true
             };
 
-            List<JsonQuestionModel>? questions = JsonSerializer.Deserialize<List<JsonQuestionModel>>(json, options);
+            List<JsonQuestionModel>? jsonQuestions = JsonSerializer.Deserialize<List<JsonQuestionModel>>(json, options);
 
-            if (questions is null)
+            if (jsonQuestions is null)
             {
                 Console.WriteLine("IT WAS NULL AHHHHHH");
                 throw new Exception();
-            }         
-
-            foreach (var q in questions)
-            {
-                Console.WriteLine(q.Question);
-                Console.WriteLine(q.Answer1.Text);
-                Console.WriteLine(q.Answer2.Text);
-                Console.WriteLine(q.Answer3.Text);
-                Console.WriteLine(q.Answer4.Text);
-                Console.WriteLine(q.Answer5.Text);
             }
+
+            List<QuestionDto> questions = jsonQuestions.Select(q =>
+                new QuestionDto
+                {
+                    Content = q.Question,
+                    Answers = [
+                        new AnswerDto
+                        {
+                            Content = q.Answer1.Text,
+                            Points = q.Answer1.Points,
+                            Ranking = 1
+                        },
+                        new AnswerDto
+                        {
+                            Content = q.Answer2.Text,
+                            Points = q.Answer2.Points,
+                            Ranking = 2
+                        },
+                        new AnswerDto
+                        {
+                            Content = q.Answer3.Text,
+                            Points = q.Answer3.Points,
+                            Ranking = 3
+                        },
+                        new AnswerDto
+                        {
+                            Content = q.Answer4.Text,
+                            Points = q.Answer4.Points,
+                            Ranking = 4
+                        },
+                        new AnswerDto
+                        {
+                            Content = q.Answer5.Text,
+                            Points = q.Answer5.Points,
+                            Ranking = 5
+                        },
+                    ]
+                }
+            ).ToList();
+
+
             return questions;
         }
         catch (Exception ex)
         {
-            Console.WriteLine();
             Console.WriteLine("ERROR: " + ex);
-            Console.WriteLine();
-            Console.WriteLine();
             return null;
         }
-        
+
     }
 
     public static void Test()
     {
-        var _ = ReadAndParseJsonFile("Data/ff_questions.json");
+        Populate("Data/ff_questions.json");
     }
 
 }
