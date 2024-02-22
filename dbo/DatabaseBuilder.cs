@@ -5,10 +5,15 @@ using Dapper;
 
 namespace FeudingFamily.Data;
 
-static public class DatabaseBuilder
+public class DatabaseBuilder
 {
-    private static readonly string connectionString = $"Data Source=Data/FamilyFeudDB.db;Foreign Keys=true;";
-    public static void CreateQuestionsTable()
+
+    public DatabaseBuilder(SqliteConnection sqliteConnection)
+    {
+        
+    }
+    private readonly string connectionString = $"Data Source=Data/FamilyFeudDB.db;Foreign Keys=true;";
+    public void CreateQuestionsTable()
     {
         using (var connection = new SqliteConnection(connectionString))
         {
@@ -38,7 +43,7 @@ static public class DatabaseBuilder
         }
     }
 
-    public static void CreateAnswersTable()
+    public void CreateAnswersTable()
     {
         using (var connection = new SqliteConnection(connectionString))
         {
@@ -72,7 +77,7 @@ static public class DatabaseBuilder
         }
     }
 
-    public static bool TableExists(SqliteConnection connection, string tableName)
+    public bool TableExists(SqliteConnection connection, string tableName)
     {
         using (SqliteCommand command = connection.CreateCommand())
         {
@@ -81,7 +86,7 @@ static public class DatabaseBuilder
         }
     }
 
-    public static void PopulateDB(string jsonFilePath)
+    public void PopulateDB(string jsonFilePath)
     {
         var questions = ReadAndParseJsonFile(jsonFilePath);
 
@@ -131,7 +136,7 @@ static public class DatabaseBuilder
 
     }
 
-    public static bool CheckIfQuestionInDatabase(QuestionDto question)
+    public bool CheckIfQuestionInDatabase(QuestionDto question)
     {
         using var connection = new SqliteConnection(connectionString);
         var sql = @"
@@ -148,7 +153,7 @@ static public class DatabaseBuilder
             return true;
         }
     }
-    public static List<QuestionDto> ReadAndParseJsonFile(string jsonFilePath)
+    public List<QuestionDto> ReadAndParseJsonFile(string jsonFilePath)
     {
         using Stream json = new StreamReader(jsonFilePath).BaseStream;
 
@@ -219,7 +224,7 @@ static public class DatabaseBuilder
 
     }
 
-    public static void Test()
+    public void Test()
     {
         PopulateDB("Data/ff_questions.json");
     }
