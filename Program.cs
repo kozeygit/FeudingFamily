@@ -1,10 +1,9 @@
 using Microsoft.AspNetCore.ResponseCompression;
-using BlazorServer.Components;
-using BlazorServer.Hubs;
+using FeudingFamily.Components;
+using FeudingFamily.Hubs;
 using Dapper;
-using BlazorServer.Models;
+using FeudingFamily.Models;
 using Microsoft.Data.Sqlite;
-using BlazorServer.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,13 +11,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
 builder.Services.AddResponseCompression(opts =>
 {
-   opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-         ["application/octet-stream"]);
+    opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+          ["application/octet-stream"]);
 });
 
 builder.Services.AddSingleton(serviceProvider =>
@@ -42,12 +38,6 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 
-    if (app.Environment.IsDevelopment())
-    {
-        app.UseSwagger();
-        app.UseSwaggerUI();
-    }
-
 }
 
 app.UseResponseCompression();
@@ -64,10 +54,10 @@ app.MapHub<GameHub>("/gameHub");
 
 
 // Question Endpoint
-app.MapGet("questions", async (IConfiguration configuration) =>
+app.MapGet("/questions", async (IConfiguration configuration) =>
 {
     var connectionString = configuration.GetConnectionString("DefaultConnection");
-    
+
     using var connection = new SqliteConnection(connectionString);
 
     const string sql = "SELECT * FROM Questions";
@@ -76,13 +66,11 @@ app.MapGet("questions", async (IConfiguration configuration) =>
 
     return Results.Ok(questions);
 
-})
-.WithName("GetQuestions");
+});
 
 //build db
-DatabaseBuilder.CreateQuestionsTable();
-DatabaseBuilder.CreateAnswersTable();
+// DatabaseBuilder.CreateQuestionsTable();
+// DatabaseBuilder.CreateAnswersTable();
+// DatabaseBuilder.PopulateDB("Data/ff_questions.json");
 
-DatabaseBuilder.Test();
-
-// app.Run();
+app.Run();

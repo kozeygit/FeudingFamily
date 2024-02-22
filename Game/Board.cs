@@ -1,4 +1,4 @@
-namespace BlazorServer.Game;
+namespace FeudingFamily.Game;
 
 public record Board
 {

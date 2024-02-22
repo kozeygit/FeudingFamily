@@ -1,4 +1,4 @@
-namespace BlazorServer.Models;
+namespace FeudingFamily.Models;
 public record Answer
 {
     public int Id { get; set; }

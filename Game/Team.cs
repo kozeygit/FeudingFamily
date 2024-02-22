@@ -1,4 +1,4 @@
-namespace BlazorServer.Game;
+namespace FeudingFamily.Game;
 
 public class Team
 {

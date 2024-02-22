@@ -1,9 +1,9 @@
-using BlazorServer.Models;
+using FeudingFamily.Models;
 using Microsoft.Data.Sqlite;
 using System.Text.Json;
 using Dapper;
 
-namespace BlazorServer.Data;
+namespace FeudingFamily.Data;
 
 static public class DatabaseBuilder
 {
@@ -81,7 +81,7 @@ static public class DatabaseBuilder
         }
     }
 
-    public static void Populate(string jsonFilePath)
+    public static void PopulateDB(string jsonFilePath)
     {
         var questions = ReadAndParseJsonFile(jsonFilePath);
 
@@ -221,7 +221,7 @@ static public class DatabaseBuilder
 
     public static void Test()
     {
-        Populate("Data/ff_questions.json");
+        PopulateDB("Data/ff_questions.json");
     }
 
 }

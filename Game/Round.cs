@@ -1,6 +1,6 @@
-using BlazorServer.Models;
+using FeudingFamily.Models;
 
-namespace BlazorServer.Game;
+namespace FeudingFamily.Game;
 
 public class Round
 {

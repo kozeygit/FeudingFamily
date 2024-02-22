@@ -1,8 +1,8 @@
-using BlazorServer.Game;
-using BlazorServer.Models;
+using FeudingFamily.Game;
+using FeudingFamily.Models;
 using Microsoft.AspNetCore.SignalR;
 
-namespace BlazorServer.Hubs;
+namespace FeudingFamily.Hubs;
 
 public class GameHub : Hub
 {

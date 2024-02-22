@@ -1,4 +1,4 @@
-namespace BlazorServer.Models
+namespace FeudingFamily.Models
 {
     public record JsonQuestionModel
     {
