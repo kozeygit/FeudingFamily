@@ -4,12 +4,16 @@ using FeudingFamily.Hubs;
 using Dapper;
 using FeudingFamily.Models;
 using Microsoft.Data.Sqlite;
+using FeudingFamily.dbo.Tables;
+using FeudingFamily.Data;
+using System.Data.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddRazorPages();
+builder.Services.AddServerSideBlazor();
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 builder.Services.AddResponseCompression(opts =>
 {
@@ -17,17 +21,15 @@ builder.Services.AddResponseCompression(opts =>
           ["application/octet-stream"]);
 });
 
-builder.Services.AddSingleton(serviceProvider =>
+
+builder.Services.AddScoped<IDatabaseConnection, DatabaseConnection>(provider =>
 {
-    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-
+    // Configure connection string or inject it here
+    var configuration = provider.GetRequiredService<IConfiguration>();
     var connectionString = configuration.GetConnectionString("DefaultConnection");
-
-    return new SqliteConnection(connectionString);
+    return new DatabaseConnection(connectionString);
 
 });
-
-
 
 
 var app = builder.Build();
@@ -55,23 +57,26 @@ app.MapHub<GameHub>("/gameHub");
 
 
 // Question Endpoint
-app.MapGet("/questions", async (IConfiguration configuration) =>
+app.MapGet("/questions", async (IDatabaseConnection dbConnection) =>
 {
-    var connectionString = configuration.GetConnectionString("DefaultConnection");
-
-    using var connection = new SqliteConnection(connectionString);
+    SqliteConnection _connection = dbConnection.Connection; 
 
     const string sql = "SELECT * FROM Questions";
 
-    var questions = await connection.QueryAsync<Question>(sql);
+    var questions = await _connection.QueryAsync<Question>(sql);
+
+    Console.WriteLine(questions);
 
     return Results.Ok(questions);
 
 });
 
-//build db
-// DatabaseBuilder.CreateQuestionsTable();
-// DatabaseBuilder.CreateAnswersTable();
-// DatabaseBuilder.PopulateDB("Data/ff_questions.json");
+// build db
+var dbConnection = new DatabaseConnection(app.Configuration.GetConnectionString("DefaultConnection"));
+
+DatabaseBuilder dbBuilder = new(dbConnection);
+await dbBuilder.CreateTableAsync(CreateTableSql.Questions);
+await dbBuilder.CreateTableAsync(CreateTableSql.Answers);
+// await dbBuilder.PopulateTablesAsync("dbo/JsonQuestions/ff_questions.json");
 
 app.Run();
