@@ -23,7 +23,8 @@ public class Round
             }
         }
     }
-    public Question CurrentQuestion { get; set; }
+    public Question? CurrentQuestion { get; set; }
+    
 
 
 }

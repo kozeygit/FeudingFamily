@@ -6,7 +6,9 @@ using FeudingFamily.Models;
 using Microsoft.Data.Sqlite;
 using FeudingFamily.dbo.Tables;
 using FeudingFamily.Data;
-using System.Data.Common;
+using System.Data;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+using Microsoft.VisualBasic;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,12 +24,12 @@ builder.Services.AddResponseCompression(opts =>
 });
 
 
-builder.Services.AddScoped<IDatabaseConnection, DatabaseConnection>(provider =>
+builder.Services.AddTransient<IDbConnection>(provider =>
 {
     // Configure connection string or inject it here
     var configuration = provider.GetRequiredService<IConfiguration>();
     var connectionString = configuration.GetConnectionString("DefaultConnection");
-    return new DatabaseConnection(connectionString);
+    return new SqliteConnection(connectionString);
 
 });
 
@@ -40,7 +42,6 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
-
 }
 
 app.UseResponseCompression();
@@ -50,16 +51,16 @@ app.UseStaticFiles();
 app.UseAntiforgery();
 
 app.MapBlazorHub();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
+
 app.MapHub<GameHub>("/gameHub");
 
 
 
 // Question Endpoint
-app.MapGet("/questions", async (IDatabaseConnection dbConnection) =>
+app.MapGet("/questions", async (IDbConnection connection) =>
 {
-    SqliteConnection _connection = dbConnection.Connection; 
+    IDbConnection _connection = connection;
 
     const string sql = "SELECT * FROM Questions";
 
@@ -72,9 +73,10 @@ app.MapGet("/questions", async (IDatabaseConnection dbConnection) =>
 });
 
 // build db
-var dbConnection = new DatabaseConnection(app.Configuration.GetConnectionString("DefaultConnection"));
 
-DatabaseBuilder dbBuilder = new(dbConnection);
+var connection = app.Services.GetRequiredService<IDbConnection>();
+
+DatabaseBuilder dbBuilder = new(connection);
 await dbBuilder.CreateTableAsync(CreateTableSql.Questions);
 await dbBuilder.CreateTableAsync(CreateTableSql.Answers);
 // await dbBuilder.PopulateTablesAsync("dbo/JsonQuestions/ff_questions.json");

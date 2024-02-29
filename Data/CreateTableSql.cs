@@ -11,10 +11,6 @@ public class CreateTableSql
                     Content TEXT NOT NULL
                 );";
 
-            //  return @"CREATE TABLE Questions (
-            //      Id INTEGER PRIMARY KEY AUTOINCREMENT,
-            //      Content TEXT NOT NULL
-            //  );";
         }
 
     }
@@ -31,15 +27,6 @@ public class CreateTableSql
                     QuestionId INTEGER,
                     FOREIGN KEY (QuestionId) REFERENCES Questions(Id)
                 );";
-
-            // return @"CREATE TABLE Answers (
-            //     Id INTEGER PRIMARY KEY AUTOINCREMENT,
-            //     Content TEXT NOT NULL,
-            //     Points INTEGER,
-            //     Ranking INTEGER,
-            //     QuestionId INTEGER,
-            //     FOREIGN KEY(QuestionId) REFERENCES Questions(Id)
-            // ); ";
         }
     }
 }

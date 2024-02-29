@@ -2,16 +2,17 @@ using FeudingFamily.Models;
 using Microsoft.Data.Sqlite;
 using System.Text.Json;
 using Dapper;
+using System.Data;
 
 namespace FeudingFamily.Data;
 
 public class DatabaseBuilder
 {
 
-    private readonly SqliteConnection _connection;
-    public DatabaseBuilder(IDatabaseConnection _db)
+    private readonly IDbConnection _connection;
+    public DatabaseBuilder(IDbConnection connection)
     {
-        _connection = _db.Connection;
+        _connection = connection;
     }
 
     public async Task CreateTableAsync(string createTableSql)
@@ -163,7 +164,6 @@ public class DatabaseBuilder
                     }
                 }
             ).ToList();
-
 
             return questions;
         }
