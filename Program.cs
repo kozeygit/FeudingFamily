@@ -7,8 +7,7 @@ using Microsoft.Data.Sqlite;
 using FeudingFamily.dbo.Tables;
 using FeudingFamily.Data;
 using System.Data;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
-using Microsoft.VisualBasic;
+using FeudingFamily.Game;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +31,7 @@ builder.Services.AddTransient<IDbConnection>(provider =>
     return new SqliteConnection(connectionString);
 
 });
+builder.Services.AddSingleton<IQuestionService, QuestionService>();
 
 
 var app = builder.Build();

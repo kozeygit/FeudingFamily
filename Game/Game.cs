@@ -2,7 +2,7 @@ using FeudingFamily.Models;
 
 namespace FeudingFamily.Game;
 
-public class Round
+public class Game
 {
     public Team? Team1 { get; set; } = null;
     public Team? Team2 { get; set; } = null;
@@ -24,6 +24,7 @@ public class Round
         }
     }
     public Question? CurrentQuestion { get; set; }
+    public Board Board { get; set; } = new Board();
     
 
 
