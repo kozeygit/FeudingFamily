@@ -58,7 +58,7 @@ app.MapHub<GameHub>("/gameHub");
 
 
 // Question Endpoint
-app.MapGet("/questions", (IQuestionService questionService) =>
+app.MapGet("/questions2", (IQuestionService questionService) =>
 {
     IQuestionService _questionService = questionService;
 

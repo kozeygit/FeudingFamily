@@ -6,6 +6,7 @@ using System.Data;
 
 namespace FeudingFamily.Data;
 
+// this sucks, but i only need to use it once soooooo.
 public class DatabaseBuilder
 {
 

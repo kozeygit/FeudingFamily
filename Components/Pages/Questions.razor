@@ -1,0 +1,29 @@
+@page "/questions"
+@attribute [StreamRendering]
+@inject IQuestionService questionSevice
+
+<PageTitle>Weather</PageTitle>
+
+<h1 class="border-cyan-300 bg-red-200">Questions</h1>
+<br/>
+
+<table class="questions">
+@foreach (var question in QuestionsList) {
+    <h2 class="font-semibold font-">Question: @question.Content</h2>
+    <h3>@question.Answers[0].Content - @question.Answers[0].Points</h3>
+    <h3>@question.Answers[1].Content - @question.Answers[1].Points</h3>
+    <h3>@question.Answers[2].Content - @question.Answers[2].Points</h3>
+    <h3>@question.Answers[3].Content - @question.Answers[3].Points</h3>
+    <h3>@question.Answers[4].Content - @question.Answers[4].Points</h3>
+    <h2>-----------------------------------------------</h2>
+}
+</table>
+
+@code {
+    public List<QuestionDto> QuestionsList { get; set; } = [];
+
+        protected override void OnInitialized()
+        {
+            QuestionsList = questionSevice.GetShuffledQuestions().Select(q => q.MapToDto()).ToList();
+        }
+}
