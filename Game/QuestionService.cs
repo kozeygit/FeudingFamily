@@ -7,23 +7,15 @@ namespace FeudingFamily.Game;
 public class QuestionService : IQuestionService
 {
     private readonly IDbConnection _connection;
-    private int _questionIndex = 0;
-    public int QuestionIndex
-    {
-        get => _questionIndex % Questions.Count;
-        set => _questionIndex = value;
-    }
     public List<Question> Questions { get; init; } = [];
 
     public QuestionService(IDbConnection connection)
     {
         _connection = connection;
-
         Questions = GetQuestionsFromDB();
-        ShuffleQuestions();
     }
 
-    public List<Answer> GetAnswersForQuestionFromDB(int questionId)
+    private List<Answer> GetAnswersForQuestionFromDB(int questionId)
     {
         var results = _connection
             .Query<Answer>(@"
@@ -36,7 +28,7 @@ public class QuestionService : IQuestionService
         return results;
     }
 
-    public List<Question> GetQuestionsFromDB()
+    private List<Question> GetQuestionsFromDB()
     {
         var results = _connection.Query<Question>("SELECT * FROM Questions;");
         foreach (var question in results)
@@ -47,14 +39,13 @@ public class QuestionService : IQuestionService
         return results.ToList();
     }
 
-    public Question GetNextQuestion()
+
+    public List<Question> GetQuestions()
     {
-        var question = Questions[QuestionIndex];
-        QuestionIndex++;
-        return question;
+        return Questions;
     }
 
-    public void ShuffleQuestions()
+    public List<Question> GetShuffledQuestions()
     {
         // Fisher-Yates Shuffle Algorithm
         // Assuming we have an array num of n elements:
@@ -62,19 +53,21 @@ public class QuestionService : IQuestionService
         //  k ← random integer that is 0 ≤ j ≤ i
         //  swap num[k] with num[i]
 
-        for (int i = Questions.Count - 1; i > 0; i--)
+        var shuffledQuestions = new List<Question>(Questions);
+
+        for (int i = shuffledQuestions.Count - 1; i > 0; i--)
         {
             int k = Random.Shared.Next(0, i + 1);
-            (Questions[k], Questions[i]) = (Questions[i], Questions[k]);
+            (shuffledQuestions[k], shuffledQuestions[i]) = (shuffledQuestions[i], shuffledQuestions[k]);
         }
+
+        return shuffledQuestions;
     }
 }
 
 public interface IQuestionService
 {
-    Question GetNextQuestion();
-    List<Question> GetQuestionsFromDB();
-    List<Answer> GetAnswersForQuestionFromDB(int questionId);
-    void ShuffleQuestions();
+    List<Question> GetQuestions();
+    List<Question> GetShuffledQuestions();
 }
 

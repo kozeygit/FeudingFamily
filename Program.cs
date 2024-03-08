@@ -74,11 +74,11 @@ app.MapGet("/questions", async (IDbConnection connection) =>
 
 // build db
 
-var connection = app.Services.GetRequiredService<IDbConnection>();
+// var connection = app.Services.GetRequiredService<IDbConnection>();
 
-DatabaseBuilder dbBuilder = new(connection);
-await dbBuilder.CreateTableAsync(CreateTableSql.Questions);
-await dbBuilder.CreateTableAsync(CreateTableSql.Answers);
+// DatabaseBuilder dbBuilder = new(connection);
+// await dbBuilder.CreateTableAsync(CreateTableSql.Questions);
+// await dbBuilder.CreateTableAsync(CreateTableSql.Answers);
 // await dbBuilder.PopulateTablesAsync("dbo/JsonQuestions/ff_questions.json");
 
 app.Run();
