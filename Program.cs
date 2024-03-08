@@ -58,17 +58,13 @@ app.MapHub<GameHub>("/gameHub");
 
 
 // Question Endpoint
-app.MapGet("/questions", async (IDbConnection connection) =>
+app.MapGet("/questions", (IQuestionService questionService) =>
 {
-    IDbConnection _connection = connection;
+    IQuestionService _questionService = questionService;
 
-    const string sql = "SELECT * FROM Questions";
+    var questions = _questionService.GetShuffledQuestions();
 
-    var questions = await _connection.QueryAsync<Question>(sql);
-
-    Console.WriteLine(questions);
-
-    return Results.Ok(questions);
+    return Results.Ok(questions.Select(q => q.MapToDto()));
 
 });
 
