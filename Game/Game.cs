@@ -4,8 +4,7 @@ namespace FeudingFamily.Game;
 
 public class Game
 {
-    public Team? Team1 { get; set; } = null;
-    public Team? Team2 { get; set; } = null;
+    public Dictionary<string, Team> Teams { get; set; } = [];
     public Team? TeamPlaying { get; set; } = null;
     private bool _trackPoints = false;
     public bool TrackPoints
@@ -13,7 +12,7 @@ public class Game
         get => _trackPoints;
         set
         {
-            if (Team1 is not null && Team2 is not null)
+            if (Teams.Count == 2)
             {
                 _trackPoints = value;
             }
@@ -48,21 +47,25 @@ public class Game
         QuestionIndex++;
         return question;
     }
-    
-    public bool JoinTeam(string teamName)
+
+    public bool AddTeamMember(string teamName, string member)
     // Make a return object instead idk
     {
-        if (Team1 is not null && Team2 is not null)
-            return false;
-        
-        if (Team1 is null)
-            Team1 = new Team(teamName);
+        if (Teams.TryGetValue(teamName, out Team? team))
+        {
+            team.AddMember(member);
+            return true;
+        }
 
-        else if (Team2 is null)
-            Team2 = new Team(teamName);
+        else if (Teams.Count < 2)
+        {
+            var newTeam = new Team(teamName);
+            newTeam.AddMember(member);
+            Teams.Add(teamName, newTeam);
+            return true;
+        }
 
-        return true;
+        return false;
     }
-
 
 }
