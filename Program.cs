@@ -1,11 +1,7 @@
 using Microsoft.AspNetCore.ResponseCompression;
 using FeudingFamily.Components;
 using FeudingFamily.Hubs;
-using Dapper;
-using FeudingFamily.Models;
 using Microsoft.Data.Sqlite;
-using FeudingFamily.dbo.Tables;
-using FeudingFamily.Data;
 using System.Data;
 using FeudingFamily.Game;
 
@@ -32,6 +28,7 @@ builder.Services.AddTransient<IDbConnection>(provider =>
 
 });
 builder.Services.AddSingleton<IQuestionService, QuestionService>();
+builder.Services.AddSingleton<IGameManager, GameManager>();
 
 
 var app = builder.Build();

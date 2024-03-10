@@ -1,8 +1,6 @@
-using System.Data;
-
 namespace FeudingFamily.Game;
 
-public class GameManager
+public class GameManager : IGameManager
 {
     private readonly Dictionary<string, Game> games = [];
     private readonly IQuestionService _questionService;
@@ -24,18 +22,18 @@ public class GameManager
         return new JoinGameResult { GameId = gameId };
     }
 
-    public (JoinGameResult, Game?) GetGame(string gameId)
+    public JoinGameResult GetGame(string gameId)
     {
         if (games.ContainsKey(gameId) is false)
-            return (new JoinGameResult { ErrorMessage = "Game Does Not Exist" }, null);
+            return new JoinGameResult { ErrorMessage = "Game Does Not Exist" };
 
         JoinGameResult validGameKey = GameIdValidator(gameId);
         if (validGameKey.Success is false)
         {
-            return (validGameKey, null);
+            return validGameKey;
         }
 
-        return (new JoinGameResult { GameId = gameId }, games[gameId]);
+        return new JoinGameResult { GameId = gameId, Game = games[gameId] };
     }
 
     private JoinGameResult GameIdValidator(string gameId)
@@ -52,5 +50,12 @@ public class GameManager
         return new JoinGameResult { GameId = gameId };
     }
 
+
+}
+
+public interface IGameManager
+{
+    JoinGameResult CreateNewGame(string gameId);
+    JoinGameResult GetGame(string gameId);
 
 }
