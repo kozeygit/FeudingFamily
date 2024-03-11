@@ -1,8 +1,8 @@
+using Dapper;
 using FeudingFamily.Models;
 using Microsoft.Data.Sqlite;
-using System.Text.Json;
-using Dapper;
 using System.Data;
+using System.Text.Json;
 
 namespace FeudingFamily.Data;
 
@@ -25,11 +25,11 @@ public class DatabaseBuilder
             {
                 Console.WriteLine("$Result is {result} but no error thrown, table probably already exists");
             }
-            
+
             Console.WriteLine($"Table created successfully. Result: {result}");
         }
         catch (SqliteException ex)
-        {  
+        {
             Console.WriteLine($"Error creating table. Exception: {ex.Message}");
             throw;
         }
@@ -68,7 +68,7 @@ public class DatabaseBuilder
 
 
                 var lastInsertedRowId = await _connection.ExecuteScalarAsync("SELECT last_insert_rowid()");
-                
+
                 var answerSql = @"
                     INSERT INTO Answers (Content, Points, Ranking, QuestionId)
                     VALUES (@Content, @Points, @Ranking, @QuestionId);
@@ -83,7 +83,7 @@ public class DatabaseBuilder
                         Ranking = answer.Ranking,
                         QuestionId = lastInsertedRowId
                     };
-                   
+
                     var effectedAnswerRows = await _connection.ExecuteAsync(answerSql, parameters);
                     Console.WriteLine(effectedAnswerRows);
                 }

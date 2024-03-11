@@ -1,0 +1,99 @@
+﻿@page "/presenter"
+@layout Layout.EmptyLayout
+
+<PageTitle>FeudingFamily - Presenter</PageTitle>
+
+<body>
+    <div class="lights">
+      <div class="light x1"></div>
+      <div class="light x2"></div>
+      <div class="light x3"></div>
+      <div class="light x4"></div>
+      <div class="light x5"></div>
+      <div class="light x6"></div>
+      <div class="light x7"></div>
+      <div class="light x8"></div>
+      <div class="light x9"></div>
+    </div>
+    <main>
+      <dialog class="wrong-container" id="wrong-container"></dialog>
+      <dialog class="buzzer-container" id="buzzer-container"></dialog>
+      <div class="container">
+        <div class="question">
+          <h1 id="question">{{ question }}</h1>
+        </div>
+
+        <div class="answers" id="answers">
+          <div class="answer" id="1">
+            <div class="answer-num">
+              <p>1</p>
+            </div>
+            <div class="answer-answer">
+              <p id="answer1">{{ answers[1]['text'] }}</p>
+            </div>
+            <div class="answer-score">
+              <p id="points1">{{ answers[1]['points'] }}</p>
+            </div>
+          </div>
+
+          <div class="answer" id="2">
+            <div class="answer-num">
+              <p>2</p>
+            </div>
+            <div class="answer-answer">
+              <p id="answer2">{{ answers[2]['text'] }}</p>
+            </div>
+            <div class="answer-score">
+              <p id="points2">{{ answers[2]['points'] }}</p>
+            </div>
+          </div>
+
+          <div class="answer" id="3">
+            <div class="answer-num">
+              <p>3</p>
+            </div>
+            <div class="answer-answer">
+              <p id="answer3">{{ answers[3]['text'] }}</p>
+            </div>
+            <div class="answer-score">
+              <p id="points3">{{ answers[3]['points'] }}</p>
+            </div>
+          </div>
+
+          <div class="answer" id="4">
+            <div class="answer-num">
+              <p>4</p>
+            </div>
+            <div class="answer-answer">
+              <p id="answer4">{{ answers[4]['text'] }}</p>
+            </div>
+            <div class="answer-score">
+              <p id="points4">{{ answers[4]['points'] }}</p>
+            </div>
+          </div>
+
+          <div class="answer" id="5">
+            <div class="answer-num">
+              <p>5</p>
+            </div>
+            <div class="answer-answer">
+              <p id="answer5">{{ answers[5]['text'] }}</p>
+            </div>
+            <div class="answer-score">
+              <p id="points5">{{ answers[5]['points'] }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="timer-container left">
+          <div class="timer" id="left_timer"></div>
+        </div>
+        <div class="timer-container right">
+          <div class="timer" id="right_timer"></div>
+        </div>
+      </div>
+    </main>
+  </body>
+
+@code {
+
+}

@@ -13,7 +13,8 @@ public class Team(string teamName)
         {
             Members.Add(member);
         }
-        else {
+        else
+        {
             Console.WriteLine("Member already part of team.");
         }
     }
@@ -26,4 +27,4 @@ public class Team(string teamName)
     {
         RoundsWon++;
     }
-}    
+}

@@ -1,15 +1,13 @@
-using Microsoft.AspNetCore.ResponseCompression;
 using FeudingFamily.Components;
+using FeudingFamily.Game;
 using FeudingFamily.Hubs;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Data.Sqlite;
 using System.Data;
-using FeudingFamily.Game;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 builder.Services.AddResponseCompression(opts =>
@@ -17,7 +15,6 @@ builder.Services.AddResponseCompression(opts =>
     opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
           ["application/octet-stream"]);
 });
-
 
 builder.Services.AddTransient<IDbConnection>(provider =>
 {
@@ -27,6 +24,7 @@ builder.Services.AddTransient<IDbConnection>(provider =>
     return new SqliteConnection(connectionString);
 
 });
+
 builder.Services.AddSingleton<IQuestionService, QuestionService>();
 builder.Services.AddSingleton<IGameManager, GameManager>();
 
@@ -47,9 +45,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
-app.MapBlazorHub();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
-
 app.MapHub<GameHub>("/gameHub");
 
 

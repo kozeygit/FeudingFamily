@@ -12,7 +12,7 @@ public class GameManager : IGameManager
     public JoinGameResult CreateNewGame(string gameId)
     {
         JoinGameResult validGameKey = GameIdValidator(gameId);
-        
+
         if (validGameKey.Success is false)
             return validGameKey;
 
@@ -36,16 +36,19 @@ public class GameManager : IGameManager
         return new JoinGameResult { GameId = gameId, Game = games[gameId] };
     }
 
-    private JoinGameResult GameIdValidator(string gameId)
+    private JoinGameResult GameIdValidator(string? gameId)
     {
-        if (games.ContainsKey(gameId))
-            return new JoinGameResult { ErrorMessage = "Key is already in use." };
-
-        if (gameId.Length != 6)
+        if (gameId == null)
+            return new JoinGameResult { ErrorMessage = "No Game Id given" };
+        
+        if (gameId.Length != 4)
             return new JoinGameResult { ErrorMessage = "Key must be 4 characters long." };
 
         if (gameId.ToUpper() != gameId)
             return new JoinGameResult { ErrorMessage = "Key must be upper-case" };
+
+        if (games.ContainsKey(gameId))
+            return new JoinGameResult { ErrorMessage = "Key is already in use." };
 
         return new JoinGameResult { GameId = gameId };
     }

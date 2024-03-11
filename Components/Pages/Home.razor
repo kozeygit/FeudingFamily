@@ -1,7 +1,55 @@
-﻿@page "/"
+﻿@page "/join"
+@page "/"
+@layout Layout.EmptyLayout
+@inject NavigationManager NavManager
+@inject IGameManager GameManager
 
-<PageTitle>Home</PageTitle>
+<PageTitle>FeudingFamily - Join</PageTitle>
+<body>
+    <div class="grid place-content-center h-screen">
+        <EditForm OnSubmit="Submit" Model="JoinRequest" FormName="JoinGameForm">
+            <h3 class="border-b-4 border-gray-500/50 p-2 text-center">Join Game</h3>
+            <div>
+                <InputText @bind-Value="JoinRequest!.GameId" />
+            </div>
+            <button class="border-2 border-gray-500/50 p-2 rounded-md" type="submit" name="join">Join Team</button>
+            <div class="error-box">
+                @if (JoinResult.Success)
+                {
+                    <h4><br /></h4>
+                }
+                else
+                {
+                    <h4>@JoinResult.ErrorMessage</h4>
+                }
+            </div>
+        </EditForm>
+        <a href="presenter"><button type="submit" name="presenter">Presenter</button></a>
+        <a href="controller"><button type="submit" name="controller">Controller</button></a>
+    </div>
+</body>
 
-<h1>Hello, world!</h1>
+@code {
 
-Welcome to your new app.
+    [SupplyParameterFromForm]
+    public JoinGameRequest? JoinRequest { get; set; }
+
+    public JoinGameResult? JoinResult { get; set; }
+
+    protected override void OnInitialized()
+    {
+        JoinRequest ??= new();
+        JoinResult ??= new();
+    }
+
+    private void Submit()
+    {
+        JoinResult = GameManager.CreateNewGame(JoinRequest.GameId);
+    }
+
+    public class JoinGameRequest
+    {
+        public string GameId { get; set; } = String.Empty;
+        public string TeamName { get; set; } = String.Empty;
+    }
+}

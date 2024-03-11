@@ -1,6 +1,6 @@
-using System.Data;
 using Dapper;
 using FeudingFamily.Models;
+using System.Data;
 
 namespace FeudingFamily.Game;
 

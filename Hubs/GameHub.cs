@@ -16,43 +16,43 @@ public class GameHub : Hub
     {
         await Clients.Groups("Presenters", "Controllers").SendAsync("receiveQuestion", question);
     }
-    
+
     // * Just send the question model which includes a list of the answers... duh, when do i just need the answers ???
     // public async Task SendAnswers(List<Answer> answers) // Sends current answers to presenter and controller // * Will Probably move this to the view instead and reload the pages
     // {
     //     await Clients.Groups("Presenters", "Controllers").SendAsync("receiveAnswers", answers);
     // }
-    
+
     public async Task SendRevealQuestion()
     {
         await Clients.Group("Presenters").SendAsync("receiveRevealQuestion");
     }
-    
+
     public async Task SendRevealAnswer(int answerId)
     {
         await Clients.Group("Presenters").SendAsync("receiveRevealAnswer", answerId);
     }
-    
+
     public async Task SendWrongAnswer(int wrongAnswersCount)
     {
         await Clients.Group("Presenters").SendAsync("receiveWrongAnswer", wrongAnswersCount);
     }
-    
+
     public async Task SendShowWinner(Team winningTeam)
     {
         await Clients.Groups("Presenters", "Buzzers").SendAsync("receiveShowWinner", winningTeam);
     }
-    
+
     public async Task SendPlaySound(string soundName)
     {
         await Clients.Group("Presenters").SendAsync("receivePlaySound", soundName);
     }
-    
+
     public async Task SendCountdown()
     {
         await Clients.Group("Presenters").SendAsync("receiveCountdown");
     }
-    
+
     public async Task SendBuzzer(Team buzzingTeam)
     {
         await Clients.Groups("Presenters", "Controllers").SendAsync("receiveBuzzer", buzzingTeam);
