@@ -6,27 +6,32 @@
 
 <PageTitle>FeudingFamily - Join</PageTitle>
 <body>
-    <div class="grid place-content-center h-screen">
-        <EditForm OnSubmit="Submit" Model="JoinRequest" FormName="JoinGameForm">
-            <h3 class="border-b-4 border-gray-500/50 p-2 text-center">Join Game</h3>
-            <div>
-                <InputText @bind-Value="JoinRequest!.GameId" />
-            </div>
-            <button class="border-2 border-gray-500/50 p-2 rounded-md" type="submit" name="join">Join Team</button>
+<div class="h-screen grid place-content-center bg-gray-50">
+    <div class=" p-10 grid place-content-center gap-4 shadow-md rounded-xl bg-white">
+        <h1 class="font-bold text-center text-xl pb-2 mb-2 border-b-2 border-black">Feuding Family</h1>
+        
+        <EditForm OnSubmit="JoinTeamSubmit" Model="JoinRequest" FormName="JoinGameForm" class="flex flex-col gap-2">
+            <InputText required @bind-Value="JoinRequest.GameKey" placeholder="Game Key:" class="border-b-2 border-gray-500/50 p-2 focus:outline-none transition-colors duration-300 focus:border-green-400"/>
+            <InputText @bind-Value="JoinRequest.TeamName" placeholder="Team Name:" class="border-b-2 border-gray-500/50 p-2 focus:outline-none transition-colors duration-300 focus:border-green-400"/>
+            <button class="mt-4 border-2 border-green-300 p-2 rounded-sm hover:bg-green-200 focus:bg-green-200 transition-all" type="submit" name="join">Join Team</button>
+        
             <div class="error-box">
-                @if (JoinResult.Success)
+                @if (!JoinResult.Success)
                 {
-                    <h4><br /></h4>
+                    <span class="text-red-400">&#9888;</span>
+                    <h3 class="text-red-400 text-sm inline">@JoinResult.ErrorMessage</h3>
+                    
                 }
-                else
-                {
-                    <h4>@JoinResult.ErrorMessage</h4>
-                }
+            </div>
+
+            <div class="flex flex-row gap-2">
+                <button type="submit" class="text-center flex-1 py-2 px-4 border-2 rounded-sm border-red-300 hover:bg-red-200 focus:bg-red-200 transition-all">Presenter</button>
+                <button type="submit" class="text-center flex-1 py-2 px-4 border-2 rounded-sm border-blue-300 hover:bg-blue-200 focus:bg-blue-200 transition-all">Controller</button>
             </div>
         </EditForm>
-        <a href="presenter"><button type="submit" name="presenter">Presenter</button></a>
-        <a href="controller"><button type="submit" name="controller">Controller</button></a>
+
     </div>
+</div>
 </body>
 
 @code {
@@ -42,14 +47,19 @@
         JoinResult ??= new();
     }
 
-    private void Submit()
+    private void CreateGameSubmit()
     {
-        JoinResult = GameManager.CreateNewGame(JoinRequest.GameId);
+        JoinResult = GameManager.GetGame(JoinRequest.GameKey);
+    }
+
+    private void JoinTeamSubmit()
+    {
+        JoinResult = GameManager.GetGame(JoinRequest.GameKey);
     }
 
     public class JoinGameRequest
     {
-        public string GameId { get; set; } = String.Empty;
+        public string GameKey { get; set; } = String.Empty;
         public string TeamName { get; set; } = String.Empty;
     }
 }

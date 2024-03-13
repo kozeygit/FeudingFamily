@@ -9,48 +9,49 @@ public class GameManager : IGameManager
         _questionService = questionService;
     }
 
-    public JoinGameResult CreateNewGame(string gameId)
+    public JoinGameResult CreateNewGame(string gameKey)
     {
-        JoinGameResult validGameKey = GameIdValidator(gameId);
+        JoinGameResult validGameKey = GameKeyValidator(gameKey);
 
         if (validGameKey.Success is false)
             return validGameKey;
 
         var newGame = new Game(_questionService);
-        games.Add(gameId, newGame);
+        games.Add(gameKey, newGame);
 
-        return new JoinGameResult { GameId = gameId };
+        return new JoinGameResult { GameKey = gameKey };
     }
 
-    public JoinGameResult GetGame(string gameId)
+    public JoinGameResult GetGame(string gameKey)
     {
-        if (games.ContainsKey(gameId) is false)
-            return new JoinGameResult { ErrorMessage = "Game Does Not Exist" };
 
-        JoinGameResult validGameKey = GameIdValidator(gameId);
+        JoinGameResult validGameKey = GameKeyValidator(gameKey);
         if (validGameKey.Success is false)
         {
             return validGameKey;
         }
 
-        return new JoinGameResult { GameId = gameId, Game = games[gameId] };
+        if (games.ContainsKey(gameKey) is false)
+            return new JoinGameResult { ErrorMessage = "Game Does Not Exist" };
+
+        return new JoinGameResult { GameKey = gameKey, Game = games[gameKey] };
     }
 
-    private JoinGameResult GameIdValidator(string? gameId)
+    private JoinGameResult GameKeyValidator(string? gameKey)
     {
-        if (gameId == null)
-            return new JoinGameResult { ErrorMessage = "No Game Id given" };
+        if (gameKey == null)
+            return new JoinGameResult { ErrorMessage = "No Game Key given" };
         
-        if (gameId.Length != 4)
+        if (gameKey.Length != 4)
             return new JoinGameResult { ErrorMessage = "Key must be 4 characters long." };
 
-        if (gameId.ToUpper() != gameId)
+        if (gameKey.ToUpper() != gameKey)
             return new JoinGameResult { ErrorMessage = "Key must be upper-case" };
 
-        if (games.ContainsKey(gameId))
+        if (games.ContainsKey(gameKey))
             return new JoinGameResult { ErrorMessage = "Key is already in use." };
 
-        return new JoinGameResult { GameId = gameId };
+        return new JoinGameResult { GameKey = gameKey };
     }
 
 
@@ -58,7 +59,7 @@ public class GameManager : IGameManager
 
 public interface IGameManager
 {
-    JoinGameResult CreateNewGame(string gameId);
-    JoinGameResult GetGame(string gameId);
+    JoinGameResult CreateNewGame(string gameKey);
+    JoinGameResult GetGame(string gameKey);
 
 }
