@@ -1,34 +1,37 @@
 ﻿@page "/join"
 @page "/"
 @layout Layout.EmptyLayout
+@using Microsoft.AspNetCore.SignalR.Client
 @inject NavigationManager NavManager
 @inject IGameManager GameManager
 
 <PageTitle>FeudingFamily - Join</PageTitle>
 <body>
-<div class="h-screen grid place-content-center bg-gray-50">
-    <div class=" p-10 grid place-content-center gap-4 shadow-md rounded-xl bg-white">
-        <h1 class="font-bold text-center text-xl pb-2 mb-2 border-b-2 border-black">Feuding Family</h1>
+<div class="h-screen grid place-content-center bg-gray-900">
+    <div class=" p-10 grid place-content-center gap-4 shadow-md rounded-xl bg-slate-800">
+        <h1 class="font-bold text-slate-300 text-center text-xl pb-2 mb-2 border-b-2 border-slate-300">Feuding Family</h1>
         
         <EditForm OnSubmit="JoinTeamSubmit" Model="JoinRequest" FormName="JoinGameForm" class="flex flex-col gap-2">
-            <InputText required @bind-Value="JoinRequest.GameKey" placeholder="Game Key:" class="border-b-2 border-gray-500/50 p-2 focus:outline-none transition-colors duration-300 focus:border-green-400"/>
-            <InputText @bind-Value="JoinRequest.TeamName" placeholder="Team Name:" class="border-b-2 border-gray-500/50 p-2 focus:outline-none transition-colors duration-300 focus:border-green-400"/>
-            <button class="mt-4 border-2 border-green-300 p-2 rounded-sm hover:bg-green-200 focus:bg-green-200 transition-all" type="submit" name="join">Join Team</button>
+            <InputText required @bind-Value="JoinRequest.GameKey" placeholder="Game Key:" class="text-slate-300 bg-transparent border-b-2 border-gray-500/50 pt-4 focus:outline-none transition-colors duration-300 focus:border-green-400"/>
+            <InputText @bind-Value="JoinRequest.TeamName" placeholder="Team Name:" class="text-slate-300 bg-transparent border-b-2 border-gray-500/50 pt-4 focus:outline-none transition-colors duration-300 focus:border-green-400"/>
+            <button class="text-slate-300 mt-4 border-2 border-green-300 p-2 rounded-sm hover:text-black hover:bg-green-200 focus:text-black focus:bg-green-200 transition-all duration-300" type="submit" name="join">Join Team</button>
         
             <div class="error-box">
                 @if (!JoinResult.Success)
                 {
                     <span class="text-red-400">&#9888;</span>
                     <h3 class="text-red-400 text-sm inline">@JoinResult.ErrorMessage</h3>
-                    
+
                 }
             </div>
 
             <div class="flex flex-row gap-2">
-                <button type="submit" class="text-center flex-1 py-2 px-4 border-2 rounded-sm border-red-300 hover:bg-red-200 focus:bg-red-200 transition-all">Presenter</button>
-                <button type="submit" class="text-center flex-1 py-2 px-4 border-2 rounded-sm border-blue-300 hover:bg-blue-200 focus:bg-blue-200 transition-all">Controller</button>
+                <button type="submit" class="text-slate-300 text-center flex-1 p-2 border-2 rounded-sm border-red-300 hover:text-black hover:bg-red-200 focus:text-black focus:bg-red-200 transition-all duration-300">Presenter</button>
+                <button type="submit" class="text-slate-300 text-center flex-1 p-2 border-2 rounded-sm border-blue-300 hover:text-black hover:bg-blue-200 focus:text-black focus:bg-blue-200 transition-all duration-300">Controller</button>
             </div>
         </EditForm>
+
+        <h3 class="text-red-400 text-sm inline">@hubConnection.ConnectionId</h3>
 
     </div>
 </div>
@@ -41,10 +44,47 @@
 
     public JoinGameResult? JoinResult { get; set; }
 
-    protected override void OnInitialized()
+    private HubConnection? hubConnection;
+
+    protected override async Task OnInitializedAsync()
     {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavManager.ToAbsoluteUri("/gamehub"))
+            .Build();
+
+        hubConnection.On<string>("SendTest", (user) =>
+        {
+            var encodedMsg = $"Client: {user} - {hubConnection.ConnectionId}";
+            Console.WriteLine(encodedMsg);
+
+            InvokeAsync(StateHasChanged);
+        });
+
+
         JoinRequest ??= new();
         JoinResult ??= new();
+
+
+        await hubConnection.StartAsync();
+    }
+
+    private async Task Send()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("SendTest", "blah");
+        }
+    }
+
+    public bool IsConnected =>
+        hubConnection?.State == HubConnectionState.Connected;
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
     }
 
     private void CreateGameSubmit()
@@ -54,7 +94,13 @@
 
     private void JoinTeamSubmit()
     {
+        Send();
+
         JoinResult = GameManager.GetGame(JoinRequest.GameKey);
+        if (JoinResult.Success)
+        {
+            JoinResult.Game.AddTeamMember(JoinRequest.TeamName, "blah");
+        }
     }
 
     public class JoinGameRequest

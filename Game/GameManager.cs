@@ -41,7 +41,7 @@ public class GameManager : IGameManager
     {
         if (gameKey == null)
             return new JoinGameResult { ErrorMessage = "No Game Key given" };
-        
+
         if (gameKey.Length != 4)
             return new JoinGameResult { ErrorMessage = "Key must be 4 characters long." };
 

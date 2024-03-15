@@ -46,7 +46,7 @@ app.UseStaticFiles();
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
-app.MapHub<GameHub>("/gameHub");
+app.MapHub<GameHub>("/gamehub");
 
 
 

@@ -57,6 +57,11 @@ public class GameHub : Hub
     {
         await Clients.Groups("Presenters", "Controllers").SendAsync("receiveBuzzer", buzzingTeam);
     }
+    public async Task SendTest(string blah)
+    {
+        Console.WriteLine($"Server: {blah} - {Context.User.Identity.Name}");
+        await Clients.Caller.SendAsync("SendTest", blah);
+    }
 }
 
 /*
