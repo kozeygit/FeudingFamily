@@ -1,4 +1,4 @@
-namespace FeudingFamily.Game;
+namespace FeudingFamily.Logic;
 
 public class GameManager : IGameManager
 {
@@ -9,17 +9,16 @@ public class GameManager : IGameManager
         _questionService = questionService;
     }
 
-    public JoinGameResult CreateNewGame(string gameKey)
+    public JoinGameResult NewGame(string gameKey)
     {
         JoinGameResult validGameKey = GameKeyValidator(gameKey);
-
         if (validGameKey.Success is false)
             return validGameKey;
 
         var newGame = new Game(_questionService);
         games.Add(gameKey, newGame);
 
-        return new JoinGameResult { GameKey = gameKey };
+        return new JoinGameResult { GameKey = gameKey, Game = games[gameKey] };
     }
 
     public JoinGameResult GetGame(string gameKey)
@@ -37,7 +36,7 @@ public class GameManager : IGameManager
         return new JoinGameResult { GameKey = gameKey, Game = games[gameKey] };
     }
 
-    private JoinGameResult GameKeyValidator(string? gameKey)
+    public JoinGameResult GameKeyValidator(string? gameKey)
     {
         if (gameKey == null)
             return new JoinGameResult { ErrorMessage = "No Game Key given" };
@@ -59,7 +58,7 @@ public class GameManager : IGameManager
 
 public interface IGameManager
 {
-    JoinGameResult CreateNewGame(string gameKey);
+    JoinGameResult NewGame(string gameKey);
     JoinGameResult GetGame(string gameKey);
-
+    JoinGameResult GameKeyValidator(string? gameKey);
 }

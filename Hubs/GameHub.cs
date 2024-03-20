@@ -1,4 +1,4 @@
-using FeudingFamily.Game;
+using FeudingFamily.Logic;
 using FeudingFamily.Models;
 using Microsoft.AspNetCore.SignalR;
 

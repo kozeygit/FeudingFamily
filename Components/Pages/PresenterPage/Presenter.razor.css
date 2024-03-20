@@ -1,0 +1,353 @@
+html,
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: url(../images/city-bg.jpg),
+    linear-gradient(rgb(7, 135, 255), rgb(165, 29, 243));
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+* {
+  box-sizing: border-box;
+  overflow: hidden;
+  /* outline: red solid 1px; */
+}
+
+main {
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  backdrop-filter: blur(5px);
+}
+
+.container {
+  width: 70%;
+  height: 100vh;
+  padding: 3%;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 0;
+  flex-shrink: 0;
+  overflow: hidden;
+  transition: 0.5s, height 0s;
+}
+
+.question {
+  flex: 1;
+  width: 100%;
+  height: 307px;
+  border: white solid 5px;
+  border-radius: 30px;
+  text-shadow: 3px 3px 10px black;
+  display: grid;
+  place-items: center;
+  backdrop-filter: blur(100px);
+  box-shadow: 10px 10px 20px rgb(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.question::after {
+  content: "Question";
+  padding-top: 80px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(to top, #ffaa92 0%, #ffb3e6 100%);
+  color: white;
+  font-family: "Oswald", sans-serif;
+  font-weight: 400;
+  font-size: 80px;
+  text-shadow: 2px 2px 5px black;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.question > h1 {
+  position: absolute;
+  color: white;
+  font-family: "Oswald", sans-serif;
+  font-weight: 600;
+  font-size: 45px;
+  text-transform: uppercase;
+  text-align: center;
+  width: 800px;
+  letter-spacing: 3px;
+}
+
+.answers {
+  flex: 2;
+  display: grid;
+  grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
+  justify-items: center;
+  padding-top: 50px;
+  gap: 5%;
+}
+
+.answer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(100px);
+  border: white solid 3px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 5px 5px 10px rgb(0, 0, 0, 0.3);
+}
+
+.answer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(
+    to left,
+    rgb(253, 138, 178),
+    rgb(252, 195, 157)
+  );
+  color: white;
+  font-family: "Oswald", sans-serif;
+  font-weight: 400;
+  font-size: 55px;
+  text-shadow: 2px 2px 5px black;
+  text-transform: uppercase;
+  text-align: center;
+  vertical-align: center;
+}
+
+.answer:nth-child(1)::after {
+  content: "1";
+}
+.answer:nth-child(2)::after {
+  content: "2";
+}
+.answer:nth-child(3)::after {
+  content: "3";
+}
+.answer:nth-child(4)::after {
+  content: "4";
+}
+.answer:nth-child(5)::after {
+  content: "5";
+}
+
+.hide-after::after {
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.answer-num,
+.answer-score {
+  flex: 1;
+  display: grid;
+  place-items: center;
+}
+
+.answer-num {
+  border-right: solid white 3px;
+}
+
+.answer-answer {
+  flex: 12;
+  display: grid;
+  place-items: center left;
+}
+
+.answer-answer > p {
+  position: fixed;
+  letter-spacing: 3px;
+}
+
+.wrong-container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  height: 500px;
+  width: 1500px;
+  display: flex;
+  justify-content: space-evenly;
+  gap: 5%;
+  background: none;
+  border: none;
+}
+
+.wrong-container::backdrop {
+  background-color: black;
+  opacity: 50%;
+}
+
+.wrong-container > div {
+  background: url(../images/wrong-answer-icon.png);
+  background-repeat: repeat-x;
+  background-size: contain;
+  width: 450px;
+  height: 450px;
+  opacity: 100%;
+}
+
+.wrong-container:not([open]) {
+  display: none;
+}
+
+.buzzer-container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  height: 500px;
+  width: 1000px;
+  display: grid;
+  place-items: center;
+  font-family: "Oswald", sans-serif;
+  font-size: 70px;
+  font-weight: 600;
+  text-align: center;
+  gap: 5%;
+  background: none;
+  border-radius: 100px;
+}
+
+.buzzer-container::backdrop {
+  background-color: black;
+  opacity: 90%;
+}
+
+.buzzer-container::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  left: -100%;
+  top: -100%;
+  width: 300%;
+  height: 300%;
+  animation: buzzer-lights 3s;
+  background: conic-gradient(
+    white 0deg 15deg,
+    lightyellow 15deg 30deg,
+    white 30deg 45deg,
+    lightyellow 45deg 60deg,
+    white 60deg 75deg,
+    lightyellow 75deg 90deg,
+    white 90deg 105deg,
+    lightyellow 105deg 120deg,
+    white 120deg 135deg,
+    lightyellow 135deg 150deg,
+    white 150deg 165deg,
+    lightyellow 165deg 180deg,
+    white 180deg 195deg,
+    lightyellow 195deg 210deg,
+    white 210deg 225deg,
+    lightyellow 225deg 240deg,
+    white 240deg 255deg,
+    lightyellow 255deg 270deg,
+    white 270deg 285deg,
+    lightyellow 285deg 300deg,
+    white 300deg 315deg,
+    lightyellow 315deg 330deg,
+    white 330deg 345deg,
+    lightyellow 345deg 360deg
+  );
+}
+
+.buzzer-container:not([open]) {
+  display: none;
+}
+
+@keyframes buzzer-lights {
+  100% {
+    transform: rotate(1turn);
+  }
+}
+
+.answers > div:nth-child(1) {
+  width: 98%;
+}
+
+.answers > div:nth-child(2) {
+  width: 96%;
+}
+
+.answers > div:nth-child(3) {
+  width: 94%;
+}
+
+.answers > div:nth-child(4) {
+  width: 92%;
+}
+
+.answers > div:nth-child(5) {
+  width: 90%;
+}
+
+div p {
+  color: white;
+  font-family: "Oswald", sans-serif;
+  font-weight: 400;
+  font-size: 40px;
+  text-shadow: 2px 2px 5px black;
+  text-transform: uppercase;
+  margin: 20px;
+  padding-inline: 10px;
+}
+
+.timer-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  height: 80vh;
+  width: 100px;
+  border: white solid 5px;
+  border-radius: 20px;
+  background: white;
+  overflow: hidden;
+  box-shadow: 10px 10px 20px rgb(0, 0, 0, 0.3);
+}
+
+.timer {
+  background-image: linear-gradient(
+    to top,
+    rgb(253, 138, 178),
+    rgb(252, 195, 157)
+  );
+  height: 100%;
+  width: 100%;
+}
+
+.timer-animate {
+  animation-name: timer_countdown;
+  animation-duration: 30s;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+
+}
+
+@keyframes timer_countdown {
+  from {
+    translate: 0px 0px
+  };
+  to {
+    translate: 0px 100%
+  };
+}
+
+.left {
+  left: 130px;
+}
+
+.right {
+  right: 130px;
+}

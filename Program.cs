@@ -1,5 +1,5 @@
 using FeudingFamily.Components;
-using FeudingFamily.Game;
+using FeudingFamily.Logic;
 using FeudingFamily.Hubs;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Data.Sqlite;

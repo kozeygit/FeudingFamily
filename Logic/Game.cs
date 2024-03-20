@@ -1,6 +1,6 @@
 using FeudingFamily.Models;
 
-namespace FeudingFamily.Game;
+namespace FeudingFamily.Logic;
 
 public class Game
 {

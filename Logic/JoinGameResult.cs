@@ -1,4 +1,4 @@
-namespace FeudingFamily.Game;
+namespace FeudingFamily.Logic;
 
 public class JoinGameResult
 {

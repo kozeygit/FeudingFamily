@@ -2,7 +2,7 @@ using Dapper;
 using FeudingFamily.Models;
 using System.Data;
 
-namespace FeudingFamily.Game;
+namespace FeudingFamily.Logic;
 
 public class QuestionService : IQuestionService
 {

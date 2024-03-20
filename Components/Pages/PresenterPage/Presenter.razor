@@ -1,5 +1,8 @@
-﻿@page "/presenter"
+﻿@page "/presenter/{gameKey}"
 @layout Layout.EmptyLayout
+@inherits PresenterPageBase
+@using Microsoft.AspNetCore.SignalR.Client
+@using FeudingFamily.Logic
 
 <PageTitle>FeudingFamily - Presenter</PageTitle>
 
@@ -93,7 +96,3 @@
       </div>
     </main>
   </body>
-
-@code {
-
-}
