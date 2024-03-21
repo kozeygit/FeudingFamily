@@ -4,6 +4,8 @@ using FeudingFamily.Hubs;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Data.Sqlite;
 using System.Data;
+using Microsoft.AspNetCore.Http.HttpResults;
+using FeudingFamily.Components.Pages.PresenterPage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +61,19 @@ app.MapGet("/questions2", (IQuestionService questionService) =>
 
     return Results.Ok(questions.Select(q => q.MapToDto()));
 
+});
+
+app.MapGet("/form", RazorComponentResult (IGameManager GameManager, string gameKey, string teamName) =>
+{
+    JoinGameResult joinResult = GameManager.GameKeyValidator(gameKey);
+    if (joinResult.Success is false)
+    {
+        return new RazorComponentResult<Home>(joinResult);
+    }
+    
+    Console.WriteLine(gameKey);
+    Console.WriteLine(teamName);
+    return new RazorComponentResult<Presenter>(gameKey);
 });
 
 // build db

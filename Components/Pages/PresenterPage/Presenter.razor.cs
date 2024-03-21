@@ -14,6 +14,7 @@ public class PresenterPageBase : ComponentBase
 
     [Parameter]
     public string GameKey { get; set; } = string.Empty;
+    [Parameter]
     public Game Game { get; set; }
 
     protected override void OnParametersSet()
