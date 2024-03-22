@@ -6,6 +6,7 @@ using Microsoft.Data.Sqlite;
 using System.Data;
 using Microsoft.AspNetCore.Http.HttpResults;
 using FeudingFamily.Components.Pages.PresenterPage;
+using System.ComponentModel;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,17 +64,24 @@ app.MapGet("/questions2", (IQuestionService questionService) =>
 
 });
 
-app.MapGet("/form", RazorComponentResult (IGameManager GameManager, string gameKey, string teamName) =>
+app.MapGet("/form", RazorComponentResult (IGameManager GameManager, string gameKey, string teamName, string page) =>
 {
+    Console.WriteLine(gameKey.GetType());
+    Console.WriteLine(teamName);
+    Console.WriteLine(page);
+
     JoinGameResult joinResult = GameManager.GameKeyValidator(gameKey);
     if (joinResult.Success is false)
     {
-        return new RazorComponentResult<Home>(joinResult);
+        return new RazorComponentResult<Home>(new { ErrorMessage = joinResult.ErrorMessage! });
     }
+
+    // ^^ This works but... its returns the component in the same url,
+    // instead of redirecting back to join page url, styling is lost.
     
     Console.WriteLine(gameKey);
     Console.WriteLine(teamName);
-    return new RazorComponentResult<Presenter>(gameKey);
+    return new RazorComponentResult<Presenter>(new { JoinResult = joinResult });
 });
 
 // build db
