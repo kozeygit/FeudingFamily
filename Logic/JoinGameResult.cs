@@ -3,8 +3,8 @@ namespace FeudingFamily.Logic;
 public class JoinGameResult
 {
     public string? GameKey { get; set; }
-    public string? ErrorMessage { get; set; }
+    public JoinErrorCode? ErrorCode { get; set; }
     public Game? Game { get; set; }
-    public bool Success => ErrorMessage == null;
+    public bool Success => ErrorCode == null;
 
 }

@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace FeudingFamily.Logic;
 
 public class GameManager : IGameManager
@@ -31,29 +33,56 @@ public class GameManager : IGameManager
         }
 
         if (games.ContainsKey(gameKey) is false)
-            return new JoinGameResult { ErrorMessage = "Game Does Not Exist" };
+            return new JoinGameResult { ErrorCode = JoinErrorCode.GameDoesNotExist };
 
         return new JoinGameResult { GameKey = gameKey, Game = games[gameKey] };
     }
 
     public JoinGameResult GameKeyValidator(string? gameKey)
     {
-        if (gameKey == null)
-            return new JoinGameResult { ErrorMessage = "No Game Key given" };
+        if (gameKey is null)
+            return new JoinGameResult { ErrorCode = JoinErrorCode.KeyEmpty };
 
         if (gameKey.Length != 4)
-            return new JoinGameResult { ErrorMessage = "Key must be 4 characters long." };
+            return new JoinGameResult { ErrorCode = JoinErrorCode.KeyWrongLength };
 
         if (gameKey.ToUpper() != gameKey)
-            return new JoinGameResult { ErrorMessage = "Key must be upper-case" };
+            return new JoinGameResult { ErrorCode = JoinErrorCode.KeyNotUpperCase };
 
         if (games.ContainsKey(gameKey))
-            return new JoinGameResult { ErrorMessage = "Key is already in use." };
+            return new JoinGameResult { ErrorCode = JoinErrorCode.KeyInUse };
 
         return new JoinGameResult { GameKey = gameKey };
     }
 
+    public static string GetErrorMessage(Enum errorCode)
+    {
+        if (errorCode == null) { return ""; }
 
+        var type = errorCode.GetType();
+        var field = type.GetField(errorCode.ToString());
+        var custAttr = field?.GetCustomAttributes(typeof(DescriptionAttribute), false);
+        return custAttr?.SingleOrDefault() is not DescriptionAttribute attribute ? errorCode.ToString() : attribute.Description;
+    }
+
+}
+
+public enum JoinErrorCode
+{
+    [Description("Key must be provided.")]
+    KeyEmpty,
+
+    [Description("Key must be 4 characters long.")]
+    KeyWrongLength,
+
+    [Description("Key must be uppercase.")]
+    KeyNotUpperCase,
+    
+    [Description("Key is already in use.")]
+    KeyInUse,
+
+    [Description("Game does not exist.")]
+    GameDoesNotExist
 }
 
 public interface IGameManager
