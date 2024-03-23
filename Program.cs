@@ -77,19 +77,41 @@ app.MapGet("/form", (IGameManager GameManager, string gameKey, string teamName, 
         return Results.Redirect($"/?ErrorCode={(int)joinResult.ErrorCode!}");
     }
 
+    joinResult = GameManager.GetGame(gameKey);
+
+    if (!joinResult.Success)
+    {
+        joinResult = GameManager.NewGame(gameKey);
+
+        if (!joinResult.Success)
+        {
+            return Results.Redirect($"/?ErrorCode={(int)joinResult.ErrorCode!}");
+        }
+    }
+
     switch(page)
     {
         case "Join":
             Console.WriteLine("Join");
-            return Results.Redirect("/Join");
+            if (string.IsNullOrWhiteSpace(teamName))
+            {
+                return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.TeamNameEmpty}");
+            }
+
+            // Thats not gonna work dummy, what if they want to join that team!!
+            // if (joinResult.Game.HasTeam(teamName))
+            // {
+            //     return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.TeamNameTaken}");
+            // }
+            return Results.Redirect($"/Buzzer/{gameKey}?TeamName={teamName}");
 
         case "Presenter":
             Console.WriteLine("Presenter");
-            return Results.Redirect("/Presenter");
+            return Results.Redirect($"/Presenter/{gameKey}");
 
         case "Controller":
             Console.WriteLine("Controller");
-            return Results.Redirect("/Controller");
+            return Results.Redirect($"/Controller/{gameKey}");
             
         default:
             return Results.Redirect("/");

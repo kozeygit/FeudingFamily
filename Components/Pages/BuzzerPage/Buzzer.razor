@@ -1,0 +1,15 @@
+@page "/Buzzzer"
+@page "/Buzzer/{gameKey}"
+@inherits BuzzerPageBase
+@using Microsoft.AspNetCore.SignalR.Client
+@using FeudingFamily.Logic
+
+<PageTitle>Feuding Family - Buzzer</PageTitle>
+
+<body>
+    <dialog>YOU BUZZED IN!!</dialog>
+    <div class="team-name">
+        <h1>Team:<br />@TeamName</h1>
+    </div>
+    <button class="buzzer" onmousedown="send_buzz()"></button>
+</body>

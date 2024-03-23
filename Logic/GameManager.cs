@@ -17,6 +17,9 @@ public class GameManager : IGameManager
         if (validGameKey.Success is false)
             return validGameKey;
 
+        if (games.ContainsKey(gameKey))
+            return new JoinGameResult { ErrorCode = JoinErrorCode.KeyInUse };
+
         var newGame = new Game(_questionService);
         games.Add(gameKey, newGame);
 
@@ -49,12 +52,11 @@ public class GameManager : IGameManager
         if (gameKey.ToUpper() != gameKey)
             return new JoinGameResult { ErrorCode = JoinErrorCode.KeyNotUpperCase };
 
-        if (games.ContainsKey(gameKey))
-            return new JoinGameResult { ErrorCode = JoinErrorCode.KeyInUse };
 
         return new JoinGameResult { GameKey = gameKey };
     }
 
+    // stolen from the stack lol
     public static string GetErrorMessage(Enum errorCode)
     {
         if (errorCode == null) { return ""; }
@@ -82,7 +84,17 @@ public enum JoinErrorCode
     KeyInUse,
 
     [Description("Game does not exist.")]
-    GameDoesNotExist
+    GameDoesNotExist,
+    
+    [Description("Team name must be provided.")]
+    TeamNameEmpty,
+
+    [Description("Team name is already in use.")]
+    TeamNameTaken,
+
+    [Description("The requested game already has two teams playing.")]
+    GameHasTwoTeams
+
 }
 
 public interface IGameManager

@@ -48,6 +48,11 @@ public class Game
         return question;
     }
 
+    public bool HasTeam(string teamName)
+    {
+        return Teams.ContainsKey(teamName);
+    }
+
     public bool AddTeamMember(string teamName, string member)
     // Make a return object instead idk
     {
