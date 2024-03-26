@@ -98,11 +98,16 @@ app.MapGet("/form", (IGameManager GameManager, string gameKey, string teamName, 
                 return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.TeamNameEmpty}");
             }
 
-            // Thats not gonna work dummy, what if they want to join that team!!
-            // if (joinResult.Game.HasTeam(teamName))
-            // {
-            //     return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.TeamNameTaken}");
-            // }
+            if (!joinResult.Game.HasTeam(teamName))
+            {
+                if (!joinResult.Game.NewTeam(teamName))
+                {
+                    //! Change to better redirect. error code is wrong
+                    return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.TeamNameEmpty}");
+                }
+
+            }
+            
             return Results.Redirect($"/Buzzer/{gameKey}?TeamName={teamName}");
 
         case "Presenter":

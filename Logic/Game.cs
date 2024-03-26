@@ -53,24 +53,34 @@ public class Game
         return Teams.ContainsKey(teamName);
     }
 
+    public bool NewTeam(string teamName)
+    {
+        if (HasTeam(teamName))
+        {
+            return false;
+        }
+
+        if (Teams.Count >= 2)
+        {
+            return false;
+        }
+
+        var newTeam = new Team(teamName);
+        Teams.Add(teamName, newTeam);
+        return true;
+    }
+
     public bool AddTeamMember(string teamName, string member)
     // Make a return object instead idk
     {
-        if (Teams.TryGetValue(teamName, out Team? team))
-        {
-            team.AddMember(member);
-            return true;
-        }
+        if (!HasTeam(teamName))
+        { return false; }
 
-        else if (Teams.Count < 2)
-        {
-            var newTeam = new Team(teamName);
-            newTeam.AddMember(member);
-            Teams.Add(teamName, newTeam);
-            return true;
-        }
+        if (Teams[teamName].HasMember(member))
+        { return false; }
 
-        return false;
+        Teams[teamName].AddMember(member);
+        return true;
     }
 
 }
