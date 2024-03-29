@@ -44,6 +44,8 @@ public class BuzzerPageBase : ComponentBase
 
     protected async Task SendBuzz()
     {
+        Console.WriteLine("Buzzer Send Buzz");
+        
         if (hubConnection is not null)
         {
             await hubConnection.SendAsync("SendBuzz", TeamName);

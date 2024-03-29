@@ -26,9 +26,8 @@ public class PresenterPageBase : ComponentBase
 
     public Question? DefaultQuestion { get; set; }
 
-    protected override void OnParametersSet()
+    protected override void OnInitialized()
     {
-
         DefaultQuestion = new Question
         {
             Content = "Default Question",
@@ -40,7 +39,10 @@ public class PresenterPageBase : ComponentBase
                 new Answer { Ranking = 5, Content = "Answer5", Points = 20},
             }
         };
+    }
 
+    protected override void OnParametersSet()
+    {
         if (GameKey is not null)
             Game = GameManager.GetGame(GameKey).Game;
     }
@@ -74,16 +76,20 @@ public class PresenterPageBase : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         hubConnection = new HubConnectionBuilder()
-            .WithUrl(Navigation.ToAbsoluteUri("/chathub"))
+            .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
+            .WithAutomaticReconnect()
             .Build();
 
         hubConnection.On<string>("ReceiveBuzz", async (teamName) =>
         {
+            Console.WriteLine("Presenter Send Buzz", teamName);
             await ShowBuzzerModalAsync(teamName);
             await InvokeAsync(StateHasChanged);
         });
 
         await hubConnection.StartAsync();
+
+        await hubConnection.SendAsync("AddToPresenterGroup");
     }
 
     public bool IsConnected =>
@@ -93,6 +99,7 @@ public class PresenterPageBase : ComponentBase
     {
         if (hubConnection is not null)
         {
+            await hubConnection.SendAsync("Remove", GameKey);
             await hubConnection.DisposeAsync();
         }
     }

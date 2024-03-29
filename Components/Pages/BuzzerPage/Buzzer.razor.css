@@ -8,7 +8,7 @@ body,
   font-family: "Merriweather", serif;
 }
 
-body {
+.wrapper {
   height: 100dvh;
   display: flex;
   flex-direction: column;

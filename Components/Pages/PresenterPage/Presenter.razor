@@ -4,10 +4,11 @@
 @inherits PresenterPageBase
 @using Microsoft.AspNetCore.SignalR.Client
 @using FeudingFamily.Logic
+@rendermode InteractiveServer
 
 <PageTitle>FeudingFamily - Presenter</PageTitle>
 
-<body>
+<div class="wrapper">
   <div class="lights">
     <div class="light x1"></div>
     <div class="light x2"></div>
@@ -21,7 +22,7 @@
   </div>
   <main>
     <dialog class="wrong-container" id="wrong-container"></dialog>
-    <dialog class="buzzer-container" id="buzzer-container"></dialog>
+    <dialog class="buzzer-container" id="buzzer-container" open=@IsBuzzerModalShown></dialog>
     <div class="container">
       
       <div class="question">
@@ -54,4 +55,4 @@
       </div>
     </div>
   </main>
-</body>
+</div>

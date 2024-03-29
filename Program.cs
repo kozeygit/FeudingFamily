@@ -4,14 +4,12 @@ using FeudingFamily.Hubs;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Data.Sqlite;
 using System.Data;
-using Microsoft.AspNetCore.Http.HttpResults;
-using FeudingFamily.Components.Pages.PresenterPage;
-using System.ComponentModel;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddSignalR();
 
 builder.Services.AddResponseCompression(opts =>
 {
@@ -32,6 +30,9 @@ builder.Services.AddSingleton<IQuestionService, QuestionService>();
 builder.Services.AddSingleton<IGameManager, GameManager>();
 
 
+//-------------------------------------------------------------------------------\\
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -50,6 +51,7 @@ app.UseStaticFiles();
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
+
 app.MapHub<GameHub>("/gamehub");
 
 
@@ -61,7 +63,7 @@ app.MapGet("/questions2", (IQuestionService questionService) =>
 
     var questions = _questionService.GetShuffledQuestions();
 
-    return Results.Ok(questions.Select(q => q.MapToDto()));
+    return Results.Ok(questions.Select(q => q.MapToDto().Content));
 
 });
 

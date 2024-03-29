@@ -1,20 +1,21 @@
 html,
-body {
-  height: 100%;
-  width: 100%;
+body, 
+* { 
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  /* outline: red solid 1px; */
+}
+
+
+.wrapper {
   background: url(../images/city-bg.jpg),
     linear-gradient(rgb(7, 135, 255), rgb(165, 29, 243));
   background-size: cover;
   background-repeat: no-repeat;
 }
 
-* {
-  box-sizing: border-box;
-  overflow: hidden;
-  /* outline: red solid 1px; */
-}
 
 main {
   width: 100vw;
@@ -167,6 +168,7 @@ main {
 }
 
 .wrong-container {
+  z-index: 998;
   position: fixed;
   left: 0;
   right: 0;
@@ -183,6 +185,7 @@ main {
 }
 
 .wrong-container::backdrop {
+  z-index: 999;
   background-color: black;
   opacity: 50%;
 }
@@ -201,6 +204,7 @@ main {
 }
 
 .buzzer-container {
+  z-index: 999;
   position: fixed;
   left: 0;
   right: 0;

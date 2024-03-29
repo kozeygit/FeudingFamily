@@ -6,6 +6,45 @@ namespace FeudingFamily.Hubs;
 
 public class GameHub : Hub
 {
+
+    public async Task Remove(string gameKey)
+    {
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameKey);
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Presenters");
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Controllers");
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Buzzers");
+    }
+    public async Task AddToGameGroup(string gameKey)
+    {
+        await Groups.AddToGroupAsync(Context.ConnectionId, gameKey);
+    }
+
+    public async Task AddToPresenterGroup()
+    {
+        await Groups.AddToGroupAsync(Context.ConnectionId, "Presenters");
+    }
+
+    public async Task AddToControllerGroup()
+    {
+        await Groups.AddToGroupAsync(Context.ConnectionId, "Controllers");
+    }
+
+    public async Task AddToBuzzerGroup()
+    {
+        await Groups.AddToGroupAsync(Context.ConnectionId, "Buzzers");
+    }
+
+    public async Task SendBuzz(string teamName)
+    {
+        Console.WriteLine("Hub Send Buzz");
+        Console.WriteLine(Clients.Groups("Presenters"));
+        await Clients.Groups("Presenters").SendAsync("ReceiveBuzz", teamName);
+    }
+
+
+    //!----------------------------------------------------------------------------------!\\
+
+
     public async Task NewQuestion() // Gets a new question and send to the controller for host to decide if to use
     {
         Question question = new(); // TODO Replace with new question from a builder maybe idk
@@ -51,16 +90,6 @@ public class GameHub : Hub
     public async Task SendCountdown()
     {
         await Clients.Group("Presenters").SendAsync("receiveCountdown");
-    }
-
-    public async Task SendBuzzer(Team buzzingTeam)
-    {
-        await Clients.Groups("Presenters", "Controllers").SendAsync("receiveBuzzer", buzzingTeam);
-    }
-    public async Task SendTest(string blah)
-    {
-        Console.WriteLine($"Server: {blah} - {Context.User.Identity.Name}");
-        await Clients.Caller.SendAsync("SendTest", blah);
     }
 }
 
