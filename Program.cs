@@ -67,6 +67,7 @@ app.MapGet("/questions2", (IQuestionService questionService) =>
 
 });
 
+
 app.MapGet("/form", (IGameManager GameManager, string gameKey, string teamName, string page) =>
 {
     Console.WriteLine(gameKey);
@@ -103,7 +104,7 @@ app.MapGet("/form", (IGameManager GameManager, string gameKey, string teamName, 
 
             if (!joinResult.Game.HasTeam(teamName))
             {
-                if (!joinResult.Game.NewTeam(teamName))
+                if (!joinResult.Game.AddTeam(teamName))
                 {
                     //! Change to better redirect. error code is wrong
                     return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.TeamNameEmpty}");

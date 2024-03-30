@@ -20,18 +20,19 @@
     <div class="light x8"></div>
     <div class="light x9"></div>
   </div>
+  
   <main>
     <dialog class="wrong-container" id="wrong-container"></dialog>
     <dialog class="buzzer-container" id="buzzer-container" open=@IsBuzzerModalShown></dialog>
     <div class="container">
       
-      <div class="question">
-        <h1 id="question">@(Game is not null ? Game.CurrentQuestion.Content : DefaultQuestion.Content)</h1>
+      <div class="question @(Game?.Board.IsQuestionRevealed == true ? "revealed" : "")">
+        <h1 id="question">@(Game?.CurrentQuestion.Content ?? DefaultQuestion.Content)</h1>
       </div>
 
       <div class="answers" id="answers">
 
-      @foreach (Answer answer in Game is not null ? Game.CurrentQuestion.Answers : DefaultQuestion.Answers)
+      @foreach (Answer answer in Game?.CurrentQuestion.Answers ?? DefaultQuestion.Answers)
       {
         <div class="answer" id="@answer.Ranking">
           <div class="answer-ranking">

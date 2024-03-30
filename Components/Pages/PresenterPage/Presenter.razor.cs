@@ -48,6 +48,7 @@ public class PresenterPageBase : ComponentBase
     }
 
     public bool IsBuzzerModalShown { get; set; }
+    public bool IsWrongAnswerModalShown { get; set; }
     public string BuzzingTeam { get; set; } = string.Empty;
 
     public async Task ShowBuzzerModalAsync(string teamName)
@@ -99,7 +100,7 @@ public class PresenterPageBase : ComponentBase
     {
         if (hubConnection is not null)
         {
-            await hubConnection.SendAsync("Remove", GameKey);
+            await hubConnection.SendAsync("RemoveFromGroups", GameKey);
             await hubConnection.DisposeAsync();
         }
     }

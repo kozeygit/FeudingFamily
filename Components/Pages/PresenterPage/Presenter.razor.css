@@ -140,7 +140,7 @@ main {
   content: "5";
 }
 
-.hide-after::after {
+.revealed::after {
   opacity: 0;
   transition: opacity 0.5s;
 }

@@ -7,7 +7,7 @@ namespace FeudingFamily.Hubs;
 public class GameHub : Hub
 {
 
-    public async Task Remove(string gameKey)
+    public async Task RemoveFromGroups(string gameKey)
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameKey);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Presenters");
