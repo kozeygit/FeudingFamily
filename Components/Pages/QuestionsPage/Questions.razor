@@ -21,8 +21,9 @@
 @code {
     public List<QuestionDto> QuestionsList { get; set; } = [];
 
-        protected override void OnInitialized()
+        protected async override Task OnInitializedAsync()
         {
-            QuestionsList = questionSevice.GetShuffledQuestions().Select(q => q.MapToDto()).ToList();
+            var questions = await questionSevice.GetShuffledQuestionsAsync();
+            QuestionsList = questions.Select(q => q.MapToDto()).ToList();
         }
 }

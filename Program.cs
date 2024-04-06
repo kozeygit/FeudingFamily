@@ -57,11 +57,11 @@ app.MapHub<GameHub>("/gamehub");
 
 
 // Question Endpoint
-app.MapGet("/questions2", (IQuestionService questionService) =>
+app.MapGet("/questions2", async (IQuestionService questionService) =>
 {
     IQuestionService _questionService = questionService;
 
-    var questions = _questionService.GetShuffledQuestions();
+    var questions = await _questionService.GetShuffledQuestionsAsync();
 
     return Results.Ok(questions.Select(q => q.MapToDto().Content));
 
