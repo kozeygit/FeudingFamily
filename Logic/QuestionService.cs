@@ -1,51 +1,49 @@
 using Dapper;
 using FeudingFamily.Models;
+using SQLitePCL;
 using System.Data;
+using System.Runtime.InteropServices;
 
 namespace FeudingFamily.Logic;
 
 public class QuestionService : IQuestionService
 {
     private readonly IDbConnection _connection;
-    public List<Question> Questions { get; init; } = [];
 
     public QuestionService(IDbConnection connection)
     {
         _connection = connection;
-        Questions = GetQuestionsFromDB();
     }
 
-    private List<Answer> GetAnswersForQuestionFromDB(int questionId)
+    public async Task<Question> GetQuestionAsync(int questionId)
     {
-        var results = _connection
-            .Query<Answer>(@"
-                SELECT * FROM Answers
-                WHERE QuestionId == @questionId
-                ORDER BY Ranking;
-            ",
-            new { questionId }).ToList();
+        const string sql = "SELECT * FROM Questions WHERE Id = @questionId;";
 
-        return results;
+        var result = await _connection.QuerySingleAsync<Question>(sql, new { questionId });
+
+        result.Answers = await GetAnswersForQuestionAsync(questionId);
+
+        return result;
     }
 
-    private List<Question> GetQuestionsFromDB()
+    public async Task<List<Question>> GetQuestionsAsync()
     {
-        var results = _connection.Query<Question>("SELECT * FROM Questions;");
-        foreach (var question in results)
+        const string sql = "SELECT * FROM Questions;";
+
+        var results = await _connection.QueryAsync<Question>(sql);
+
+        var questions = results.Select(async q => new Question
         {
-            question.Answers = GetAnswersForQuestionFromDB(question.Id);
-        }
+            Id = q.Id,
+            Content = q.Content,
+            Answers = await GetAnswersForQuestionAsync(q.Id)
+        })
+        .ToList();
 
         return results.ToList();
     }
 
-
-    public List<Question> GetQuestions()
-    {
-        return Questions;
-    }
-
-    public List<Question> GetShuffledQuestions()
+    public async Task<List<Question>> GetShuffledQuestionsAsync()
     {
         // Fisher-Yates Shuffle Algorithm
         // Assuming we have an array num of n elements:
@@ -53,7 +51,7 @@ public class QuestionService : IQuestionService
         //  k ← random integer that is 0 ≤ j ≤ i
         //  swap num[k] with num[i]
 
-        var shuffledQuestions = new List<Question>(Questions);
+        var shuffledQuestions = await GetQuestionsAsync();
 
         for (int i = shuffledQuestions.Count - 1; i > 0; i--)
         {
@@ -63,11 +61,44 @@ public class QuestionService : IQuestionService
 
         return shuffledQuestions;
     }
+
+    public async Task<Question> GetRandomQuestionAsync()
+    {
+        const string sql = @"
+            SELECT * FROM Questions
+            ORDER BY RANDOM()
+            LIMIT 1;";
+
+        var question = await _connection.QueryFirstOrDefaultAsync<Question>(sql);
+
+        if (question is null)
+            throw new Exception("No questions found in the database.");
+
+        question.Answers = await GetAnswersForQuestionAsync(question.Id);
+
+        return question;
+    }
+
+    public async Task<List<Answer>> GetAnswersForQuestionAsync(int questionId)
+    {
+        const string sql = @"
+            SELECT * FROM Answers
+            WHERE QuestionId == @questionId
+            ORDER BY Ranking;";
+
+        var results = await _connection.QueryAsync<Answer>(sql, new { questionId });
+
+        return results.ToList();
+    }
+
 }
 
 public interface IQuestionService
 {
-    List<Question> GetQuestions();
-    List<Question> GetShuffledQuestions();
+    Task<List<Question>> GetQuestionsAsync();
+    Task<Question> GetQuestionAsync(int questionId);
+    Task<List<Question>> GetShuffledQuestionsAsync();
+    Task<Question> GetRandomQuestionAsync();
+    Task<List<Answer>> GetAnswersForQuestionAsync(int questionId);
 }
 

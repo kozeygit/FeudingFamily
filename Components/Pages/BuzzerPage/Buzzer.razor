@@ -6,9 +6,10 @@
 <PageTitle>Feuding Family - Buzzer</PageTitle>
 
 <div class="wrapper">
-    <dialog>YOU BUZZED IN!!</dialog>
+    <dialog open=@IsModalShown>YOU BUZZED IN!!</dialog>
     <div class="team-name">
-        <h1>Team:<br />@TeamName</h1>
+        <h1>Team:<br />@Team?.TeamName</h1>
     </div>
     <button class="buzzer" @onmousedown="SendBuzz"></button>
+    <h2 class="points">Points: @Team?.Points</h2>
 </div>

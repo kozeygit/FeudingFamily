@@ -14,14 +14,21 @@ body,
   flex-direction: column;
   align-items: center;
   justify-content: space-evenly;
-  background-image: linear-gradient(lightblue, white);
+  background-image: linear-gradient(rgb(71, 152, 180), blue);
 }
 
 .team-name {
   color: white;
-  font-size: 20px;
+  font-size: 40px;
   text-align: center;
-  text-shadow: 2px 2px 5px rgb(0, 0, 0, 0.5);
+  text-shadow: 2px 2px 5px rgb(0, 0, 0);
+}
+
+.points {
+  color: white;
+  font-size: 40px;
+  text-align: center;
+  text-shadow: 2px 2px 5px rgb(0, 0, 0);
 }
 
 .buzzer {
@@ -73,6 +80,7 @@ body,
 }
 
 dialog {
+  z-index: 1000;
   position: fixed;
   left: 0;
   right: 0;
@@ -88,8 +96,4 @@ dialog {
   backdrop-filter: blur(10px);
   border: solid black 5px;
   border-radius: 40px;
-}
-
-dialog::backdrop {
-  background: rgb(0, 0, 0, 0.6);
 }

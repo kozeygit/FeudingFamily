@@ -33,7 +33,7 @@ public class Team(string teamName)
         Points += points;
     }
 
-    public void AddRoundWon()
+    public void AddRoundWin()
     {
         RoundsWon++;
     }

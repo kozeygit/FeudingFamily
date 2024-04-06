@@ -57,6 +57,7 @@ public class PresenterPageBase : ComponentBase
         {
             BuzzingTeam = teamName;
             IsBuzzerModalShown = true;
+
             await InvokeAsync(StateHasChanged);
 
             // non blocking wait for 2 seconds
@@ -85,7 +86,6 @@ public class PresenterPageBase : ComponentBase
         {
             Console.WriteLine("Presenter Send Buzz", teamName);
             await ShowBuzzerModalAsync(teamName);
-            await InvokeAsync(StateHasChanged);
         });
 
         await hubConnection.StartAsync();

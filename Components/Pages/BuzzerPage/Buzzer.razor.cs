@@ -21,6 +21,9 @@ public class BuzzerPageBase : ComponentBase
     public string TeamName { get; set; }
 
     public Game? Game { get; set; }
+    public Team? Team { get; set; }
+
+    public bool IsModalShown { get; set; }
     
 
     private HubConnection? hubConnection;
@@ -28,6 +31,11 @@ public class BuzzerPageBase : ComponentBase
     protected override void OnParametersSet()
     {
         Game = GameManager.GetGame(GameKey).Game;
+        Team = Game?.GetTeam(TeamName);
+        if (Team is null)
+        {
+            Navigation.NavigateTo("/");
+        }
     }
 
     public bool IsConnected =>
@@ -44,12 +52,17 @@ public class BuzzerPageBase : ComponentBase
 
     protected async Task SendBuzz()
     {
-        Console.WriteLine("Buzzer Send Buzz");
-        
         if (hubConnection is not null)
         {
             await hubConnection.SendAsync("SendBuzz", TeamName);
         }
+
+        IsModalShown = true;
+
+        // non blocking wait for 2 seconds
+        await Task.Delay(2000).ContinueWith(_ => IsModalShown = false);
+
+        Console.WriteLine("Buzzer Send Buzz");
     }
 
     public async ValueTask DisposeAsync()
