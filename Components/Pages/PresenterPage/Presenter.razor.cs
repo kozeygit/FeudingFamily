@@ -28,17 +28,7 @@ public class PresenterPageBase : ComponentBase
 
     protected override void OnInitialized()
     {
-        DefaultQuestion = new Question
-        {
-            Content = "Default Question",
-            Answers = {
-                new Answer { Ranking = 1, Content = "Answer1", Points = 100},
-                new Answer { Ranking = 2, Content = "Answer2", Points = 80},
-                new Answer { Ranking = 3, Content = "Answer3", Points = 60},
-                new Answer { Ranking = 4, Content = "Answer4", Points = 40},
-                new Answer { Ranking = 5, Content = "Answer5", Points = 20},
-            }
-        };
+        DefaultQuestion = QuestionService.GetDefaultQuestion();
     }
 
     protected override void OnParametersSet()
@@ -91,6 +81,7 @@ public class PresenterPageBase : ComponentBase
         await hubConnection.StartAsync();
 
         await hubConnection.SendAsync("AddToPresenterGroup");
+        await hubConnection.SendAsync("AddToGameGroup", GameKey);
     }
 
     public bool IsConnected =>

@@ -10,50 +10,50 @@
 
 <div class="wrapper">
   <div class="lights">
-    <div class="light x1"></div>
-    <div class="light x2"></div>
-    <div class="light x3"></div>
-    <div class="light x4"></div>
-    <div class="light x5"></div>
-    <div class="light x6"></div>
-    <div class="light x7"></div>
-    <div class="light x8"></div>
-    <div class="light x9"></div>
+    @for (int i = 1; i < 10; i++)
+    {
+      <div class="light x@(i)"></div>
+    }
   </div>
-  
+
   <main>
     <dialog class="wrong-container" id="wrong-container"></dialog>
     <dialog class="buzzer-container" id="buzzer-container" open=@IsBuzzerModalShown></dialog>
+
     <div class="container">
-      
-      <div class="question @(Game?.Board.IsQuestionRevealed == true ? "revealed" : "")">
-        <h1 id="question">@(Game?.CurrentQuestion.Content ?? DefaultQuestion.Content)</h1>
-      </div>
-
-      <div class="answers" id="answers">
-
-      @foreach (Answer answer in Game?.CurrentQuestion.Answers ?? DefaultQuestion.Answers)
-      {
-        <div class="answer" id="@answer.Ranking">
-          <div class="answer-ranking">
-            <p>@answer.Ranking</p>
-          </div>
-          <div class="answer-content">
-            <p id="answer">@answer.Content</p>
-          </div>
-          <div class="answer-points">
-            <p id="points">@answer.Points</p>
-          </div>
+      <div class="board">
+        <div class="question @(Game?.Board.IsQuestionRevealed == true ? "revealed" : "")">
+          <h1 id="question-content">@(Game?.CurrentQuestion.Content ?? DefaultQuestion.Content)</h1>
         </div>
-      }
 
+        <div class="answers">
+
+          @foreach (Answer answer in Game?.CurrentQuestion.Answers ?? DefaultQuestion.Answers)
+          {
+            <div class="answer @(Game?.Board.IsAnswerRevealed[answer.Ranking] == true ? "revealed" : "")" id="$answer-{@answer.Ranking}">
+              <div class="answer-ranking">
+                <p>@answer.Ranking</p>
+              </div>
+              <div class="answer-content">
+                <p id="answer">@answer.Content</p>
+              </div>
+              <div class="answer-points">
+                <p id="points">@answer.Points</p>
+              </div>
+            </div>
+          }
+
+        </div>
       </div>
-      <div class="timer-container left">
+
+      <div class="left-timer-container ">
         <div class="timer" id="left_timer"></div>
       </div>
-      <div class="timer-container right">
+      
+      <div class="right-timer-container">
         <div class="timer" id="right_timer"></div>
       </div>
+    
     </div>
   </main>
 </div>

@@ -91,6 +91,22 @@ public class QuestionService : IQuestionService
         return results.ToList();
     }
 
+    public static Question GetDefaultQuestion()
+    {
+        return new Question
+        {
+            Content = "Default Question",
+            Answers =
+            [
+                new Answer { Content = "Default Answer 1", Points = 100, Ranking = 1 },
+                new Answer { Content = "Default Answer 2", Points = 80, Ranking = 2 },
+                new Answer { Content = "Default Answer 3", Points = 60, Ranking = 3 },
+                new Answer { Content = "Default Answer 4", Points = 40, Ranking = 4 },
+                new Answer { Content = "Default Answer 5", Points = 20, Ranking = 5 },
+            ]
+        };
+    }
+
 }
 
 public interface IQuestionService
