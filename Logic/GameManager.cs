@@ -5,6 +5,7 @@ namespace FeudingFamily.Logic;
 public class GameManager : IGameManager
 {
     private readonly Dictionary<string, Game> games = [];
+    private readonly Dictionary<string, List<string>> gameConnections = [];
     private readonly IQuestionService _questionService;
     public GameManager(IQuestionService questionService)
     {
@@ -22,6 +23,7 @@ public class GameManager : IGameManager
 
         var newGame = new Game(_questionService);
         games.Add(gameKey, newGame);
+        gameConnections.Add(gameKey, []);
 
         return new JoinGameResult { GameKey = gameKey, Game = games[gameKey] };
     }
@@ -56,6 +58,35 @@ public class GameManager : IGameManager
         return new JoinGameResult { GameKey = gameKey };
     }
 
+    public bool AddConnectionToGame(string gameKey, string connectionId)
+    {
+        if (games.ContainsKey(gameKey) is false)
+            return false;
+
+        gameConnections[gameKey].Add(connectionId);
+        return true;
+    }
+
+    public bool RemoveConnectionFromGame(string gameKey, string connectionId)
+    {
+        if (games.ContainsKey(gameKey) is false)
+            return false;
+
+        gameConnections[gameKey].Remove(connectionId);
+        return true;
+    }
+
+    public Game? GetGameKeyFromConnectionId(string connectionId)
+    {
+        foreach (var game in games)
+        {
+            if (gameConnections[game.Key].Contains(connectionId))
+                return game.Value;
+        }
+
+        return null;
+    }
+
     // stolen from the stack lol
     public static string GetErrorMessage(Enum errorCode)
     {
@@ -68,6 +99,7 @@ public class GameManager : IGameManager
         return custAttr?.SingleOrDefault() is not DescriptionAttribute attribute ? errorCode.ToString() : attribute.Description;
     }
 
+
 }
 
 
@@ -76,4 +108,7 @@ public interface IGameManager
     JoinGameResult NewGame(string gameKey);
     JoinGameResult GetGame(string gameKey);
     JoinGameResult GameKeyValidator(string? gameKey);
+    bool AddConnectionToGame(string gameKey, string connectionId);
+    bool RemoveConnectionFromGame(string gameKey, string connectionId);
+    Game? GetGameKeyFromConnectionId(string connectionId);
 }

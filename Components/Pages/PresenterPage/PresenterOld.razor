@@ -1,0 +1,90 @@
+﻿@page "/Presenter"
+@page "/Presenter/{GameKey}"
+@layout Layout.EmptyLayout
+@inherits PresenterPageBase
+@using Microsoft.AspNetCore.SignalR.Client
+@using FeudingFamily.Logic
+@rendermode InteractiveServer
+
+<PageTitle>FeudingFamily - Presenter</PageTitle>
+
+<div class="wrapper">
+  <div class="lights">
+    @for (int i = 1; i < 10; i++)
+    {
+      <div class="light x@(i)"></div>
+    }
+  </div>
+
+  <main>
+    <dialog class="wrong-container" id="wrong-container"></dialog>
+    <dialog class="buzzer-container" id="buzzer-container" open=@IsBuzzerModalShown></dialog>
+
+    <div class="container">
+      <div class="board">
+        <div class="question @(Game?.Board.IsQuestionRevealed == true ? "revealed" : "")">
+          <h1 id="question-content">
+            @if (Game is null)
+            {
+              @DefaultQuestion.Content
+            }
+            else
+            {
+              @Game.CurrentQuestion.Content
+            }
+
+          </h1>
+        </div>
+
+        <div class="answers">
+          @if (Game is null)
+          {
+            @foreach (Answer answer in DefaultQuestion.Answers)
+            {
+              <div class="answer @(Game?.Board.IsAnswerRevealed[answer.Ranking] == true ? "revealed" : "")"
+                id="answer-{@answer.Ranking}">
+                <div class="answer-ranking">
+                  <p>@answer.Ranking</p>
+                </div>
+                <div class="answer-content">
+                  <p id="answer">@answer.Content</p>
+                </div>
+                <div class="answer-points">
+                  <p id="points">@answer.Points</p>
+                </div>
+              </div>
+            }
+          }
+          else
+          {
+            @foreach (Answer answer in Game.CurrentQuestion.Answers)
+            {
+              <div class="answer @(Game?.Board.IsAnswerRevealed[answer.Ranking] == true ? "revealed" : "")"
+                id="answer-{@answer.Ranking}">
+                <div class="answer-ranking">
+                  <p>@answer.Ranking</p>
+                </div>
+                <div class="answer-content">
+                  <p id="answer">@answer.Content</p>
+                </div>
+                <div class="answer-points">
+                  <p id="points">@answer.Points</p>
+                </div>
+              </div>
+            }
+          }
+
+        </div>
+      </div>
+
+      <div class="left-timer-container ">
+        <div class="timer" id="left_timer"></div>
+      </div>
+
+      <div class="right-timer-container">
+        <div class="timer" id="right_timer"></div>
+      </div>
+
+    </div>
+  </main>
+</div>

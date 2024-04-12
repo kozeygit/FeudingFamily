@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using FeudingFamily.Logic;
 using FeudingFamily.Models;
 using Microsoft.AspNetCore.SignalR;
@@ -6,6 +7,12 @@ namespace FeudingFamily.Hubs;
 
 public class GameHub : Hub
 {
+    private readonly IGameManager _gameManager;
+
+    public GameHub(IGameManager gameManager)
+    {
+        _gameManager = gameManager;
+    }
 
     public async Task RemoveFromGroups(string gameKey)
     {
@@ -13,9 +20,11 @@ public class GameHub : Hub
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Presenters");
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Controllers");
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Buzzers");
+        _gameManager.RemoveConnectionFromGame(gameKey, Context.ConnectionId);
     }
     public async Task AddToGameGroup(string gameKey)
     {
+        _gameManager.AddConnectionToGame(gameKey, Context.ConnectionId);
         await Groups.AddToGroupAsync(Context.ConnectionId, gameKey);
     }
 
@@ -47,8 +56,7 @@ public class GameHub : Hub
 
     public async Task NewQuestion() // Gets a new question and send to the controller for host to decide if to use
     {
-        Question question = new(); // TODO Replace with new question from a builder maybe idk
-        await Clients.Caller.SendAsync("receiveNewQuestion", question);
+        await Clients.Caller.SendAsync("receiveNewQuestion");
     }
 
     public async Task SendQuestion(Question question) // Sends current question to presenter and controller // * Will Probably move this to the view instead and reload the pages
