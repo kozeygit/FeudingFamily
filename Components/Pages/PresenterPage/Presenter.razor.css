@@ -167,7 +167,7 @@ main {
   letter-spacing: 3px;
 }
 
-.wrong-container {
+.wrong-modal {
   z-index: 998;
   position: fixed;
   left: 0;
@@ -184,13 +184,13 @@ main {
   border: none;
 }
 
-.wrong-container::backdrop {
+.wrong-modal::backdrop {
   z-index: 999;
   background-color: black;
   opacity: 50%;
 }
 
-.wrong-container > div {
+.wrong-modal > div {
   background: url(../images/wrong-answer-icon.png);
   background-repeat: repeat-x;
   background-size: contain;
@@ -199,11 +199,11 @@ main {
   opacity: 100%;
 }
 
-.wrong-container:not([open]) {
+.wrong-modal:not([open]) {
   display: none;
 }
 
-.buzzer-container {
+.buzzer-modal {
   z-index: 999;
   position: fixed;
   left: 0;
@@ -224,12 +224,12 @@ main {
   border-radius: 100px;
 }
 
-.buzzer-container::backdrop {
+.buzzer-modal::backdrop {
   background-color: black;
   opacity: 90%;
 }
 
-.buzzer-container::before {
+.buzzer-modal::before {
   content: "";
   position: absolute;
   z-index: -2;
@@ -266,7 +266,7 @@ main {
   );
 }
 
-.buzzer-container:not([open]) {
+.buzzer-modal:not([open]) {
   display: none;
 }
 

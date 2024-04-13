@@ -22,6 +22,7 @@ public class GameHub : Hub
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Buzzers");
         _gameManager.RemoveConnectionFromGame(gameKey, Context.ConnectionId);
     }
+
     public async Task AddToGameGroup(string gameKey)
     {
         _gameManager.AddConnectionToGame(gameKey, Context.ConnectionId);
@@ -45,11 +46,11 @@ public class GameHub : Hub
 
     public async Task SendBuzz(string teamName)
     {
+        var gameKey = _gameManager.GetGameKeyFromConnectionId(Context.ConnectionId);
         Console.WriteLine("Hub Send Buzz");
-        Console.WriteLine(Clients.Groups("Presenters"));
+        
         await Clients.Groups("Presenters").SendAsync("ReceiveBuzz", teamName);
     }
-
 
     //!----------------------------------------------------------------------------------!\\
 
@@ -107,7 +108,7 @@ Needed:
 Controller:
 TODO: new question -> controller
 TODO: send question (question) -> presenter, controller
-TODO: send answer (list of answers (answer + point)) -> presenter, controller 
+TODO: send answer (list of answers (answer + point)) -> presenter, controller
 TODO: send reveal question () -> presenter
 TODO: send reveal answer (index of ans) -> presenter
 TODO: send wrong answer (how many wrong/how many Xs to show) -> presenter
@@ -121,3 +122,4 @@ TODO: send sound (sound name) -> presenter
 Buzzer:
 send buzzer call (team who buzzed) -> presenter
 */
+

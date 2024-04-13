@@ -4,6 +4,7 @@ using FeudingFamily.Logic;
 using FeudingFamily.Models;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
+using System.Text;
 
 
 namespace FeudingFamily;
@@ -38,8 +39,9 @@ public class PresenterPageBase : ComponentBase
     }
 
     public bool IsBuzzerModalShown { get; set; }
-    public bool IsWrongAnswerModalShown { get; set; }
     public string BuzzingTeam { get; set; } = string.Empty;
+    public bool IsWrongModalShown { get; set; }
+    public int WrongAnswersCount { get; set; } = 0;
 
     public async Task ShowBuzzerModalAsync(string teamName)
     {
@@ -54,6 +56,26 @@ public class PresenterPageBase : ComponentBase
             await Task.Delay(2000);
 
             IsBuzzerModalShown = false;
+
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error has occurred: {ex}");
+        }
+    }
+    public async Task ShowWrongModalAsync()
+    {
+        try
+        {
+            IsWrongModalShown = true;
+
+            await InvokeAsync(StateHasChanged);
+
+            // non blocking wait for 2 seconds
+            await Task.Delay(2000);
+
+            IsWrongModalShown = false;
 
             await InvokeAsync(StateHasChanged);
         }

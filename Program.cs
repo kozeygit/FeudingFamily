@@ -61,11 +61,13 @@ app.MapGet("/questions2", async (IQuestionService questionService) =>
 {
     IQuestionService _questionService = questionService;
 
-    var questions = await _questionService.GetShuffledQuestionsAsync();
+    var questions = await _questionService.GetQuestionsAsync();
 
     return Results.Ok(questions.Select(q => q.MapToDto().Content));
 
 });
+
+
 
 
 app.MapGet("/form", (IGameManager GameManager, string gameKey, string teamName, string page) =>

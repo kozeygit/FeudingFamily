@@ -5,7 +5,6 @@ namespace FeudingFamily.Logic;
 public class GameManager : IGameManager
 {
     private readonly Dictionary<string, Game> games = [];
-    private readonly Dictionary<string, List<string>> gameConnections = [];
     private readonly IQuestionService _questionService;
     public GameManager(IQuestionService questionService)
     {
@@ -24,6 +23,23 @@ public class GameManager : IGameManager
         var newGame = new Game(_questionService);
         games.Add(gameKey, newGame);
         gameConnections.Add(gameKey, []);
+
+        return new JoinGameResult { GameKey = gameKey, Game = games[gameKey] };
+    }
+
+    public JoinGameResult TryJoinGame(string gameKey, string connectionId)
+    {
+        JoinGameResult validGameKey = GameKeyValidator(gameKey);
+        if (validGameKey.Success is false)
+        {
+            return validGameKey;
+        }
+
+        if (games.ContainsKey(gameKey) is false)
+            return new JoinGameResult { ErrorCode = JoinErrorCode.GameDoesNotExist };
+
+        if (gameConnections[gameKey].Contains(connectionId))
+            return new JoinGameResult { ErrorCode = JoinErrorCode.AlreadyJoined };
 
         return new JoinGameResult { GameKey = gameKey, Game = games[gameKey] };
     }
@@ -76,15 +92,15 @@ public class GameManager : IGameManager
         return true;
     }
 
-    public Game? GetGameKeyFromConnectionId(string connectionId)
+    public string GetGameKeyFromConnectionId(string connectionId)
     {
         foreach (var game in games)
         {
             if (gameConnections[game.Key].Contains(connectionId))
-                return game.Value;
+                return game.Key;
         }
 
-        return null;
+        return "";
     }
 
     // stolen from the stack lol
@@ -110,5 +126,5 @@ public interface IGameManager
     JoinGameResult GameKeyValidator(string? gameKey);
     bool AddConnectionToGame(string gameKey, string connectionId);
     bool RemoveConnectionFromGame(string gameKey, string connectionId);
-    Game? GetGameKeyFromConnectionId(string connectionId);
+    string GetGameKeyFromConnectionId(string connectionId);
 }

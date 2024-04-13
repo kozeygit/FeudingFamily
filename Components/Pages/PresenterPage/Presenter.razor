@@ -8,14 +8,16 @@
 
 <PageTitle>FeudingFamily - Presenter</PageTitle>
 <main>
-  <dialog class="wrong-container" id="wrong-container"></dialog>
-  <dialog class="buzzer-container" id="buzzer-container" open=@IsBuzzerModalShown></dialog>
+  <dialog class="wrong-modal" id="wrong-modal" open=@IsWrongModalShown></dialog>
+  <dialog class="buzzer-modal" id="buzzer-modal" open=@IsBuzzerModalShown></dialog>
 
-  <div class="board">
+  <div class="game-board">
 
-    @{var question = Game is not null ? Game.CurrentQuestion : DefaultQuestion;};
+    @{
+      var question = Game is not null ? Game.CurrentQuestion : DefaultQuestion;
+    };
 
-    <div class="question revealed">
+    <div class="question is-revealed">
       <h1 id="question-content">
         @question.Content;
       </h1>
@@ -24,21 +26,18 @@
     <div class="answers">
       @foreach (var answer in question.Answers)
       {
-        <div class="answer revealed" id="answer-{@answer.Ranking}">
-          <div class="answer-ranking">
-            <p>@answer.Ranking</p>
-          </div>
-          <div class="answer-content">
-            <p id="answer">@answer.Content</p>
-          </div>
-          <div class="answer-points">
-            <p id="points">@answer.Points</p>
-          </div>
+        <div class="answer is-revealed" id="answer-{@answer.Ranking}">
+          <h2 class="answer-ranking" id="answer-ranking">
+            @answer.Ranking
+          </h2>
+          <h2 class="answer-content" id="answer-content">
+            @answer.Content
+          </h2>
+          <h2 class="answer-points" id="answer-points">
+            @answer.Points
+          </h2>
         </div>
       }
-      }
-      }
-
     </div>
 
     <div class="left-timer-container ">
@@ -48,6 +47,7 @@
     <div class="right-timer-container">
       <div class="timer" id="right_timer"></div>
     </div>
+
   </div>
 
 </main>
