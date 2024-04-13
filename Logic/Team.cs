@@ -5,23 +5,19 @@ public class Team(string teamName)
     public string TeamName { get; set; } = teamName;
     public int Points { get; set; } = 0;
     public int RoundsWon { get; set; } = 0;
-    public HashSet<string> Members { get; set; } = [];
+    public HashSet<GameConnection> Members { get; set; } = [];
 
-    public void AddMember(string member)
+    public void AddMember(GameConnection member)
     {
-        if (!Members.Contains(member))
-        {
-            Members.Add(member);
-        }
-        else
+        if (!Members.Add(member))
         {
             Console.WriteLine("Member already part of team.");
         }
     }
 
-    public bool HasMember(string member)
+    public bool HasMember(GameConnection member)
     {
-        if (member.Contains(member))
+        if (Members.Contains(member))
         {
             return true;
         }

@@ -1,20 +1,20 @@
 using System.ComponentModel;
 using FeudingFamily.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FeudingFamily.Logic;
 
 public class Game
 {
     private readonly IQuestionService _questionService;
-    private int _questionIndex = 0;
-    private int roundPoints = 0;
-    private int wrongAnswers = 0;
     private bool isQuestionManual = false;
 
-    public Dictionary<string, Team> Teams { get; set; } = [];
+    public Team[] Teams { get; set; } = new Team[2];
     public Team? TeamPlaying { get; set; } = null;
-    public Question? CurrentQuestion { get; set; }
     public Board Board { get; set; }
+    public Question? CurrentQuestion { get; set; }
+    public int RoundPoints { get; set; } = 0;
+    public int WrongAnswers { get; set; } = 0;
 
 
     public Game(IQuestionService questionService)
@@ -28,10 +28,15 @@ public class Game
 
     public void GiveCorrectAnswer(AnswerDto answer, string teamName)
     {
-        TeamPlaying = Teams[teamName];
-        roundPoints += answer.Points;
-        TeamPlaying?.AddRoundWin();
-        throw new NotImplementedException();
+        var team = Teams.SingleOrDefault(x => x.TeamName == teamName);
+        if (team is null)
+        {
+            throw new InvalidOperationException("Team does not exist");
+        }
+
+        TeamPlaying = team;
+        RoundPoints += answer.Points;
+        TeamPlaying.AddRoundWin();
     }
 
     public void GiveCorrectAnswer(AnswerDto answer)
@@ -41,7 +46,7 @@ public class Game
         {
             // EndRound();
         }
-        roundPoints += answer.Points;
+        RoundPoints += answer.Points;
         throw new NotImplementedException();
     }
 
@@ -56,8 +61,8 @@ public class Game
         Board.IsAnswerRevealed = Board.IsAnswerRevealed.Select(_ => false).ToArray();
         Board.IsQuestionRevealed = false;
         
-        roundPoints = 0;
-        wrongAnswers = 0;
+        RoundPoints = 0;
+        WrongAnswers = 0;
         TeamPlaying = null;
         
         
@@ -74,7 +79,7 @@ public class Game
     public void EndRound()
     {
         Board.IsAnswerRevealed = Board.IsAnswerRevealed.Select(_ => true).ToArray();
-        TeamPlaying?.AddPoints(roundPoints);
+        TeamPlaying?.AddPoints(RoundPoints);
         TeamPlaying?.AddRoundWin();
         throw new NotImplementedException();
     }
@@ -83,13 +88,13 @@ public class Game
     {
         Board.IsAnswerRevealed[answer.Ranking] = true;
 
-        wrongAnswers++;
-        if (wrongAnswers == 2)
+        WrongAnswers++;
+        if (WrongAnswers == 2)
         {
             SwapTeamPlaying();
         }
 
-        if (wrongAnswers == 3)
+        if (WrongAnswers == 3)
         {
             SwapTeamPlaying();
             EndRound();
@@ -99,7 +104,9 @@ public class Game
 
     public void SetTeamPlaying(string teamName)
     {
-        if (!Teams.TryGetValue(teamName, out Team? team))
+        var team = Teams.SingleOrDefault(t => t.TeamName == teamName);
+        
+        if (team is null)
         {
             throw new InvalidOperationException("Team does not exist");
         }
@@ -113,7 +120,7 @@ public class Game
             throw new InvalidOperationException("No team is currently playing");
         }
 
-        TeamPlaying = TeamPlaying == Teams.Values.First() ? Teams.Values.Last() : Teams.Values.First();
+        TeamPlaying = TeamPlaying == Teams.First() ? Teams.Last() : Teams.First();
     }
 
     public async Task<Question> NewQuestion(int id)
@@ -136,7 +143,7 @@ public class Game
 
     public bool HasTeam(string teamName)
     {
-        return Teams.ContainsKey(teamName);
+        return Teams.SingleOrDefault(x => x.TeamName == teamName) is not null;
     }
 
     public bool AddTeam(string teamName)
@@ -146,23 +153,20 @@ public class Game
             return false;
         }
 
-        if (Teams.Count >= 2)
+        if (Teams.Length >= 2)
         {
             return false;
         }
 
         var newTeam = new Team(teamName);
-        Teams.Add(teamName, newTeam);
+        _ = Teams.Append(newTeam);
+        
         return true;
     }
 
     public Team? GetTeam(string teamName)
     {
-        if (!HasTeam(teamName))
-        {
-            return null;
-        }
-        return Teams[teamName];
+        return Teams.SingleOrDefault(x => x.TeamName == teamName);
     }
 
 }

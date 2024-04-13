@@ -1,31 +1,21 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace FeudingFamily.Logic;
 
-public enum ConnectionType
+public class GameRoom
 {
-    Presenter,
-    Controller,
-    Buzzer
-}
-public class GameConnection
-{
-    public string ConnectionId { get; set; }
-    public ConnectionType ConnectionType { get; set; }
-}
-
-public class GameGroup
-{
-    public string GroupId { get; set; }
+    [Required]
+    public string? GameId { get; set; }
     public List<GameConnection> Connections { get; set; } = [];
-    public Game Game { get; set; }
+
+    public void AddConnection(GameConnection connection)
+    {
+        Connections.Add(connection);
+    }
 
     public void AddConnection(string connectionId, ConnectionType connectionType)
     {
-        Connections.Add(new GameConnection { ConnectionId = connectionId, ConnectionType = connectionType });
+        AddConnection(new GameConnection { ConnectionId = connectionId, ConnectionType = connectionType });
     }
 
     public void RemoveConnection(string connectionId)

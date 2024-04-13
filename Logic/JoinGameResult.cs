@@ -18,8 +18,8 @@ public enum JoinErrorCode
     [Description("Key must be 4 characters long.")]
     KeyWrongLength,
 
-    [Description("Key must be uppercase.")]
-    KeyNotUpperCase,
+    [Description("Key must contain only alphanumeric characters.")]
+    KeyNotAlphanumeric,
     
     [Description("Key is already in use.")]
     KeyInUse,
