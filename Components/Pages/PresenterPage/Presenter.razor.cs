@@ -41,7 +41,6 @@ public class PresenterPageBase : ComponentBase
     public bool IsBuzzerModalShown { get; set; }
     public string BuzzingTeam { get; set; } = string.Empty;
     public bool IsWrongModalShown { get; set; }
-    public int WrongAnswersCount { get; set; } = 0;
 
     public async Task ShowBuzzerModalAsync(string teamName)
     {
@@ -102,18 +101,17 @@ public class PresenterPageBase : ComponentBase
 
         await hubConnection.StartAsync();
 
-        await hubConnection.SendAsync("AddToPresenterGroup");
-        await hubConnection.SendAsync("AddToGameGroup", GameKey);
+        await hubConnection.InvokeAsync("JoinGame", GameKey, ConnectionType.Presenter);
     }
 
-    public bool IsConnected =>
+    public bool IsConnectedToGameHub =>
         hubConnection?.State == HubConnectionState.Connected;
 
     public async ValueTask DisposeAsync()
     {
         if (hubConnection is not null)
         {
-            await hubConnection.SendAsync("RemoveFromGroups", GameKey);
+            await hubConnection.SendAsync("LeaveGame", GameKey);
             await hubConnection.DisposeAsync();
         }
     }

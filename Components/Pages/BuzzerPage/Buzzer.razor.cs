@@ -48,6 +48,11 @@ public class BuzzerPageBase : ComponentBase
             .Build();
 
         await hubConnection.StartAsync();
+
+        await hubConnection.SendAsync("JoinGroup", GameKey, TeamName);
+
+
+
     }
 
     protected async Task SendBuzz()

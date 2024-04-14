@@ -2,7 +2,7 @@ namespace FeudingFamily.Logic;
 
 public class Team(string teamName)
 {
-    public string TeamName { get; set; } = teamName;
+    public string Name { get; set; } = teamName;
     public int Points { get; set; } = 0;
     public int RoundsWon { get; set; } = 0;
     public HashSet<GameConnection> Members { get; set; } = [];
@@ -23,6 +23,12 @@ public class Team(string teamName)
         }
 
         return false;
+    }
+
+    public bool RemoveMember(GameConnection member)
+    {
+        // true if member found and removed; otherwise, false
+        return Members.Remove(member);
     }
     public void AddPoints(int points)
     {

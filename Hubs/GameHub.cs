@@ -17,39 +17,38 @@ public class GameHub : Hub
     public async Task RemoveFromGroups(string gameKey)
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameKey);
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Presenters");
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Controllers");
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Buzzers");
-        _gameManager.RemoveConnectionFromGame(gameKey, Context.ConnectionId);
+        _gameManager.LeaveGame(gameKey, Context.ConnectionId);
     }
 
-    public async Task AddToGameGroup(string gameKey)
+    public async Task JoinGame(string gameKey, ConnectionType connectionType)
     {
-        _gameManager.AddConnectionToGame(gameKey, Context.ConnectionId);
+        _gameManager.JoinGame(gameKey, Context.ConnectionId, connectionType);
+        await Groups.AddToGroupAsync(Context.ConnectionId, gameKey);
+    }
+    
+    public async Task JoinGame(string gameKey, string TeamName)
+    {
+        _gameManager.JoinGame(gameKey, Context.ConnectionId, TeamName);
         await Groups.AddToGroupAsync(Context.ConnectionId, gameKey);
     }
 
-    public async Task AddToPresenterGroup()
+    public async Task LeaveGame(string gameKey)
     {
-        await Groups.AddToGroupAsync(Context.ConnectionId, "Presenters");
-    }
-
-    public async Task AddToControllerGroup()
-    {
-        await Groups.AddToGroupAsync(Context.ConnectionId, "Controllers");
-    }
-
-    public async Task AddToBuzzerGroup()
-    {
-        await Groups.AddToGroupAsync(Context.ConnectionId, "Buzzers");
+        _gameManager.LeaveGame(gameKey, Context.ConnectionId);
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameKey);
     }
 
     public async Task SendBuzz(string teamName)
     {
         var gameKey = _gameManager.GetGameKeyFromConnectionId(Context.ConnectionId);
+        var pConns = _gameManager.GetPresenterConnections(gameKey);
+        var cConns = _gameManager.GetControllerConnections(gameKey);
+
+        List<string> conns = pConns.Concat(cConns).Select(c => c.ConnectionId).ToList() ?? [];
+
         Console.WriteLine("Hub Send Buzz");
         
-        await Clients.Groups("Presenters").SendAsync("ReceiveBuzz", teamName);
+        await Clients.Clients(conns).SendAsync("receiveBuzz", teamName);
     }
 
     //!----------------------------------------------------------------------------------!\\

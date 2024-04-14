@@ -25,7 +25,7 @@ public class QuestionService : IQuestionService
 
         return result;
     }
-
+    
     public async Task<List<Question>> GetQuestionsAsync()
     {
         const string sql = "SELECT * FROM Questions;";
@@ -109,12 +109,41 @@ public class QuestionService : IQuestionService
 
 }
 
+/// <summary>
+/// Represents a service for managing questions and answers.
+/// </summary>
 public interface IQuestionService
 {
+    /// <summary>
+    /// Retrieves all questions.
+    /// </summary>
+    /// <returns>A list of all questions.</returns>
     Task<List<Question>> GetQuestionsAsync();
+
+    /// <summary>
+    /// Retrieves a question by its ID.
+    /// </summary>
+    /// <param name="questionId">The ID of the question to retrieve.</param>
+    /// <returns>The question with the specified ID.</returns>
     Task<Question> GetQuestionAsync(int questionId);
+
+    /// <summary>
+    /// Retrieves all questions in a shuffled order.
+    /// </summary>
+    /// <returns>A list of shuffled questions.</returns>
     Task<List<Question>> GetShuffledQuestionsAsync();
+
+    /// <summary>
+    /// Retrieves a random question.
+    /// </summary>
+    /// <returns>A random question.</returns>
     Task<Question> GetRandomQuestionAsync();
-    Task<List<Answer>> GetAnswersForQuestionAsync(int questionId);
+
+    /// <summary>
+    /// Retrieves the answers for a question.
+    /// </summary>
+    /// <param name="questionId">The ID of the question.</param>
+    /// <returns>A list of answers for the specified question.</returns>
+    /// Task<List<Answer>> GetAnswersForQuestionAsync(int questionId);
 }
 

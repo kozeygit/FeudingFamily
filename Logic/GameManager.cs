@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace FeudingFamily.Logic;
 
@@ -101,7 +100,7 @@ public class GameManager : IGameManager
             return new JoinGameResult { ErrorCode = JoinErrorCode.GameDoesNotExist };
         }
 
-        if (game.Teams.Length == 2)
+        if (game.Teams.Count == 2)
         {
             return new JoinGameResult { ErrorCode = JoinErrorCode.GameHasTwoTeams };
         }
@@ -118,27 +117,56 @@ public class GameManager : IGameManager
             game.AddTeam(TeamName);
         }
 
-        var team = game.Teams.Single(t => t.TeamName == TeamName);
+        var team = game.Teams.Single(t => t.Name == TeamName);
         team.AddMember(connection);
 
         gamesRooms[gameKey].AddConnection(connection);
 
         return new JoinGameResult { Game = game };
     }
+    
+    public void LeaveGame(string gameKey, string connectionId)
+    {
+        var connection = gamesRooms[gameKey].Connections.Single(c => c.ConnectionId == connectionId);
+        
+        foreach (var team in games[gameKey].Teams)
+        {
+            team.RemoveMember(connection);
+        }
 
-    public bool AddConnection(string gameKey, string connectionId)
+        var gameRoom = gamesRooms[gameKey];        
+        gameRoom.RemoveConnection(connection);
+    }
+
+
+    public string GetGameKeyFromConnectionId(string connectionId)
     {
         throw new NotImplementedException();
     }
 
-    public bool RemoveConnection(string gameKey, string connectionId)
+    public List<GameConnection> GetConnections(string gameKey)
     {
+        var connections = gamesRooms[gameKey].Connections;
+        return connections;
         throw new NotImplementedException();
     }
-
-    public string GetGameKeyFromConnection(string connectionId)
+    public List<GameConnection> GetPresenterConnections(string gameKey)
     {
-        throw new NotImplementedException();
+        var connections = GetConnections(gameKey); 
+        var presenterConnections = connections.Where(c => c.ConnectionType == ConnectionType.Presenter).ToList();
+        return presenterConnections;
+    }
+    public List<GameConnection> GetControllerConnections(string gameKey)
+    {
+        var connections = GetConnections(gameKey); 
+        var controllerConnections = connections.Where(c => c.ConnectionType == ConnectionType.Controller).ToList();
+        return controllerConnections;
+    }
+    public List<GameConnection> GetBuzzerConnections(string gameKey)
+    {
+        var connections = GetConnections(gameKey); 
+        var buzzerConnections = connections.Where(c => c.ConnectionType == ConnectionType.Buzzer).ToList();
+        return buzzerConnections;
     }
 
 
@@ -163,8 +191,11 @@ public interface IGameManager
     JoinGameResult JoinGame(string gameKey, string connectionId, ConnectionType connectionType);
     JoinGameResult JoinGame(string gameKey, string connectionId, string TeamName);
     JoinGameResult GetGame(string gameKey);
+    void LeaveGame(string gameKey, string connectionId);
     JoinGameResult GameKeyValidator(string? gameKey);
-    bool AddConnection(string gameKey, string connectionId);
-    bool RemoveConnection(string gameKey, string connectionId);
-    string GetGameKeyFromConnection(string connectionId);
+    string GetGameKeyFromConnectionId(string connectionId);
+    List<GameConnection> GetConnections(string gameKey);
+    List<GameConnection> GetPresenterConnections(string gameKey);
+    List<GameConnection> GetControllerConnections(string gameKey);
+    List<GameConnection> GetBuzzerConnections(string gameKey);
 }

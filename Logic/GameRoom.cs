@@ -1,28 +1,41 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace FeudingFamily.Logic;
 
 public class GameRoom
 {
-    [Required]
-    public string? GameId { get; set; }
+    /// <summary>
+    /// Gets the unique identifier for the game.
+    /// </summary>
+    public string? GameId { get; init; }
+
+    /// <summary>
+    /// Gets or sets the list of game connections.
+    /// </summary>
     public List<GameConnection> Connections { get; set; } = [];
 
+    /// <summary>
+    /// Adds a game connection to the list of connections.
+    /// </summary>
+    /// <param name="connection">The game connection to add.</param>
     public void AddConnection(GameConnection connection)
     {
         Connections.Add(connection);
     }
 
-    public void AddConnection(string connectionId, ConnectionType connectionType)
+    /// <summary>
+    /// Removes a game connection from the list of connections.
+    /// </summary>
+    /// <param name="connection">The game connection to remove.</param>
+    public void RemoveConnection(GameConnection connection)
     {
-        AddConnection(new GameConnection { ConnectionId = connectionId, ConnectionType = connectionType });
+        Connections.Remove(connection);
     }
 
-    public void RemoveConnection(string connectionId)
-    {
-        Connections.RemoveAll(x => x.ConnectionId == connectionId);
-    }
-
+    /// <summary>
+    /// Gets the connection type of the game connection with the specified connection ID.
+    /// If the connection is not found, returns the default connection type (Presenter).
+    /// </summary>
+    /// <param name="connectionId">The connection ID of the game connection.</param>
+    /// <returns>The connection type of the game connection.</returns>
     public ConnectionType GetConnectionType(string connectionId)
     {
         var connection = Connections.FirstOrDefault(conn => conn.ConnectionId == connectionId);
@@ -33,6 +46,5 @@ public class GameRoom
         }
 
         return connection.ConnectionType;
-   
     }
 }

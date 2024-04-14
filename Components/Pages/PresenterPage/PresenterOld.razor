@@ -22,7 +22,7 @@
 
     <div class="container">
       <div class="board">
-        <div class="question @(Game?.Board.IsQuestionRevealed == true ? "revealed" : "")">
+        <div class="question @(Game?.CurrentRound.IsQuestionRevealed == true ? "revealed" : "")">
           <h1 id="question-content">
             @if (Game is null)
             {
@@ -41,7 +41,7 @@
           {
             @foreach (Answer answer in DefaultQuestion.Answers)
             {
-              <div class="answer @(Game?.Board.IsAnswerRevealed[answer.Ranking] == true ? "revealed" : "")"
+              <div class="answer @(Game?.CurrentRound.IsAnswerRevealed[answer.Ranking] == true ? "revealed" : "")"
                 id="answer-{@answer.Ranking}">
                 <div class="answer-ranking">
                   <p>@answer.Ranking</p>
@@ -59,7 +59,7 @@
           {
             @foreach (Answer answer in Game.CurrentQuestion.Answers)
             {
-              <div class="answer @(Game?.Board.IsAnswerRevealed[answer.Ranking] == true ? "revealed" : "")"
+              <div class="answer @(Game?.CurrentRound.IsAnswerRevealed[answer.Ranking] == true ? "revealed" : "")"
                 id="answer-{@answer.Ranking}">
                 <div class="answer-ranking">
                   <p>@answer.Ranking</p>
