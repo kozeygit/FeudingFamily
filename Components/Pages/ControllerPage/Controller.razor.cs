@@ -7,15 +7,54 @@ namespace FeudingFamily;
 public class ControllerPageBase : ComponentBase
 {
     [Inject]
-    IGameManager GameManager { get; set; }
+    NavigationManager Navigation { get; set; }
 
     [Parameter]
-    public string GameKey { get; set; }
+    public string? GameKey { get; set; }
 
-    public Game? Game { get; set; }
+    public RoundDto Round { get; set; }
+    public QuestionDto Question { get; set; }
+    public List<TeamDto> Teams { get; set; }
 
-    protected override void OnParametersSet()
+    protected bool IsBuzzerModalShown { get; set; }
+    protected string BuzzingTeam { get; set; } = string.Empty;
+    protected bool IsWrongModalShown { get; set; }
+
+    public bool IsGameConnected { get; set; }
+    protected HubConnection? hubConnection;
+    protected override async Task OnInitializedAsync()
     {
-        Game = GameManager.GetGame(GameKey).Game;
+        Question = QuestionService.GetDefaultQuestion().MapToDto();
+
+        if (GameKey is null)
+        {
+            Navigation.NavigateTo($"/ErrorCode={(int)JoinErrorCode.KeyEmpty}");
+        }
+
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
+            .Build();
+
+        hubConnection.On<bool>("ReceiveGameConnected", (isConnected) =>
+        {
+            IsGameConnected = isConnected;
+            InvokeAsync(StateHasChanged);
+        });
+
+        await hubConnection.StartAsync();
+
+        await hubConnection.SendAsync("JoinGame", GameKey, ConnectionType.Controller, null);
     }
+
+    public bool IsHubConnected =>
+        hubConnection?.State == HubConnectionState.Connected;
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+
 }

@@ -1,0 +1,38 @@
+Board:
+	bool QuestionRevealed
+	bool[] AnswerRevealed
+
+Question:
+	string Content
+	Answers[] Answers...
+
+Team: - About the teams
+	string TeamName
+	List<GameConnection> TeamMembers
+
+GameConnection:
+	string ConnectionId
+	enum ConnectionType
+
+
+GameRoom - About the connections to the game.
+	string GameId
+	List<GameConnection>
+
+Game: - About the game
+	string GameId
+	Team[] Teams
+	Question CurrentQuestion
+
+	{Other Game Logic}
+
+
+
+GameManager - Handles the joining and retrieving of game rooms and game data
+
+
+
+#
+
+FRONT END SHOULD NOT ACCESS GAMEMANAGER ANYMORE, ALL DATA MUST BE SENT AS DTOS BY HUB, CONNECTION MANAGERS WILL KEEP TRACK OF WHAT GAME THEY ARE CONNECTED TO!!!
+

@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using FeudingFamily.Logic;
 using FeudingFamily.Models;
 using Microsoft.AspNetCore.SignalR;
@@ -20,16 +19,34 @@ public class GameHub : Hub
         _gameManager.LeaveGame(gameKey, Context.ConnectionId);
     }
 
-    public async Task JoinGame(string gameKey, ConnectionType connectionType)
+    public async Task JoinGame(string gameKey, ConnectionType connectionType, string? teamName)
     {
-        _gameManager.JoinGame(gameKey, Context.ConnectionId, connectionType);
+        JoinGameResult joinGame;
+
+        Console.WriteLine($"--Hub-- JoinGame - gameKey: {gameKey}, connectionType: {connectionType}, teamName: {teamName}, caller: {Context.ConnectionId}");
+        
+        if (teamName is null)
+            joinGame = _gameManager.JoinGame(gameKey, Context.ConnectionId, connectionType);
+        
+        else
+            joinGame = _gameManager.JoinGame(gameKey, Context.ConnectionId, teamName);
+
+        if (joinGame.Success is false)
+        {
+            await Clients.Caller.SendAsync("ReceiveGame", false);
+            return;
+        }
+
+        joinGame = _gameManager.GetGame(gameKey);
+        
+        if (joinGame.Success is false)
+        {
+            await Clients.Caller.SendAsync("ReceiveGameConnected", false);
+            return;
+        }
+        
         await Groups.AddToGroupAsync(Context.ConnectionId, gameKey);
-    }
-    
-    public async Task JoinGame(string gameKey, string TeamName)
-    {
-        _gameManager.JoinGame(gameKey, Context.ConnectionId, TeamName);
-        await Groups.AddToGroupAsync(Context.ConnectionId, gameKey);
+        await Clients.Caller.SendAsync("ReceiveGameConnected", true);
     }
 
     public async Task LeaveGame(string gameKey)
@@ -41,12 +58,12 @@ public class GameHub : Hub
     public async Task SendBuzz(string teamName)
     {
         var gameKey = _gameManager.GetGameKeyFromConnectionId(Context.ConnectionId);
-        var pConns = _gameManager.GetPresenterConnections(gameKey);
-        var cConns = _gameManager.GetControllerConnections(gameKey);
+        var presenterConnections = _gameManager.GetPresenterConnections(gameKey);
+        var controllerConnections = _gameManager.GetControllerConnections(gameKey);
 
-        List<string> conns = pConns.Concat(cConns).Select(c => c.ConnectionId).ToList() ?? [];
+        var conns = presenterConnections.Concat(controllerConnections).Select(c => c.ConnectionId).ToList();
 
-        Console.WriteLine("Hub Send Buzz");
+        Console.WriteLine($"--Hub-- SendBuzz - teamName: {teamName}, gameKey: {gameKey}, sender: {Context.ConnectionId}");
         
         await Clients.Clients(conns).SendAsync("receiveBuzz", teamName);
     }

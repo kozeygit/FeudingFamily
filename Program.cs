@@ -101,7 +101,6 @@ app.MapGet("/form", (IGameManager GameManager, string gameKey, string teamName, 
             Console.WriteLine("Join");
             return Results.Redirect($"/Buzzer/{gameKey}?TeamName={teamName}");
             
-
         case "Presenter":
             Console.WriteLine("Presenter");
             return Results.Redirect($"/Presenter/{gameKey}");

@@ -1,15 +1,26 @@
 @page "/Buzzzer"
 @page "/Buzzer/{gameKey}"
 @inherits BuzzerPageBase
+@attribute [StreamRendering(false)]
 @rendermode InteractiveServer
 
 <PageTitle>Feuding Family - Buzzer</PageTitle>
 
-<div class="wrapper">
-    <dialog open=@IsModalShown>YOU BUZZED IN!!</dialog>
-    <div class="team-name">
-        <h1>Team:<br />@Team?.Name</h1>
+@if (IsGameConnected)
+{
+    <div class="wrapper">
+        <dialog open=@IsModalShown>YOU BUZZED IN!!</dialog>
+        <div class="team-name">
+            <h1>Team:<br />@TeamName</h1>
+        </div>
+        <button class="buzzer" @onmousedown="SendBuzz"></button>
+        <h2 class="points">Points:</h2>
     </div>
-    <button class="buzzer" @onmousedown="SendBuzz"></button>
-    <h2 class="points">Points: @Team?.Points</h2>
-</div>
+}
+
+else
+{
+    <div class="wrapper">
+        <h1 class="text-3xl text-white font-bold font-sans">Finding Game...</h1>
+    </div>
+}

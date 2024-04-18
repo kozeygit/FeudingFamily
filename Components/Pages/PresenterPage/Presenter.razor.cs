@@ -3,44 +3,62 @@ using Microsoft.AspNetCore.Components;
 using FeudingFamily.Logic;
 using FeudingFamily.Models;
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.JSInterop;
-using System.Text;
-
 
 namespace FeudingFamily;
+
 
 public class PresenterPageBase : ComponentBase
 {
     [Inject]
-    IJSRuntime JS { get; set; }
-
-    [Inject]
     NavigationManager Navigation { get; set; }
-
-    [Inject]
-    IGameManager GameManager { get; set; }
 
     [Parameter]
     public string? GameKey { get; set; }
 
-    public Game? Game { get; set; }
+    public RoundDto Round { get; set; }
+    public QuestionDto Question { get; set; }
+    public List<TeamDto> Teams { get; set; }
 
-    public Question? DefaultQuestion { get; set; }
+    protected bool IsBuzzerModalShown { get; set; }
+    protected string BuzzingTeam { get; set; } = string.Empty;
+    protected bool IsWrongModalShown { get; set; }
 
-    protected override void OnInitialized()
+    public bool IsGameConnected { get; set; }
+    protected HubConnection? hubConnection;
+    protected override async Task OnInitializedAsync()
     {
-        DefaultQuestion = QuestionService.GetDefaultQuestion();
+        Question = QuestionService.GetDefaultQuestion().MapToDto();
+
+        if (GameKey is null)
+        {
+            Navigation.NavigateTo($"/ErrorCode={(int)JoinErrorCode.KeyEmpty}");
+        }
+
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
+            .Build();
+
+        hubConnection.On<bool>("ReceiveGameConnected", (isConnected) =>
+        {
+            IsGameConnected = isConnected;
+            InvokeAsync(StateHasChanged);
+        });
+
+        await hubConnection.StartAsync();
+
+        await hubConnection.SendAsync("JoinGame", GameKey, ConnectionType.Presenter, null);
     }
 
-    protected override void OnParametersSet()
-    {
-        if (GameKey is not null)
-            Game = GameManager.GetGame(GameKey).Game;
-    }
+    public bool IsHubConnected =>
+        hubConnection?.State == HubConnectionState.Connected;
 
-    public bool IsBuzzerModalShown { get; set; }
-    public string BuzzingTeam { get; set; } = string.Empty;
-    public bool IsWrongModalShown { get; set; }
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
 
     public async Task ShowBuzzerModalAsync(string teamName)
     {
@@ -84,36 +102,5 @@ public class PresenterPageBase : ComponentBase
         }
     }
 
-    private HubConnection? hubConnection;
-
-    protected override async Task OnInitializedAsync()
-    {
-        hubConnection = new HubConnectionBuilder()
-            .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
-            .WithAutomaticReconnect()
-            .Build();
-
-        hubConnection.On<string>("ReceiveBuzz", async (teamName) =>
-        {
-            Console.WriteLine("Presenter Send Buzz", teamName);
-            await ShowBuzzerModalAsync(teamName);
-        });
-
-        await hubConnection.StartAsync();
-
-        await hubConnection.InvokeAsync("JoinGame", GameKey, ConnectionType.Presenter);
-    }
-
-    public bool IsConnectedToGameHub =>
-        hubConnection?.State == HubConnectionState.Connected;
-
-    public async ValueTask DisposeAsync()
-    {
-        if (hubConnection is not null)
-        {
-            await hubConnection.SendAsync("LeaveGame", GameKey);
-            await hubConnection.DisposeAsync();
-        }
-    }
 
 }

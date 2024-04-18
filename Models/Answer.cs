@@ -1,4 +1,12 @@
 namespace FeudingFamily.Models;
+
+public record AnswerDto
+{
+    public string Content { get; set; } = string.Empty;
+    public int Points { get; set; }
+    public int Ranking { get; set; }
+}
+
 public class Answer
 {
     public int Id { get; set; }
@@ -18,9 +26,3 @@ public class Answer
     }
 }
 
-public record AnswerDto
-{
-    public string Content { get; set; } = string.Empty;
-    public int Points { get; set; }
-    public int Ranking { get; set; }
-}

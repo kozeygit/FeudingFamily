@@ -12,19 +12,14 @@
   <dialog class="buzzer-modal" id="buzzer-modal" open=@IsBuzzerModalShown></dialog>
 
   <div class="game-board">
-
-    @{
-      var question = Game is not null ? Game.CurrentQuestion : DefaultQuestion;
-    };
-
     <div class="question is-revealed">
       <h1 id="question-content">
-        @question.Content;
+        @Question.Content;
       </h1>
     </div>
 
     <div class="answers">
-      @foreach (var answer in question.Answers)
+      @foreach (var answer in Question.Answers)
       {
         <div class="answer is-revealed" id="answer-{@answer.Ranking}">
           <h2 class="answer-ranking" id="answer-ranking">
