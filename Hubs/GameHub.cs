@@ -24,7 +24,7 @@ public class GameHub : Hub
         JoinGameResult joinGame;
 
         Console.WriteLine($"--Hub-- JoinGame - gameKey: {gameKey}, connectionType: {connectionType}, teamName: {teamName}, caller: {Context.ConnectionId}");
-        
+
         if (teamName is null)
             joinGame = _gameManager.JoinGame(gameKey, Context.ConnectionId, connectionType);
         
@@ -33,7 +33,7 @@ public class GameHub : Hub
 
         if (joinGame.Success is false)
         {
-            await Clients.Caller.SendAsync("ReceiveGame", false);
+            await Clients.Caller.SendAsync("receiveGameConnected", false);
             return;
         }
 
@@ -41,12 +41,12 @@ public class GameHub : Hub
         
         if (joinGame.Success is false)
         {
-            await Clients.Caller.SendAsync("ReceiveGameConnected", false);
+            await Clients.Caller.SendAsync("receiveGameConnected", false);
             return;
         }
         
         await Groups.AddToGroupAsync(Context.ConnectionId, gameKey);
-        await Clients.Caller.SendAsync("ReceiveGameConnected", true);
+        await Clients.Caller.SendAsync("receiveGameConnected", true);
     }
 
     public async Task LeaveGame(string gameKey)
@@ -55,13 +55,19 @@ public class GameHub : Hub
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameKey);
     }
 
-    public async Task SendBuzz(string teamName)
+    public async Task SendBuzz(string gameKey, string teamName)
     {
-        var gameKey = _gameManager.GetGameKeyFromConnectionId(Context.ConnectionId);
+        var connection = _gameManager.GetConnection(gameKey, Context.ConnectionId);
+        if (_gameManager.HasConnection(gameKey, connection) is false)
+        {
+            return;
+        }
+
         var presenterConnections = _gameManager.GetPresenterConnections(gameKey);
         var controllerConnections = _gameManager.GetControllerConnections(gameKey);
 
         var conns = presenterConnections.Concat(controllerConnections).Select(c => c.ConnectionId).ToList();
+        conns.Add(connection.ConnectionId);
 
         Console.WriteLine($"--Hub-- SendBuzz - teamName: {teamName}, gameKey: {gameKey}, sender: {Context.ConnectionId}");
         
@@ -70,7 +76,9 @@ public class GameHub : Hub
 
     public async Task SendGetQuestion(string gameKey)
     {
-        if (gameKey != _gameManager.GetGameKeyFromConnectionId(Context.ConnectionId))
+        var connection = _gameManager.GetConnection(gameKey, Context.ConnectionId);
+
+        if (_gameManager.HasConnection(gameKey, connection))
         {
             await Clients.Caller.SendAsync("receiveQuestion", null);
             return;
@@ -93,7 +101,8 @@ public class GameHub : Hub
     public async Task SendGetTeam(string gameKey)
     {
         var connection = _gameManager.GetConnection(gameKey, Context.ConnectionId);
-        if (gameKey != _gameManager.GetGameKeyFromConnection(Context.ConnectionId))
+
+        if (_gameManager.HasConnection(gameKey, connection) is false)
         {
             await Clients.Caller.SendAsync("receiveTeam", null);
             return;
@@ -108,15 +117,57 @@ public class GameHub : Hub
         }
 
         var game = joinGameResult.Game;
-        var team = game.Teams.MapToDto();
+        var team = game.GetTeam(connection);
         
-        await Clients.Caller.SendAsync("receiveTeam", question);
+        await Clients.Caller.SendAsync("receiveTeam", team);
+    }
+    
+    public async Task SendGetTeams(string gameKey)
+    {
+        var connection = _gameManager.GetConnection(gameKey, Context.ConnectionId);
+
+        if (_gameManager.HasConnection(gameKey, connection) is false)
+        {
+            await Clients.Caller.SendAsync("receiveTeams", null);
+            return;
+        }
+
+        var joinGameResult = _gameManager.GetGame(gameKey);
+
+        if (joinGameResult.Success is false)
+        {
+            await Clients.Caller.SendAsync("receiveTeams", null);
+            return;
+        }
+
+        var game = joinGameResult.Game;
+        var teams = game.Teams.Select(t => t.MapToDto()).ToList();
+        
+        await Clients.Caller.SendAsync("receiveTeams", teams);
     }
     
     public async Task SendGetRound(string gameKey)
     {
-        var teamDto = _gameManager.GetTeamDto(gameKey);
-        await Clients.Caller.SendAsync("receiveTeamDto", teamDto);
+        var connection = _gameManager.GetConnection(gameKey, Context.ConnectionId);
+
+        if (_gameManager.HasConnection(gameKey, connection))
+        {
+            await Clients.Caller.SendAsync("receiveRound", null);
+            return;
+        }
+
+        var joinGameResult = _gameManager.GetGame(gameKey);
+
+        if (joinGameResult.Success is false)
+        {
+            await Clients.Caller.SendAsync("receiveRound", null);
+            return;
+        }
+
+        var game = joinGameResult.Game;
+        var round = game.CurrentRound.MapToDto();
+
+        await Clients.Caller.SendAsync("receiveRound", round);
     }
 
     //!----------------------------------------------------------------------------------!\\

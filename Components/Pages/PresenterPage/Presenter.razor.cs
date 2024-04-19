@@ -14,9 +14,9 @@ public class PresenterPageBase : ComponentBase
     [Parameter]
     public string? GameKey { get; set; }
 
-    public RoundDto Round { get; set; }
-    public QuestionDto Question { get; set; }
-    public List<TeamDto> Teams { get; set; }
+    public RoundDto Round { get; set; } = new RoundDto();
+    public QuestionDto Question { get; set; } = new QuestionDto();
+    public List<TeamDto> Teams { get; set; } = [new TeamDto(), new TeamDto()];
 
     protected bool IsBuzzerModalShown { get; set; }
     protected string BuzzingTeam { get; set; } = string.Empty;
@@ -37,10 +37,36 @@ public class PresenterPageBase : ComponentBase
             .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
             .Build();
 
-        hubConnection.On<bool>("ReceiveGameConnected", (isConnected) =>
+        hubConnection.On<QuestionDto>("receiveQuestion", async (question) =>
         {
+            Console.WriteLine($"Received question: {question.Content}");
+            Question = question;
+
+            await InvokeAsync(StateHasChanged);
+        });
+
+        hubConnection.On<RoundDto>("receiveRound", async (round) =>
+        {
+            Round = round;
+            await InvokeAsync(StateHasChanged);
+        });
+
+        hubConnection.On<List<TeamDto>>("receiveTeams", async (teams) =>
+        {
+            Teams = teams;
+            await InvokeAsync(StateHasChanged);
+        });
+
+        hubConnection.On<bool>("receiveGameConnected", async (isConnected) =>
+        {
+            Console.WriteLine($"Game connected: {isConnected}");
+
+            await hubConnection.SendAsync("SendGetQuestion", GameKey);
+            await hubConnection.SendAsync("SendGetRound", GameKey);
+            await hubConnection.SendAsync("SendGetTeams", GameKey);
+            
             IsGameConnected = isConnected;
-            InvokeAsync(StateHasChanged);
+            await InvokeAsync(StateHasChanged);
         });
 
         await hubConnection.StartAsync();

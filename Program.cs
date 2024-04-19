@@ -72,10 +72,6 @@ app.MapGet("/questions2", async (IQuestionService questionService) =>
 
 app.MapGet("/form", (IGameManager GameManager, string gameKey, string teamName, string page) =>
 {
-    Console.WriteLine(gameKey);
-    Console.WriteLine(teamName);
-    Console.WriteLine(page);
-
     JoinGameResult joinResult = GameManager.GameKeyValidator(gameKey);
     
     if (!joinResult.Success)

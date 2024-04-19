@@ -36,7 +36,7 @@ public class ControllerPageBase : ComponentBase
             .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
             .Build();
 
-        hubConnection.On<bool>("ReceiveGameConnected", (isConnected) =>
+        hubConnection.On<bool>("receiveGameConnected", (isConnected) =>
         {
             IsGameConnected = isConnected;
             InvokeAsync(StateHasChanged);

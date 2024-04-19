@@ -7,13 +7,14 @@
 @rendermode InteractiveServer
 
 <PageTitle>FeudingFamily - Presenter</PageTitle>
+
 <main>
   <dialog class="wrong-modal" id="wrong-modal" open=@IsWrongModalShown></dialog>
   <dialog class="buzzer-modal" id="buzzer-modal" open=@IsBuzzerModalShown></dialog>
 
   <div class="game-board">
     
-    <Question IsRevealed=Round.IsQuestionRevealed Content=@Question.Content />
+    <Question IsRevealed=@Round.IsQuestionRevealed Content=@Question.Content />
 
     <div class="answers">
       @for (int i = 0; i < 5; i++)

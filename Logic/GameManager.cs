@@ -139,9 +139,9 @@ public class GameManager : IGameManager
     }
 
 
-    public bool HasConnection(GameConnection connection)
+    public bool HasConnection(string gameKey, GameConnection connection)
     {
-        var conns = GetConnections(connectionId);
+        var conns = GetConnections(gameKey);
         return conns.Contains(connection);
     }
 
@@ -199,7 +199,8 @@ public interface IGameManager
     JoinGameResult GetGame(string gameKey);
     void LeaveGame(string gameKey, string connectionId);
     JoinGameResult GameKeyValidator(string? gameKey);
-    bool HasConnection(GameConnection connection);
+    bool HasConnection(string gameKey, GameConnection connection);
+    GameConnection GetConnection(string gameKey, string connectionId);
     List<GameConnection> GetConnections(string gameKey);
     List<GameConnection> GetPresenterConnections(string gameKey);
     List<GameConnection> GetControllerConnections(string gameKey);

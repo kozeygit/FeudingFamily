@@ -49,6 +49,11 @@ public class Game
     {
         return Teams.FirstOrDefault(team => team.Name == teamName);
     }
+    
+    public Team? GetTeam(GameConnection connection)
+    {
+        return Teams.FirstOrDefault(team => team.Members.Contains(connection));
+    }
 
     // On client, when user holds down new question button
     // Show popup with input field for question id

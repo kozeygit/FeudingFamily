@@ -17,7 +17,6 @@ public class BuzzerPageBase : ComponentBase
     public string TeamName { get; set; }
 
     
-    public RoundDto Round { get; set; }
     public TeamDto Team { get; set; }
     
     public bool IsGameConnected { get; set; }
@@ -41,7 +40,7 @@ public class BuzzerPageBase : ComponentBase
             .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
             .Build();
 
-        hubConnection.On<bool>("ReceiveGameConnected", (isConnected) =>
+        hubConnection.On<bool>("receiveGameConnected", (isConnected) =>
         {
             IsGameConnected = isConnected;
             InvokeAsync(StateHasChanged);
