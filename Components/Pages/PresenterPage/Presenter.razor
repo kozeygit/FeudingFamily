@@ -12,26 +12,17 @@
   <dialog class="buzzer-modal" id="buzzer-modal" open=@IsBuzzerModalShown></dialog>
 
   <div class="game-board">
-    <div class="question is-revealed">
-      <h1 id="question-content">
-        @Question.Content;
-      </h1>
-    </div>
+    
+    <Question IsRevealed=Round.IsQuestionRevealed Content=@Question.Content />
 
     <div class="answers">
-      @foreach (var answer in Question.Answers)
+      @for (int i = 0; i < 5; i++)
       {
-        <div class="answer is-revealed" id="answer-{@answer.Ranking}">
-          <h2 class="answer-ranking" id="answer-ranking">
-            @answer.Ranking
-          </h2>
-          <h2 class="answer-content" id="answer-content">
-            @answer.Content
-          </h2>
-          <h2 class="answer-points" id="answer-points">
-            @answer.Points
-          </h2>
-        </div>
+        <Answer IsRevealed=Round.IsAnswerRevealed[i]
+          Ranking=@Question.Answers[i].Ranking
+          Content=@Question.Answers[i].Content
+          Points=@Question.Answers[i].Points
+        />
       }
     </div>
 

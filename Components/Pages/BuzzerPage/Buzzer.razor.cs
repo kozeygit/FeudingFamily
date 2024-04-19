@@ -1,17 +1,9 @@
 using Microsoft.AspNetCore.Components;
 using FeudingFamily.Logic;
 using Microsoft.AspNetCore.SignalR.Client;
-using System.Text.Json;
 
 
-namespace FeudingFamily;
-
-public struct BuzzerModel
-{
-    public string? GameKey { get; set; }
-    public string? TeamName { get; set; }
-    public int Points { get; set; }
-}
+namespace FeudingFamily.Components;
 
 public class BuzzerPageBase : ComponentBase
 {
@@ -24,10 +16,12 @@ public class BuzzerPageBase : ComponentBase
     [SupplyParameterFromQuery]
     public string TeamName { get; set; }
 
-    public bool IsGameConnected { get; set; }
-
-    public bool IsModalShown { get; set; }
     
+    public RoundDto Round { get; set; }
+    public TeamDto Team { get; set; }
+    
+    public bool IsGameConnected { get; set; }
+    public bool IsModalShown { get; set; }
     protected HubConnection? hubConnection;
 
 
@@ -55,7 +49,7 @@ public class BuzzerPageBase : ComponentBase
 
         await hubConnection.StartAsync();
         
-        await hubConnection.SendAsync("JoinGame", GameKey, ConnectionType.Buzzer, TeamName);
+        await hubConnection.SendAsync("SendJoinGame", GameKey, ConnectionType.Buzzer, TeamName);
 
 
     }

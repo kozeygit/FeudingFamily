@@ -19,7 +19,7 @@ public class GameHub : Hub
         _gameManager.LeaveGame(gameKey, Context.ConnectionId);
     }
 
-    public async Task JoinGame(string gameKey, ConnectionType connectionType, string? teamName)
+    public async Task SendJoinGame(string gameKey, ConnectionType connectionType, string? teamName)
     {
         JoinGameResult joinGame;
 
@@ -66,6 +66,57 @@ public class GameHub : Hub
         Console.WriteLine($"--Hub-- SendBuzz - teamName: {teamName}, gameKey: {gameKey}, sender: {Context.ConnectionId}");
         
         await Clients.Clients(conns).SendAsync("receiveBuzz", teamName);
+    }
+
+    public async Task SendGetQuestion(string gameKey)
+    {
+        if (gameKey != _gameManager.GetGameKeyFromConnectionId(Context.ConnectionId))
+        {
+            await Clients.Caller.SendAsync("receiveQuestion", null);
+            return;
+        }
+
+        var joinGameResult = _gameManager.GetGame(gameKey);
+
+        if (joinGameResult.Success is false)
+        {
+            await Clients.Caller.SendAsync("receiveQuestion", null);
+            return;
+        }
+
+        var game = joinGameResult.Game;
+        var question = game.CurrentQuestion.MapToDto();
+
+        await Clients.Caller.SendAsync("receiveQuestion", question);
+    }
+    
+    public async Task SendGetTeam(string gameKey)
+    {
+        var connection = _gameManager.GetConnection(gameKey, Context.ConnectionId);
+        if (gameKey != _gameManager.GetGameKeyFromConnection(Context.ConnectionId))
+        {
+            await Clients.Caller.SendAsync("receiveTeam", null);
+            return;
+        }
+
+        var joinGameResult = _gameManager.GetGame(gameKey);
+
+        if (joinGameResult.Success is false)
+        {
+            await Clients.Caller.SendAsync("receiveTeam", null);
+            return;
+        }
+
+        var game = joinGameResult.Game;
+        var team = game.Teams.MapToDto();
+        
+        await Clients.Caller.SendAsync("receiveTeam", question);
+    }
+    
+    public async Task SendGetRound(string gameKey)
+    {
+        var teamDto = _gameManager.GetTeamDto(gameKey);
+        await Clients.Caller.SendAsync("receiveTeamDto", teamDto);
     }
 
     //!----------------------------------------------------------------------------------!\\

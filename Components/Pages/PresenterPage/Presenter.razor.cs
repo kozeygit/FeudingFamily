@@ -1,10 +1,9 @@
-
 using Microsoft.AspNetCore.Components;
 using FeudingFamily.Logic;
 using FeudingFamily.Models;
 using Microsoft.AspNetCore.SignalR.Client;
 
-namespace FeudingFamily;
+namespace FeudingFamily.Components;
 
 
 public class PresenterPageBase : ComponentBase
@@ -46,7 +45,7 @@ public class PresenterPageBase : ComponentBase
 
         await hubConnection.StartAsync();
 
-        await hubConnection.SendAsync("JoinGame", GameKey, ConnectionType.Presenter, null);
+        await hubConnection.SendAsync("SendJoinGame", GameKey, ConnectionType.Presenter, null);
     }
 
     public bool IsHubConnected =>

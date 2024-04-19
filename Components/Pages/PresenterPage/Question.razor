@@ -1,0 +1,23 @@
+﻿@namespace FeudingFamily.Components
+
+<div class="question is-revealed">
+    <h1 id="question-content">
+        @Content;
+    </h1>
+</div>
+
+
+<style>
+
+</style>
+
+
+@code {
+
+    [Parameter]
+    public bool IsRevealed { get; set; }
+
+    [Parameter]
+    public string Content { get; set; } = string.Empty;
+
+}

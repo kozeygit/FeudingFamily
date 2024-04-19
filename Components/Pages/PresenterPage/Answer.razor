@@ -1,0 +1,34 @@
+﻿@namespace FeudingFamily.Components
+
+<div class="answer is-revealed" id="answer-{@Ranking}">
+    <span class="answer-ranking" id="answer-ranking">
+        @Ranking
+    </span>
+    <span class="answer-content" id="answer-content">
+        @Content
+    </span>
+    <span class="answer-points" id="answer-points">
+        @Points
+    </span>
+</div>
+
+
+<style>
+
+</style>
+
+
+@code {
+    
+    [Parameter]
+    public bool IsRevealed { get; set; }   
+
+    [Parameter]
+    public int Ranking { get; set; }   
+
+    [Parameter]
+    public string Content { get; set; } = string.Empty;
+
+    [Parameter]
+    public int Points { get; set; }   
+}

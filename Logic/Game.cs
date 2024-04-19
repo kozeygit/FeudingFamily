@@ -10,7 +10,7 @@ public class Game
     public List<Team> Teams { get; set; } = [];
     public Team? TeamPlaying { get; set; } = null;
     public Round CurrentRound { get; set; }
-    public Question? CurrentQuestion { get; set; }
+    public Question CurrentQuestion { get; set; }
     public List<Round> PreviousRounds { get; set; } = [];
     
 

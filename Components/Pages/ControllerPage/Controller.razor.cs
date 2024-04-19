@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Components;
 using FeudingFamily.Logic;
+using FeudingFamily.Models;
+using Microsoft.AspNetCore.SignalR.Client;
 
-
-namespace FeudingFamily;
+namespace FeudingFamily.Components;
 
 public class ControllerPageBase : ComponentBase
 {
@@ -43,7 +44,7 @@ public class ControllerPageBase : ComponentBase
 
         await hubConnection.StartAsync();
 
-        await hubConnection.SendAsync("JoinGame", GameKey, ConnectionType.Controller, null);
+        await hubConnection.SendAsync("SendJoinGame", GameKey, ConnectionType.Controller, null);
     }
 
     public bool IsHubConnected =>

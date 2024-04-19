@@ -95,14 +95,14 @@ public class QuestionService : IQuestionService
     {
         return new Question
         {
-            Content = "Default Question",
+            Content = "default-question",
             Answers =
             [
-                new Answer { Content = "Default Answer 1", Points = 100, Ranking = 1 },
-                new Answer { Content = "Default Answer 2", Points = 80, Ranking = 2 },
-                new Answer { Content = "Default Answer 3", Points = 60, Ranking = 3 },
-                new Answer { Content = "Default Answer 4", Points = 40, Ranking = 4 },
-                new Answer { Content = "Default Answer 5", Points = 20, Ranking = 5 },
+                new Answer { Content = "default-answer-1", Points = 100, Ranking = 1 },
+                new Answer { Content = "default-answer-2", Points = 80, Ranking = 2 },
+                new Answer { Content = "default-answer-3", Points = 60, Ranking = 3 },
+                new Answer { Content = "default-answer-4", Points = 40, Ranking = 4 },
+                new Answer { Content = "default-answer-5", Points = 20, Ranking = 5 },
             ]
         };
     }

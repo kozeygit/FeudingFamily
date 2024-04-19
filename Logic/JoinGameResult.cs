@@ -6,6 +6,7 @@ public class JoinGameResult
     public string? GameKey { get; set; }
     public JoinErrorCode? ErrorCode { get; set; }
     public bool Success => ErrorCode is null;
+    public Game? Game { get; set; }
 
 }
 

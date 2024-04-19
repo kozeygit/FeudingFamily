@@ -139,16 +139,22 @@ public class GameManager : IGameManager
     }
 
 
-    public string GetGameKeyFromConnectionId(string connectionId)
+    public bool HasConnection(GameConnection connection)
     {
-        throw new NotImplementedException();
+        var conns = GetConnections(connectionId);
+        return conns.Contains(connection);
     }
 
     public List<GameConnection> GetConnections(string gameKey)
     {
         var connections = gamesRooms[gameKey].Connections;
         return connections;
-        throw new NotImplementedException();
+    }
+    public GameConnection GetConnection(string gameKey, string connectionId)
+    {
+        var connections = GetConnections(gameKey);
+        var connection = connections.Single(c => c.ConnectionId == connectionId);
+        return connection;
     }
     public List<GameConnection> GetPresenterConnections(string gameKey)
     {
@@ -193,7 +199,7 @@ public interface IGameManager
     JoinGameResult GetGame(string gameKey);
     void LeaveGame(string gameKey, string connectionId);
     JoinGameResult GameKeyValidator(string? gameKey);
-    string GetGameKeyFromConnectionId(string connectionId);
+    bool HasConnection(GameConnection connection);
     List<GameConnection> GetConnections(string gameKey);
     List<GameConnection> GetPresenterConnections(string gameKey);
     List<GameConnection> GetControllerConnections(string gameKey);
