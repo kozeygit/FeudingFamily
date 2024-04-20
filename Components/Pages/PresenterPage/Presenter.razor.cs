@@ -39,20 +39,21 @@ public class PresenterPageBase : ComponentBase
 
         hubConnection.On<QuestionDto>("receiveQuestion", async (question) =>
         {
-            Console.WriteLine($"Received question: {question.Content}");
+            Console.WriteLine($"Received question");
             Question = question;
-
             await InvokeAsync(StateHasChanged);
         });
 
         hubConnection.On<RoundDto>("receiveRound", async (round) =>
         {
+            Console.WriteLine($"Received round");
             Round = round;
             await InvokeAsync(StateHasChanged);
         });
 
         hubConnection.On<List<TeamDto>>("receiveTeams", async (teams) =>
         {
+            Console.WriteLine($"Received teams");
             Teams = teams;
             await InvokeAsync(StateHasChanged);
         });
@@ -61,11 +62,17 @@ public class PresenterPageBase : ComponentBase
         {
             Console.WriteLine($"Game connected: {isConnected}");
 
+            if (isConnected is false)
+            {
+                Navigation.NavigateTo($"/ErrorCode={(int)JoinErrorCode.GameDoesNotExist}");
+            }
+            
+            IsGameConnected = isConnected;
+
             await hubConnection.SendAsync("SendGetQuestion", GameKey);
             await hubConnection.SendAsync("SendGetRound", GameKey);
             await hubConnection.SendAsync("SendGetTeams", GameKey);
-            
-            IsGameConnected = isConnected;
+
             await InvokeAsync(StateHasChanged);
         });
 

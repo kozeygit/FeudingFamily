@@ -1,6 +1,12 @@
 ﻿@namespace FeudingFamily.Components
 
-<div class="answer is-revealed" id="answer-{@Ranking}">
+<div class="answer" id="answer-@Ranking" @onclick="Reveal">
+    @if (!IsRevealed)
+    {
+        <div class="overlay" id="overlay-@Ranking">
+            @Ranking
+        </div>
+    }
     <span class="answer-ranking" id="answer-ranking">
         @Ranking
     </span>
@@ -14,21 +20,76 @@
 
 
 <style>
+    .answer {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(100px);
+        border: white solid 3px;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 5px 5px 10px rgb(0, 0, 0, 0.3);
 
+        * {
+            color: white;
+            font-family: "Oswald", sans-serif;
+            font-weight: 400;
+            font-size: 30px;
+            text-shadow: 2px 2px 5px black;
+            text-transform: uppercase;
+        }
+    }
+
+    .overlay {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background-image: linear-gradient(to left,
+            rgb(253, 138, 178),
+            rgb(252, 195, 157)
+        );
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .answer-points {
+        flex: 2;
+        border-left: solid white 3px;
+        text-align: center;
+    }
+
+    .answer-ranking {
+        flex: 1;
+        border-right: solid white 3px;
+        text-align: center;
+    }
+
+    .answer-content {
+        flex: 12;
+        padding-left: 2rem;
+    }
 </style>
 
 
 @code {
-    
-    [Parameter]
-    public bool IsRevealed { get; set; }   
 
     [Parameter]
-    public int Ranking { get; set; }   
+    public bool IsRevealed { get; set; }
+
+    [Parameter]
+    public int Ranking { get; set; }
 
     [Parameter]
     public string Content { get; set; } = string.Empty;
 
     [Parameter]
-    public int Points { get; set; }   
+    public int Points { get; set; }
+
+    private void Reveal()
+    {
+        IsRevealed = !IsRevealed;
+    }
 }

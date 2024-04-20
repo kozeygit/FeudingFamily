@@ -5,7 +5,7 @@ public record RoundDto
 {
     public int Points { get; set; } = 0;
     public int WrongAnswers { get; set; } = 0;
-    public bool IsQuestionRevealed { get; set; } = false;
+    public bool IsQuestionRevealed { get; set; }
     public bool[] IsAnswerRevealed { get; set; } = [false, false, false, false, false];
 }
 

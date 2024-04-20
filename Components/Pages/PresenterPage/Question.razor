@@ -1,14 +1,59 @@
 ﻿@namespace FeudingFamily.Components
 
-<div class="question is-revealed">
-    <h1 id="question-content">
-        @Content;
+<div class="question" @onclick="Reveal">
+    @if (!IsRevealed)
+    {
+        <div class="overlay">
+            Question
+        </div>
+    }
+    <h1 class="question-content" id="question-content">
+        @Content
     </h1>
 </div>
 
 
 <style>
+    .question {
+        flex: 1;
+        width: 100%;
+        border: white solid 5px;
+        border-radius: 30px;
+        text-shadow: 3px 3px 10px black;
+        display: grid;
+        place-items: center;
+        backdrop-filter: blur(100px);
+        box-shadow: 10px 10px 20px rgb(0, 0, 0, 0.3);
+        overflow: hidden;
 
+        * {
+            color: white;
+            font-family: "Oswald", sans-serif;
+            font-weight: 600;
+            font-size: 45px;
+            text-shadow: 2px 2px 5px black;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+    }
+
+    .overlay {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        background-image: linear-gradient(to left,
+            rgb(253, 138, 178),
+            rgb(252, 195, 157)
+        );
+            display: flex;
+            justify-content: center;
+            align-items: center;
+    }
+
+    .question-content {
+        padding: 0;
+        margin: 0;
+    }
 </style>
 
 
@@ -19,5 +64,10 @@
 
     [Parameter]
     public string Content { get; set; } = string.Empty;
+
+    public void Reveal()
+    {
+        IsRevealed = !IsRevealed;
+    }
 
 }

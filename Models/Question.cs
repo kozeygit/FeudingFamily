@@ -3,7 +3,14 @@ namespace FeudingFamily.Models;
 public record QuestionDto
 {
     public string Content { get; set; } = string.Empty;
-    public List<AnswerDto> Answers { get; set; } = [];
+    public List<AnswerDto> Answers { get; set; } = [
+        new AnswerDto(),
+        new AnswerDto(),
+        new AnswerDto(),
+        new AnswerDto(),
+        new AnswerDto()
+    ];
+
 }
 
 public class Question

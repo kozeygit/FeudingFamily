@@ -80,7 +80,7 @@ public class GameHub : Hub
 
         if (_gameManager.HasConnection(gameKey, connection))
         {
-            await Clients.Caller.SendAsync("receiveQuestion", null);
+            await Clients.Caller.SendAsync("receiveTeam", null);
             return;
         }
 
@@ -88,14 +88,14 @@ public class GameHub : Hub
 
         if (joinGameResult.Success is false)
         {
-            await Clients.Caller.SendAsync("receiveQuestion", null);
+            await Clients.Caller.SendAsync("receiveTeam", null);
             return;
         }
 
         var game = joinGameResult.Game;
         var question = game.CurrentQuestion.MapToDto();
 
-        await Clients.Caller.SendAsync("receiveQuestion", question);
+        await Clients.Caller.SendAsync("receiveTeam", question);
     }
     
     public async Task SendGetTeam(string gameKey)
@@ -150,7 +150,7 @@ public class GameHub : Hub
     {
         var connection = _gameManager.GetConnection(gameKey, Context.ConnectionId);
 
-        if (_gameManager.HasConnection(gameKey, connection))
+        if (_gameManager.HasConnection(gameKey, connection) is false)
         {
             await Clients.Caller.SendAsync("receiveRound", null);
             return;
