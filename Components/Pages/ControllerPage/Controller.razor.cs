@@ -29,7 +29,7 @@ public class ControllerPageBase : ComponentBase
 
         if (GameKey is null)
         {
-            Navigation.NavigateTo($"/ErrorCode={(int)JoinErrorCode.KeyEmpty}");
+            Navigation.NavigateTo($"/?ErrorCode={(int)JoinErrorCode.KeyEmpty}");
         }
 
         hubConnection = new HubConnectionBuilder()

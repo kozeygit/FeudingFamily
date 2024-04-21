@@ -5,7 +5,7 @@ namespace FeudingFamily.Logic;
 public class GameManager : IGameManager
 {
     private readonly Dictionary<string, Game> games = [];
-    private readonly Dictionary<string, GameRoom> gamesRooms = [];
+    private readonly Dictionary<string, GameRoom> gameRooms = [];
     private readonly IQuestionService _questionService;
     public GameManager(IQuestionService questionService)
     {
@@ -31,7 +31,7 @@ public class GameManager : IGameManager
             return new JoinGameResult { ErrorCode = JoinErrorCode.KeyNotAlphanumeric };
         }
 
-        return new JoinGameResult();
+        return new JoinGameResult { GameKey = gameKey };
     }
 
     public JoinGameResult NewGame(string gameKey)
@@ -48,7 +48,7 @@ public class GameManager : IGameManager
 
         var game = new Game(_questionService);
         games.Add(gameKey, game);
-        gamesRooms.Add(gameKey, new GameRoom { GameId = gameKey });
+        gameRooms.Add(gameKey, new GameRoom { GameId = gameKey });
 
         return new JoinGameResult { Game = game };
 
@@ -63,7 +63,7 @@ public class GameManager : IGameManager
         
         if (!games.TryGetValue(gameKey, out Game? game))
         {
-            return new JoinGameResult { ErrorCode = JoinErrorCode.GameDoesNotExist };
+            return new JoinGameResult { ErrorCode = JoinErrorCode.GameNotFound };
         }
 
         return new JoinGameResult { Game = game };
@@ -78,18 +78,20 @@ public class GameManager : IGameManager
 
         if (!games.TryGetValue(gameKey, out Game? game))
         {
-            return new JoinGameResult { ErrorCode = JoinErrorCode.GameDoesNotExist };
+            return new JoinGameResult { ErrorCode = JoinErrorCode.GameNotFound };
         }
 
         var connection = new GameConnection { ConnectionId = connectionId, ConnectionType = connectionType };
 
-        gamesRooms[gameKey].AddConnection(connection);
+        gameRooms[gameKey].AddConnection(connection);
 
         return new JoinGameResult { Game = game };
     }
 
     public JoinGameResult JoinGame(string gameKey, string connectionId, string TeamName)
     {
+        Team team;
+
         if (!GameKeyValidator(gameKey).Success)
         {
             return new JoinGameResult { ErrorCode = GameKeyValidator(gameKey).ErrorCode };
@@ -97,12 +99,7 @@ public class GameManager : IGameManager
 
         if (!games.TryGetValue(gameKey, out Game? game))
         {
-            return new JoinGameResult { ErrorCode = JoinErrorCode.GameDoesNotExist };
-        }
-
-        if (game.Teams.Count == 2)
-        {
-            return new JoinGameResult { ErrorCode = JoinErrorCode.GameHasTwoTeams };
+            return new JoinGameResult { ErrorCode = JoinErrorCode.GameNotFound };
         }
 
         if (string.IsNullOrWhiteSpace(TeamName))
@@ -112,30 +109,49 @@ public class GameManager : IGameManager
 
         var connection = new GameConnection { ConnectionId = connectionId, ConnectionType = ConnectionType.Buzzer };
 
-        if (!game.HasTeam(TeamName))
-        {   
-            game.AddTeam(TeamName);
+        if (game.HasTeam(TeamName))
+        {
+            team = game.GetTeam(TeamName)!;
+            team.AddMember(connection);
+            gameRooms[gameKey].AddConnection(connection);
+            return new JoinGameResult { Game = game };
         }
 
-        var team = game.Teams.Single(t => t.Name == TeamName);
-        team.AddMember(connection);
+        if (game.Teams.Count >= 2)
+        {
+            return new JoinGameResult { ErrorCode = JoinErrorCode.GameHasTwoTeams };
+        }
 
-        gamesRooms[gameKey].AddConnection(connection);
+        game.AddTeam(TeamName);
+        
+        team = game.GetTeam(TeamName)!;
+        team.AddMember(connection);
+        gameRooms[gameKey].AddConnection(connection);
 
         return new JoinGameResult { Game = game };
     }
     
     public void LeaveGame(string gameKey, string connectionId)
     {
-        var connection = gamesRooms[gameKey].Connections.Single(c => c.ConnectionId == connectionId);
+        var connection = gameRooms[gameKey].Connections.SingleOrDefault(c => c.ConnectionId == connectionId);
         
-        foreach (var team in games[gameKey].Teams)
+        if (connection is null)
         {
-            team.RemoveMember(connection);
+            return;
         }
 
-        var gameRoom = gamesRooms[gameKey];        
+        games[gameKey].Teams.ForEach(t => t.Members.Remove(connection));
+
+        games[gameKey].Teams.RemoveAll(t => t.Members.Count == 0);
+
+        var gameRoom = gameRooms[gameKey];
         gameRoom.RemoveConnection(connection);
+
+        if (gameRoom.Connections.Count == 0)
+        {
+            games.Remove(gameKey);
+            gameRooms.Remove(gameKey);
+        }
     }
 
 
@@ -147,13 +163,17 @@ public class GameManager : IGameManager
 
     public List<GameConnection> GetConnections(string gameKey)
     {
-        var connections = gamesRooms[gameKey].Connections;
+        var connections = gameRooms[gameKey].Connections;
         return connections;
     }
     public GameConnection GetConnection(string gameKey, string connectionId)
     {
         var connections = GetConnections(gameKey);
-        var connection = connections.Single(c => c.ConnectionId == connectionId);
+        var connection = connections.SingleOrDefault(c => c.ConnectionId == connectionId);
+        if (connection is null)
+        {
+            return new GameConnection { ConnectionId = connectionId };
+        }
         return connection;
     }
     public List<GameConnection> GetPresenterConnections(string gameKey)

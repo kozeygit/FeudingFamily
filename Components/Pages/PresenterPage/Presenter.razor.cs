@@ -30,12 +30,17 @@ public class PresenterPageBase : ComponentBase
 
         if (GameKey is null)
         {
-            Navigation.NavigateTo($"/ErrorCode={(int)JoinErrorCode.KeyEmpty}");
+            Navigation.NavigateTo($"/?ErrorCode={(int)JoinErrorCode.KeyEmpty}");
         }
 
         hubConnection = new HubConnectionBuilder()
             .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
             .Build();
+
+        hubConnection.On<string>("receiveBuzz", async (teamName) =>
+        {
+            await ShowBuzzerModal(teamName);
+        });
 
         hubConnection.On<QuestionDto>("receiveQuestion", async (question) =>
         {
@@ -64,7 +69,7 @@ public class PresenterPageBase : ComponentBase
 
             if (isConnected is false)
             {
-                Navigation.NavigateTo($"/ErrorCode={(int)JoinErrorCode.GameDoesNotExist}");
+                Navigation.NavigateTo($"/?ErrorCode={(int)JoinErrorCode.GameNotFound}");
             }
             
             IsGameConnected = isConnected;
@@ -92,20 +97,17 @@ public class PresenterPageBase : ComponentBase
         }
     }
 
-    public async Task ShowBuzzerModalAsync(string teamName)
+    public async Task ShowBuzzerModal(string teamName)
     {
         try
         {
             BuzzingTeam = teamName;
-            IsBuzzerModalShown = true;
 
+            IsBuzzerModalShown = true;
             await InvokeAsync(StateHasChanged);
 
-            // non blocking wait for 2 seconds
             await Task.Delay(2000);
-
             IsBuzzerModalShown = false;
-
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
@@ -113,7 +115,7 @@ public class PresenterPageBase : ComponentBase
             Console.WriteLine($"An error has occurred: {ex}");
         }
     }
-    public async Task ShowWrongModalAsync()
+    public async Task ShowWrongModal()
     {
         try
         {

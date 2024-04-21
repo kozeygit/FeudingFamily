@@ -6,21 +6,26 @@
 
 <PageTitle>Feuding Family - Buzzer</PageTitle>
 
-@if (IsGameConnected)
-{
-    <div class="wrapper">
-        <dialog open=@IsModalShown>YOU BUZZED IN!!</dialog>
-        <div class="team-name">
-            <h1>Team:<br />@TeamName</h1>
-        </div>
-        <button class="buzzer" @onmousedown="SendBuzz"></button>
-        <h2 class="points">Points:</h2>
-    </div>
-}
 
-else
+@if (!IsGameConnected)
 {
     <div class="wrapper">
         <h1 class="text-3xl text-white font-bold font-sans">Finding Game...</h1>
     </div>
 }
+
+@if (Team is null)
+{
+    <div class="wrapper">
+        <h1 class="text-3xl text-white font-bold font-sans">Joining Game...</h1>
+    </div>
+}
+
+<div class="wrapper">
+    <dialog open=@IsModalShown>YOUR TEAM BUZZED IN!!</dialog>
+    <div class="team-name">
+        <h1>Team:<br />@TeamName</h1>
+    </div>
+    <button class="buzzer" @onmousedown="SendBuzz"></button>
+    <h2 class="points">Points:</h2>
+</div>

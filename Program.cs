@@ -72,6 +72,19 @@ app.MapGet("/questions2", async (IQuestionService questionService) =>
 
 app.MapGet("/form", (IGameManager GameManager, string gameKey, string teamName, string page) =>
 {
+    if (string.IsNullOrWhiteSpace(gameKey))
+    {
+        return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.KeyEmpty}");
+    }
+
+    if (page == "Join")
+    {
+        if (string.IsNullOrWhiteSpace(teamName))
+        {
+            return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.TeamNameEmpty}");
+        }
+    }
+
     JoinGameResult joinResult = GameManager.GameKeyValidator(gameKey);
     
     if (!joinResult.Success)

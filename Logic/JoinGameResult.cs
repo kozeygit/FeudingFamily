@@ -25,7 +25,7 @@ public enum JoinErrorCode
     KeyInUse,
 
     [Description("Game does not exist.")]
-    GameDoesNotExist,
+    GameNotFound,
     
     [Description("Team name must be provided.")]
     TeamNameEmpty,
