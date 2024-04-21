@@ -37,14 +37,14 @@ public class PresenterPageBase : ComponentBase
             .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
             .Build();
 
-        hubConnection.On<string>("receiveBuzz", async (teamName) =>
-        {
-            await ShowBuzzerModal(teamName);
-        });
+        hubConnection.On<string>("receiveBuzz", ShowBuzzerModal);
+
+        hubConnection.On("receiveWrong", ShowWrongModal);
 
         hubConnection.On<QuestionDto>("receiveQuestion", async (question) =>
         {
             Console.WriteLine($"Received question");
+            Console.WriteLine(question);
             Question = question;
             await InvokeAsync(StateHasChanged);
         });

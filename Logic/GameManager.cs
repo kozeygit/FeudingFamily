@@ -133,21 +133,30 @@ public class GameManager : IGameManager
     
     public void LeaveGame(string gameKey, string connectionId)
     {
-        var connection = gameRooms[gameKey].Connections.SingleOrDefault(c => c.ConnectionId == connectionId);
+        if (games.TryGetValue(gameKey, out Game? game) is false)
+        {
+            return;
+        }
+        
+        if (gameRooms.TryGetValue(gameKey, out GameRoom? gameRoom) is false)
+        {
+            return;
+        }
+
+        var connection = gameRoom.Connections.SingleOrDefault(c => c.ConnectionId == connectionId);
         
         if (connection is null)
         {
             return;
         }
 
-        games[gameKey].Teams.ForEach(t => t.Members.Remove(connection));
+        game.Teams.ForEach(t => t.Members.Remove(connection));
 
-        games[gameKey].Teams.RemoveAll(t => t.Members.Count == 0);
+        game.Teams.RemoveAll(t => t.Members.Count == 0);
 
-        var gameRoom = gameRooms[gameKey];
         gameRoom.RemoveConnection(connection);
 
-        if (gameRoom.Connections.Count == 0)
+        if (gameRoom.Connections.Count == 0 && game.CreatedOn.AddMinutes(5) < DateTime.Now)
         {
             games.Remove(gameKey);
             gameRooms.Remove(gameKey);

@@ -7,6 +7,7 @@ public class Game
     private readonly IQuestionService _questionService;
     private bool isQuestionManual = false;
 
+    public DateTime CreatedOn { get; init; }
     public List<Team> Teams { get; set; } = [];
     public Team? TeamPlaying { get; set; } = null;
     public Round CurrentRound { get; set; }
@@ -22,6 +23,8 @@ public class Game
         CurrentQuestion = QuestionService.GetDefaultQuestion();
 
         CurrentRound = new Round();
+
+        CreatedOn = DateTime.Now;
     }
 
     public bool AddTeam(string teamName)

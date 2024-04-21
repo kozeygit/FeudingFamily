@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices.Marshalling;
 using FeudingFamily.Logic;
 using FeudingFamily.Models;
 using Microsoft.AspNetCore.SignalR;
@@ -72,7 +73,6 @@ public class GameHub : Hub
         {
             Console.WriteLine(connection.ConnectionId);
             return;
-
         }
 
         var game = joinGameResult.Game;
@@ -98,22 +98,22 @@ public class GameHub : Hub
 
         if (joinGameResult.Success is false)
         {
-            await Clients.Caller.SendAsync("receiveTeam", null);
+            await Clients.Caller.SendAsync("receiveQuestion", null);
             return;
         }
 
         var connection = _gameManager.GetConnection(gameKey, Context.ConnectionId);
 
-        if (_gameManager.HasConnection(gameKey, connection))
+        if (_gameManager.HasConnection(gameKey, connection) is false)
         {
-            await Clients.Caller.SendAsync("receiveTeam", null);
+            await Clients.Caller.SendAsync("receiveQuestion", null);
             return;
         }
 
         var game = joinGameResult.Game;
         var question = game.CurrentQuestion.MapToDto();
 
-        await Clients.Caller.SendAsync("receiveTeam", question);
+        await Clients.Caller.SendAsync("receiveQuestion", question);
     }
     
     public async Task SendGetTeam(string gameKey)
@@ -191,15 +191,33 @@ public class GameHub : Hub
     //!----------------------------------------------------------------------------------!\\
 
 
-    public async Task NewQuestion() // Gets a new question and send to the controller for host to decide if to use
+    public async Task SendNewRound(string gameKey) // Gets a new question and send to the controller for host to decide if to use
     {
-        await Clients.Caller.SendAsync("receiveNewQuestion");
+        var joinGameResult = _gameManager.GetGame(gameKey);
+
+        if (joinGameResult.Success is false)
+        {
+            await Clients.Caller.SendAsync("receiveError", joinGameResult.ErrorCode.ToString());
+            return;
+        }
+
+        var connection = _gameManager.GetConnection(gameKey, Context.ConnectionId);
+
+        var game = joinGameResult.Game;
+        await game.NewRound();
+
+        var conns = _gameManager.GetConnections(gameKey).Select(c => c.ConnectionId);
+
+        await Clients.Clients(conns).SendAsync("receiveQuestion", game.CurrentQuestion.MapToDto());
+        await Clients.Clients(conns).SendAsync("receiveRound", game.CurrentRound.MapToDto());
+
+        foreach (var team in game.Teams)
+        {
+            var teamConns = team.Members.Select(c => c.ConnectionId);
+            await Clients.Clients(teamConns).SendAsync("receiveTeam", team.MapToDto());
+        }
     }
 
-    public async Task SendQuestion(Question question) // Sends current question to presenter and controller // * Will Probably move this to the view instead and reload the pages
-    {
-        await Clients.Groups("Presenters", "Controllers").SendAsync("receiveQuestion", question);
-    }
 
     // * Just send the question model which includes a list of the answers... duh, when do i just need the answers ???
     // public async Task SendAnswers(List<Answer> answers) // Sends current answers to presenter and controller // * Will Probably move this to the view instead and reload the pages

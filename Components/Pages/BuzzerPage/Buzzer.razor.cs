@@ -85,7 +85,14 @@ public class BuzzerPageBase : ComponentBase, IDisposable
             Console.WriteLine($"--BuzzerPage-- SendBuzz - TeamName: {TeamName}");
             await hubConnection.SendAsync("SendBuzz", GameKey);
         }
+    }
 
+    protected async Task NewRound()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("SendNewRound", GameKey);
+        }
     }
 
     public async ValueTask DisposeAsync()
