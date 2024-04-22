@@ -1,0 +1,80 @@
+﻿@if (IsRevealed)
+{
+    <button class="answer" id="answer-@Ranking" @onclick="Reveal" type="button">
+        <span class="answer-ranking">
+            @Ranking
+        </span>
+        <span class="answer-content">
+            @Content
+        </span>
+        <span class="answer-points">
+            @Points
+        </span>
+    </button>
+}
+else
+{
+    <button class="answer hidden" id="answer-@Ranking" @onclick="Reveal" type="button">
+        <span class="answer-ranking">
+            @Ranking
+        </span>
+        <span class="answer-content">
+            @Content
+        </span>
+        <span class="answer-points">
+            @Points
+        </span>
+    </button>
+}
+
+<style>
+    .hidden {
+        background-color: lightgreen;
+    }
+
+     .answer {
+        width: 100%;
+        display: flex;
+        border: black solid 2px;
+
+        * {
+            box-sizing: border-box;
+            color: black;
+            font-family: "Oswald", sans-serif;
+            text-transform: uppercase;
+        }
+    }
+
+    .answer-points {
+        flex: 2;
+        border-left: solid black 3px;
+        text-align: center;
+    }
+
+    .answer-ranking {
+        flex: 1;
+        border-right: solid black 3px;
+        text-align: center;
+    }
+
+    .answer-content {
+        flex: 12;
+        padding-left: 2rem;
+        text-align: left;
+    }
+    
+</style>
+
+@code {
+    [Parameter] public bool IsRevealed { get; set; }
+    [Parameter] public int Ranking { get; set; }
+    [Parameter] public string Content { get; set; } = string.Empty;
+    [Parameter] public int Points { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+
+    public async Task Reveal()
+    {
+        await OnClick.InvokeAsync(new { answerId=Ranking });
+        IsRevealed = !IsRevealed;
+    }
+}

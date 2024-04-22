@@ -63,6 +63,15 @@ public class GameHub : Hub
 
     public async Task SendLeaveGame(string gameKey)
     {
+        if (string.IsNullOrEmpty(gameKey) is true)
+            return;
+
+        if (_gameManager.GetGame(gameKey).Success is false)
+            return;
+
+        int connCount = _gameManager.GetConnections(gameKey).Count;
+        Console.WriteLine($"Connections: {connCount}");
+        
         _gameManager.LeaveGame(gameKey, Context.ConnectionId);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameKey);
     }
@@ -97,7 +106,6 @@ public class GameHub : Hub
         var conns = presenterConnections.Concat(controllerConnections).Concat(teamConnections);
 
         Console.WriteLine($"--Hub-- SendBuzz - teamName: {team.Name}, gameKey: {gameKey}, sender: {Context.ConnectionId}");
-        Console.WriteLine(conns.Count());
         
         await Clients.Clients(conns).SendAsync("receiveBuzz", team.Name);
     }
@@ -249,6 +257,8 @@ public class GameHub : Hub
         var pConns = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
         var cConns = _gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
         var conns = pConns.Concat(cConns);
+
+        Console.WriteLine($"--Hub-- SendRevealQuestion - gameKey: {gameKey}, sender: {Context.ConnectionId}");
 
         await Clients.Clients(conns).SendAsync("receiveRound", round.MapToDto());
     }

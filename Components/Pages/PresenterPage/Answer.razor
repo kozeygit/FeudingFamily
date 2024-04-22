@@ -74,18 +74,10 @@
 
 
 @code {
-
-    [Parameter]
-    public bool IsRevealed { get; set; }
-
-    [Parameter]
-    public int Ranking { get; set; }
-
-    [Parameter]
-    public string Content { get; set; } = string.Empty;
-
-    [Parameter]
-    public int Points { get; set; }
+    [Parameter] public bool IsRevealed { get; set; }
+    [Parameter] public int Ranking { get; set; }
+    [Parameter] public string Content { get; set; } = string.Empty;
+    [Parameter] public int Points { get; set; }
 
     private void Reveal()
     {

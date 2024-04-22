@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 namespace FeudingFamily.Components;
 
 
-public class PresenterPageBase : ComponentBase
+public class PresenterPageBase : ComponentBase, IAsyncDisposable
 {
     [Inject]
     NavigationManager Navigation { get; set; }
@@ -43,22 +43,18 @@ public class PresenterPageBase : ComponentBase
 
         hubConnection.On<QuestionDto>("receiveQuestion", async (question) =>
         {
-            Console.WriteLine($"Received question");
-            Console.WriteLine(question);
             Question = question;
             await InvokeAsync(StateHasChanged);
         });
 
         hubConnection.On<RoundDto>("receiveRound", async (round) =>
         {
-            Console.WriteLine($"Received round");
             Round = round;
             await InvokeAsync(StateHasChanged);
         });
 
         hubConnection.On<List<TeamDto>>("receiveTeams", async (teams) =>
         {
-            Console.WriteLine($"Received teams");
             Teams = teams;
             await InvokeAsync(StateHasChanged);
         });
@@ -93,8 +89,16 @@ public class PresenterPageBase : ComponentBase
     {
         if (hubConnection is not null)
         {
+            await hubConnection.SendAsync("SendLeaveGame", GameKey);
+            Console.WriteLine("Disposing");
             await hubConnection.DisposeAsync();
         }
+        else
+        {
+            Console.WriteLine("Error disposing; hubConnection is null");
+        }
+
+        GC.SuppressFinalize(this);
     }
 
     public async Task RevealQuestion()

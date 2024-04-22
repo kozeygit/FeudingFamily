@@ -57,19 +57,13 @@
 
 
 @code {
+    [Parameter] public bool IsRevealed { get; set; }
+    [Parameter] public string Content { get; set; } = string.Empty;
+    [Parameter] public EventCallback OnClick { get; set; }
 
-    [Parameter]
-    public bool IsRevealed { get; set; }
-
-    [Parameter]
-    public string Content { get; set; } = string.Empty;
-
-    [Parameter]
-    public EventCallback onClick { get; set; }
-
-    public async Task Reveal()
+    private async Task Reveal()
     {
-        await onClick.InvokeAsync();
+        await OnClick.InvokeAsync();
         @* IsRevealed = !IsRevealed; *@
     }
 

@@ -1,0 +1,55 @@
+﻿@if (IsRevealed)
+{
+    <button class="question" onclick=@Reveal>
+        <h1 class="question-content">@Content</h1>
+    </button>
+}
+else
+{
+    <button class="question hidden" onclick=@Reveal>
+        <h1 class="question-content">@Content</h1>
+    </button>
+}
+
+<style>
+    .hidden {
+        background-color: lightgreen;
+    }
+
+    .question {
+        overflow: visible;
+        border: black solid 2px;
+        color: black;
+        height: 200px;
+        background-color: lightskyblue;
+        display: grid;
+        place-items: center;
+
+        h1 {
+            font-family: "Oswald", sans-serif;
+            font-weight: 600;
+            font-size: 30px;
+            text-transform: uppercase;
+            text-align: center;
+            padding-inline: 10px;
+        }
+    }
+</style>
+
+@code {
+    [Parameter]
+    public bool IsRevealed { get; set; }
+
+    [Parameter]
+    public string Content { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+
+    public async Task Reveal()
+    {
+        await OnClick.InvokeAsync();
+        IsRevealed = !IsRevealed;
+    }
+}
+

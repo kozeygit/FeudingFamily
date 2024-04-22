@@ -156,9 +156,9 @@ public class GameManager : IGameManager
 
         gameRoom.RemoveConnection(connection);
 
-        Console.WriteLine(gameRoom.Connections.Count);
+        Console.WriteLine($"Connections: {gameRoom.Connections.Count}");
 
-        if (gameRoom.Connections.Count == 0 && game.CreatedOn.AddMinutes(5) < DateTime.Now)
+        if (gameRoom.Connections.Count == 0 && game.CreatedOn.AddMinutes(1) < DateTime.Now)
         {
             games.Remove(gameKey);
             gameRooms.Remove(gameKey);

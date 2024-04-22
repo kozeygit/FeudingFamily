@@ -14,16 +14,14 @@
 
   <div class="game-board">
     
-    <Question IsRevealed=@Round.IsQuestionRevealed Content=@Question.Content onClick="RevealQuestion" />
+    <Question IsRevealed=@Round.IsQuestionRevealed Content=@Question.Content OnClick=@RevealQuestion />
 
     <div class="answers">
       @for (int i = 0; i < 5; i++)
       {
-        <Answer IsRevealed=Round.IsAnswerRevealed[i]
-          Ranking=@Question.Answers[i].Ranking
-          Content=@Question.Answers[i].Content
-          Points=@Question.Answers[i].Points
-        />
+        var answer = Question.Answers[i];
+
+        <Answer IsRevealed=@Round.IsAnswerRevealed[i] Ranking=@answer.Ranking Content=@answer.Content Points=@answer.Points />
       }
     </div>
     

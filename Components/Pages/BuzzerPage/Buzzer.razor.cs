@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Components;
 using FeudingFamily.Logic;
 using Microsoft.AspNetCore.SignalR.Client;
+using System.Runtime.CompilerServices;
 
 
 namespace FeudingFamily.Components;
 
-public class BuzzerPageBase : ComponentBase, IDisposable
+public class BuzzerPageBase : ComponentBase, IAsyncDisposable
 {
     [Inject]
     NavigationManager Navigation { get; set; }
@@ -42,7 +43,6 @@ public class BuzzerPageBase : ComponentBase, IDisposable
 
         hubConnection.On<TeamDto>("receiveTeam", async (team) =>
         {
-            Console.WriteLine($"Received team");
             Team = team;
             await InvokeAsync(StateHasChanged);
         });
@@ -82,7 +82,6 @@ public class BuzzerPageBase : ComponentBase, IDisposable
     {
         if (hubConnection is not null)
         {
-            Console.WriteLine($"--BuzzerPage-- SendBuzz - TeamName: {TeamName}");
             await hubConnection.SendAsync("SendBuzz", GameKey);
         }
     }
@@ -99,18 +98,16 @@ public class BuzzerPageBase : ComponentBase, IDisposable
     {
         if (hubConnection is not null)
         {
+            await hubConnection.SendAsync("SendLeaveGame", GameKey);
+            Console.WriteLine("Disposing");
             await hubConnection.DisposeAsync();
         }
+        else
+        {
+            Console.WriteLine("Error disposing; hubConnection is null");
+        }
+
+        GC.SuppressFinalize(this);
     }
 
-    void IDisposable.Dispose()
-    {
-        if (hubConnection is not null)
-        {
-            hubConnection.SendAsync("SendLeaveGame", GameKey);
-            Console.WriteLine("Disposing");
-            hubConnection.DisposeAsync();
-        }
-        Console.WriteLine("Error disposing; hubConnection is null");
-    }
 }

@@ -3,40 +3,27 @@
 @inherits ControllerPageBase
 @using Microsoft.AspNetCore.SignalR.Client
 @using FeudingFamily.Logic
+@rendermode InteractiveServer
 
 <PageTitle>Feuding Family - Controller</PageTitle>
 
 <main>
     
-    @{var questionRevealed = Round.IsQuestionRevealed ? "" : "hidden";}
-    <div class="question @questionRevealed">
-        <h1 class="question-content">@Question.Content</h1>
-    </div>
+    <ControllerQuestion Content="@Question.Content" IsRevealed="@Round.IsQuestionRevealed" OnClick="@RevealQuestion" />
 
     <div class="answers" id="answers">
         @for (int i = 0; i < Question.Answers.Count; i++)
         {
             var answer = Question.Answers[i];
-            var revealed = Round.IsAnswerRevealed[i] ? "" : "hidden";
 
-            <button class="answer @revealed" id="answer-@answer.Ranking" onclick="@Reveal(i)" type="button">
-                <span class="answer-ranking">
-                    @answer.Ranking
-                </span>
-                <span class="answer-content">
-                    @answer.Content
-                </span>
-                <span class="answer-points">
-                    @answer-Points
-                </span>
-            </button>
+            <ControllerAnswer IsRevealed="@Round.IsAnswerRevealed[i]" Ranking="@answer.Ranking" Content="@answer.Content" Points="@answer.Points" OnClick="@(() => RevealAnswer(answer.Ranking))" />
         }
     </div>
 
     <div class="stats">
-        <div id="wrong-answer">{{ wrong_answers }}</div>
+        <div id="wrong-answer">0</div>
         <div id="buzzer-active">❌</div>
-        <div id="round-points">{{ total_points }}</div>
+        <div id="round-points">9</div>
     </div>
 
     <div class="answer-btns">
