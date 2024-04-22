@@ -64,9 +64,13 @@
     [Parameter]
     public string Content { get; set; } = string.Empty;
 
-    public void Reveal()
+    [Parameter]
+    public EventCallback onClick { get; set; }
+
+    public async Task Reveal()
     {
-        IsRevealed = !IsRevealed;
+        await onClick.InvokeAsync();
+        @* IsRevealed = !IsRevealed; *@
     }
 
 }

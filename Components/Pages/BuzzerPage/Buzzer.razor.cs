@@ -105,7 +105,12 @@ public class BuzzerPageBase : ComponentBase, IDisposable
 
     void IDisposable.Dispose()
     {
-        hubConnection.SendAsync("LeaveGame", GameKey);
-        Console.WriteLine("Disposing");
+        if (hubConnection is not null)
+        {
+            hubConnection.SendAsync("SendLeaveGame", GameKey);
+            Console.WriteLine("Disposing");
+            hubConnection.DisposeAsync();
+        }
+        Console.WriteLine("Error disposing; hubConnection is null");
     }
 }

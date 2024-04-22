@@ -74,6 +74,12 @@ public class Game
 
     public async Task NewRound()
     {
+        //! REMOVE THIS
+
+        Teams.ForEach(team => team.Points+=10);
+
+        //!^^^^^^^^^^^^^^^^^^^^^^^^^
+
         CurrentRound = new Round();
         
         if (!isQuestionManual)

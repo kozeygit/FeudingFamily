@@ -97,6 +97,14 @@ public class PresenterPageBase : ComponentBase
         }
     }
 
+    public async Task RevealQuestion()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("SendRevealQuestion", GameKey);
+        }
+    }
+
     public async Task ShowBuzzerModal(string teamName)
     {
         try

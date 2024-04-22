@@ -51,7 +51,7 @@ public class GameHub : Hub
         await Clients.Caller.SendAsync("receiveGameConnected", true);
     }
 
-    public async Task LeaveGame(string gameKey)
+    public async Task SendLeaveGame(string gameKey)
     {
         _gameManager.LeaveGame(gameKey, Context.ConnectionId);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameKey);
@@ -218,6 +218,31 @@ public class GameHub : Hub
         }
     }
 
+    public async Task SendRevealQuestion(string gameKey)
+    {
+        var joinGameResult = _gameManager.GetGame(gameKey);
+
+        if (joinGameResult.Success is false)
+        {
+            await Clients.Caller.SendAsync("receiveError", joinGameResult.ErrorCode.ToString());
+            return;
+        }
+
+        var connection = _gameManager.GetConnection(gameKey, Context.ConnectionId);
+
+        var game = joinGameResult.Game;
+
+        var round = game.CurrentRound;
+
+        round.IsQuestionRevealed = true;
+
+        var pConns = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
+        var cConns = _gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
+        var conns = pConns.Concat(cConns);
+
+        await Clients.Clients(conns).SendAsync("receiveRound", round.MapToDto());
+    }
+
 
     // * Just send the question model which includes a list of the answers... duh, when do i just need the answers ???
     // public async Task SendAnswers(List<Answer> answers) // Sends current answers to presenter and controller // * Will Probably move this to the view instead and reload the pages
@@ -225,10 +250,6 @@ public class GameHub : Hub
     //     await Clients.Groups("Presenters", "Controllers").SendAsync("receiveAnswers", answers);
     // }
 
-    public async Task SendRevealQuestion()
-    {
-        await Clients.Group("Presenters").SendAsync("receiveRevealQuestion");
-    }
 
     public async Task SendRevealAnswer(int answerId)
     {
