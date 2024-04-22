@@ -58,4 +58,12 @@ public class ControllerPageBase : ComponentBase
         }
     }
 
+    public async Task Reveal(int i)
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("SendRevealAnswer", GameKey, i);
+        }
+    }
+
 }

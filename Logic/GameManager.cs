@@ -165,6 +165,16 @@ public class GameManager : IGameManager
         }
     }
 
+    public string GetGameKey(string connectionId)
+    {
+        var gameKey = gameRooms.SingleOrDefault(
+            gr => gr.Value.Connections.Any(
+                c => c.ConnectionId == connectionId)
+            ).Key;
+        
+        return gameKey;
+    }
+
 
     public bool HasConnection(string gameKey, GameConnection connection)
     {
@@ -230,6 +240,7 @@ public interface IGameManager
     JoinGameResult GetGame(string gameKey);
     void LeaveGame(string gameKey, string connectionId);
     JoinGameResult GameKeyValidator(string? gameKey);
+    string GetGameKey(string connectionId);
     bool HasConnection(string gameKey, GameConnection connection);
     GameConnection GetConnection(string gameKey, string connectionId);
     List<GameConnection> GetConnections(string gameKey);

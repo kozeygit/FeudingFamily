@@ -131,6 +131,6 @@ app.MapGet("/form", (IGameManager GameManager, string gameKey, string teamName, 
 // DatabaseBuilder dbBuilder = new(connection);
 // await dbBuilder.CreateTableAsync(CreateTableSql.Questions);
 // await dbBuilder.CreateTableAsync(CreateTableSql.Answers);
-// await dbBuilder.PopulateTablesAsync("dbo/JsonQuestions/ff_questions.json");
+// await dbBuilder.PopulateTablesAsync("Data/dbo/JsonQuestions/ff_questions.json");
 
 app.Run();

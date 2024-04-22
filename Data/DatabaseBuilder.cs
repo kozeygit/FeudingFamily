@@ -127,8 +127,7 @@ public class DatabaseBuilder
 
             if (jsonQuestions is null)
             {
-                Console.WriteLine("IT WAS NULL AHHHHHH");
-                throw new Exception();
+                throw new Exception("JsonQuestions is null");
             }
 
             var questions = jsonQuestions.Select(q =>
@@ -178,7 +177,7 @@ public class DatabaseBuilder
 
     public async Task TestAsync()
     {
-        await PopulateTablesAsync("Data/ff_questions.json");
+        await PopulateTablesAsync("Data/dbo/JsonQuestions/ff_questions.json");
     }
 
 }

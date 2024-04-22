@@ -10,6 +10,9 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.container {
   width: 90%;
   height: 100vh - 50px;
   padding: 3%;

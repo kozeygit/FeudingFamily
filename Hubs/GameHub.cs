@@ -51,6 +51,16 @@ public class GameHub : Hub
         await Clients.Caller.SendAsync("receiveGameConnected", true);
     }
 
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        var gameKey = _gameManager.GetGameKey(Context.ConnectionId);
+        
+        if (string.IsNullOrEmpty(gameKey) is false)
+            await SendLeaveGame(gameKey);
+        
+        await base.OnDisconnectedAsync(exception);
+    }
+
     public async Task SendLeaveGame(string gameKey)
     {
         _gameManager.LeaveGame(gameKey, Context.ConnectionId);
