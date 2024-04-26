@@ -8,7 +8,7 @@
 <PageTitle>Feuding Family - Controller</PageTitle>
 
 <main>
-    
+
     <ControllerQuestion Content="@Question.Content" IsRevealed="@Round.IsQuestionRevealed" OnClick="@RevealQuestion" />
 
     <div class="answers" id="answers">
@@ -16,7 +16,8 @@
         {
             var answer = Question.Answers[i];
 
-            <ControllerAnswer IsRevealed="@Round.IsAnswerRevealed[i]" Ranking="@answer.Ranking" Content="@answer.Content" Points="@answer.Points" OnClick="@(() => RevealAnswer(answer.Ranking))" />
+            <ControllerAnswer IsRevealed=Round.IsAnswerRevealed[i] Ranking=answer.Ranking Content=@answer.Content
+                Points=answer.Points OnClick="@(() => RevealAnswer(answer.Ranking))" />
         }
     </div>
 
@@ -27,29 +28,32 @@
     </div>
 
     <div class="answer-btns">
-        <button class="wrong-answer-btn" onclick="wrong_answer()" type="button">
-            <p>Wrong Answer</p>
-        </button>
-        <button class="reveal-btn" onclick="reveal_question()" type="button">
-            <p>reveal question</p>
-        </button>
+        <ControllerButton TailwindStyle="bg-blue-300" OnClick=@(() => Console.WriteLine("DidShit"))>
+            Wrong Answer
+        </ControllerButton>
+
+        <ControllerButton TailwindStyle="" OnClick=@(() => Console.WriteLine("DidShit"))>
+            reveal question
+        </ControllerButton>
     </div>
     <div class="buzzer-btns">
-        <button class="buzzer-btn" onclick="activate_buzzers()" type="button">
-            <p>BUZZERS ON</p>
-        </button>
-        <button class="buzzer-btn" onclick="deactivate_buzzers()" type="button">
-            <p>BUZZERS OFF</p>
-        </button>
+        <ControllerButton TailwindStyle="" OnClick=@(() => Console.WriteLine("DidShit"))>
+            BUZZERS ON
+        </ControllerButton>
+
+        <ControllerButton TailwindStyle="" OnClick=@(() => Console.WriteLine("DidShit"))>
+            BUZZERS OFF
+        </ControllerButton>
     </div>
 
     <div class="btn-pair">
-        <button class="new_question-btn" onclick="new_question()" type="button">
-            <p>New Question</p>
-        </button>
-        <button class="buzz-whenever" onclick="buzz_whenever()" type="button">
-            <p>WRONG BUZZER</p>
-        </button>
+        <ControllerButton TailwindStyle="" OnClick=NewRound>
+            New Round
+        </ControllerButton>
+
+        <ControllerButton TailwindStyle="" OnClick=@(() => Console.WriteLine("DidShit"))>
+            WRONG BUZZER
+        </ControllerButton>
     </div>
 
     <div class="sound-btns">

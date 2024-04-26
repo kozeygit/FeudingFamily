@@ -1,6 +1,9 @@
+using System.Reflection;
 using System.Runtime.InteropServices.Marshalling;
+using System.Runtime.Versioning;
 using FeudingFamily.Logic;
 using FeudingFamily.Models;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.SignalR;
 
 namespace FeudingFamily.Hubs;
@@ -70,7 +73,6 @@ public class GameHub : Hub
             return;
 
         int connCount = _gameManager.GetConnections(gameKey).Count;
-        Console.WriteLine($"Connections: {connCount}");
         
         _gameManager.LeaveGame(gameKey, Context.ConnectionId);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameKey);
@@ -94,10 +96,14 @@ public class GameHub : Hub
             return;
         }
 
-        var game = joinGameResult.Game;
+        var game = joinGameResult.Game!;
+        
         var team = game.GetTeam(connection);
 
-        // Game buzz in logic if true do, if false dont yno
+        if (game.Buzz(team) is false)
+        {
+            return;
+        };
 
         var presenterConnections = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
         var controllerConnections = _gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
@@ -206,10 +212,7 @@ public class GameHub : Hub
         await Clients.Caller.SendAsync("receiveRound", round);
     }
 
-    //!----------------------------------------------------------------------------------!\\
-
-
-    public async Task SendNewRound(string gameKey) // Gets a new question and send to the controller for host to decide if to use
+    public async Task SendNewRound(string gameKey)
     {
         var joinGameResult = _gameManager.GetGame(gameKey);
 
@@ -228,6 +231,7 @@ public class GameHub : Hub
 
         await Clients.Clients(conns).SendAsync("receiveQuestion", game.CurrentQuestion.MapToDto());
         await Clients.Clients(conns).SendAsync("receiveRound", game.CurrentRound.MapToDto());
+        await Clients.Clients(conns).SendAsync("receiveTeams", game.Teams.Select(t => t.MapToDto()));
 
         foreach (var team in game.Teams)
         {
@@ -263,22 +267,59 @@ public class GameHub : Hub
         await Clients.Clients(conns).SendAsync("receiveRound", round.MapToDto());
     }
 
-
-    // * Just send the question model which includes a list of the answers... duh, when do i just need the answers ???
-    // public async Task SendAnswers(List<Answer> answers) // Sends current answers to presenter and controller // * Will Probably move this to the view instead and reload the pages
-    // {
-    //     await Clients.Groups("Presenters", "Controllers").SendAsync("receiveAnswers", answers);
-    // }
-
-
-    public async Task SendRevealAnswer(int answerId)
+    public async Task SendRevealAnswer(string gameKey, int answerRanking)
     {
-        await Clients.Group("Presenters").SendAsync("receiveRevealAnswer", answerId);
+        var joinGameResult = _gameManager.GetGame(gameKey);
+
+        if (joinGameResult.Success is false)
+        {
+            await Clients.Caller.SendAsync("receiveError", joinGameResult.ErrorCode.ToString());
+            return;
+        }
+
+        var connection = _gameManager.GetConnection(gameKey, Context.ConnectionId);
+
+        var game = joinGameResult.Game!;
+
+        game.GiveCorrectAnswer(answerRanking);
+
+        var round = game.CurrentRound;
+
+        var pConns = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
+        var cConns = _gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
+        var conns = pConns.Concat(cConns);
+
+        Console.WriteLine($"--Hub-- SendRevealAnswer - gameKey: {gameKey}, answer: {answerRanking}, sender: {Context.ConnectionId}");
+
+        await Clients.Clients(conns).SendAsync("receiveRound", round.MapToDto());
     }
 
-    public async Task SendWrongAnswer(int wrongAnswersCount)
+    public async Task SendWrongAnswer(string gameKey)
     {
-        await Clients.Group("Presenters").SendAsync("receiveWrongAnswer", wrongAnswersCount);
+        var joinGameResult = _gameManager.GetGame(gameKey);
+
+        if (joinGameResult.Success is false)
+        {
+            await Clients.Caller.SendAsync("receiveError", joinGameResult.ErrorCode.ToString());
+            return;
+        }
+
+        var connection = _gameManager.GetConnection(gameKey, Context.ConnectionId);
+
+        var game = joinGameResult.Game;
+
+        game.GiveIncorrectAnswer();
+
+        var round = game.CurrentRound;
+
+        var pConns = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
+        var cConns = _gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
+        var conns = pConns.Concat(cConns);
+
+        Console.WriteLine($"--Hub-- SendWrongAnswer - gameKey: {gameKey}, sender: {Context.ConnectionId}");
+
+        await Clients.Clients(conns).SendAsync("receiveRound", round.MapToDto());
+
     }
 
     public async Task SendShowWinner(Team winningTeam)

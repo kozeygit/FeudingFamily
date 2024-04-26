@@ -1,0 +1,23 @@
+﻿<button class="answer-btn @TailwindStyle" @onclick=OnClick>
+    @ChildContent
+</button>
+
+<style>
+    .answer-btn {
+        background-color: lightcoral;
+        border: black solid 2px;
+        color: white;
+
+        
+    }
+    .answer-btn:active {
+        background-color: #1a202c;
+    }
+    
+</style>
+
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+    [Parameter] public string TailwindStyle { get; set; }
+}

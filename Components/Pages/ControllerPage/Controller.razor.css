@@ -7,14 +7,18 @@
 main {
   display: flex;
   flex-direction: column;
-  margin: 4rem;
+  margin: auto;
+  padding: 2rem;
+  max-width: 800px;
 }
 
 .answers {
-  margin-top: 2rem;
-  padding-inline: 1rem;
+  margin-top: 1rem;
+  padding-inline: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
 }
-
 
 .answer-btns,
 .buzzer-btns,
@@ -23,43 +27,6 @@ main {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
-}
-
-.buzzer-btn,
-.wrong-answer-btn,
-.reveal-btn {
-  border: black solid 2px;
-  background-color: lightcoral;
-}
-
-.buzzer-btn:first-child {
-  background-color: lightgreen;
-  border-top-left-radius: 50px;
-  border-bottom-left-radius: 50px;
-}
-
-.buzzer-btn:last-child {
-  border-top-right-radius: 50px;
-  border-bottom-right-radius: 50px;
-}
-
-.new_question-btn {
-  border: black solid 2px;
-  background-color: lightcoral;
-}
-
-.buzz-whenever {
-  border: black solid 2px;
-  background-color: lightcoral;
-}
-
-.reveal-btn {
-  background-color: lightskyblue;
-}
-
-.new_question-btn {
-  background-color: black;
-  color: white;
 }
 
 .sound-btns {
@@ -89,10 +56,10 @@ main {
 
 #round-points {
   text-align: right;
+}
 
-  before {
-    content: "POINTS: ";
-  }
+#round-points::before {
+  content: "POINTS: ";
 }
 
 #buzzer-active {
@@ -113,4 +80,3 @@ main {
 #connection-status::before {
   content: "Connected: ";
 }
-

@@ -6,6 +6,7 @@ public class Game
 {
     private readonly IQuestionService _questionService;
     private bool isQuestionManual = false;
+    private bool isBuzzersEnabled = false;
 
     public DateTime CreatedOn { get; init; }
     public List<Team> Teams { get; set; } = [];
@@ -25,6 +26,23 @@ public class Game
         CurrentRound = new Round();
 
         CreatedOn = DateTime.Now;
+    }
+
+    public bool Buzz(Team team)
+    {
+        if (!isBuzzersEnabled)
+        {
+            return false;
+        }
+
+        if (!Teams.Contains(team))
+        {
+            return false;
+        }
+
+        isBuzzersEnabled = false;
+        TeamPlaying = team;
+        return true;
     }
 
     public bool AddTeam(string teamName)
@@ -80,6 +98,8 @@ public class Game
 
         //!^^^^^^^^^^^^^^^^^^^^^^^^^
 
+        isBuzzersEnabled = true;
+
         CurrentRound = new Round();
         
         if (!isQuestionManual)
@@ -103,21 +123,25 @@ public class Game
         }
     }
 
-    public void GiveCorrectAnswer(Answer answer, string teamName)
+    public void GiveCorrectAnswer(int answerRanking, string teamName)
     {
-        GiveCorrectAnswer(answer);
+        GiveCorrectAnswer(answerRanking);
         SetTeamPlaying(teamName);
     }
 
-    public void GiveCorrectAnswer(Answer answer)
+    public void GiveCorrectAnswer(int answerRanking)
     {
-        if (CurrentRound.IsAnswerRevealed[answer.Ranking])
+        isBuzzersEnabled = false;
+
+        var answer = CurrentQuestion.Answers[answerRanking-1];
+        
+        if (CurrentRound.IsAnswerRevealed[answer.Ranking-1])
         {
             return;
         }
 
         CurrentRound.Points += answer.Points;
-        CurrentRound.IsAnswerRevealed[answer.Ranking] = true;
+        CurrentRound.IsAnswerRevealed[answer.Ranking-1] = true;
 
         if (CurrentRound.IsAnswerRevealed.All(x => x == true))
         {

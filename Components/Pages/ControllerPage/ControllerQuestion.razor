@@ -1,12 +1,12 @@
 ﻿@if (IsRevealed)
 {
-    <button class="question" onclick=@Reveal>
+    <button class="question" @onclick=Reveal>
         <h1 class="question-content">@Content</h1>
     </button>
 }
 else
 {
-    <button class="question hidden" onclick=@Reveal>
+    <button class="question hidden" @onclick=Reveal>
         <h1 class="question-content">@Content</h1>
     </button>
 }
@@ -20,7 +20,8 @@ else
         overflow: visible;
         border: black solid 2px;
         color: black;
-        height: 200px;
+        height: 150px;
+        font-size: 1.2rem;
         background-color: lightskyblue;
         display: grid;
         place-items: center;
@@ -28,7 +29,6 @@ else
         h1 {
             font-family: "Oswald", sans-serif;
             font-weight: 600;
-            font-size: 30px;
             text-transform: uppercase;
             text-align: center;
             padding-inline: 10px;
@@ -49,7 +49,6 @@ else
     public async Task Reveal()
     {
         await OnClick.InvokeAsync();
-        IsRevealed = !IsRevealed;
     }
 }
 

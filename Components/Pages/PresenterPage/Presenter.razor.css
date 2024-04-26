@@ -3,6 +3,8 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
+  font-family: "Oswald", sans-serif;
+  text-transform: uppercase;
 }
 
 .game-board {
@@ -64,28 +66,21 @@ main {
 
 .buzzer-modal {
   z-index: 999;
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
+  overflow: hidden;
+  position: absolute;
+  inset: 0;
   margin: auto;
-  height: 500px;
-  width: 1000px;
+  width: clamp(500px, 80%, 1000px);
+  aspect-ratio: 3/2;
   display: grid;
   place-items: center;
-  font-family: "Oswald", sans-serif;
-  font-size: 70px;
+  font-size: 2rem;
   font-weight: 600;
   text-align: center;
   gap: 5%;
   background: none;
+  border: black 10px solid;
   border-radius: 100px;
-}
-
-.buzzer-modal::backdrop {
-  background-color: black;
-  opacity: 90%;
 }
 
 .buzzer-modal::before {
@@ -127,70 +122,4 @@ main {
 
 .buzzer-modal:not([open]) {
   display: none;
-}
-
-@keyframes buzzer-lights {
-  100% {
-    transform: rotate(1turn);
-  }
-}
-
-div p {
-  color: white;
-  font-family: "Oswald", sans-serif;
-  font-weight: 400;
-  font-size: 40px;
-  text-shadow: 2px 2px 5px black;
-  text-transform: uppercase;
-  margin: 20px;
-  padding-inline: 10px;
-}
-
-.timer-container {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  margin: auto;
-  height: 80vh;
-  width: 100px;
-  border: white solid 5px;
-  border-radius: 20px;
-  background: white;
-  overflow: hidden;
-  box-shadow: 10px 10px 20px rgb(0, 0, 0, 0.3);
-}
-
-.timer {
-  background-image: linear-gradient(
-    to top,
-    rgb(253, 138, 178),
-    rgb(252, 195, 157)
-  );
-  height: 100%;
-  width: 100%;
-}
-
-.timer-animate {
-  animation-name: timer_countdown;
-  animation-duration: 30s;
-  animation-timing-function: ease-in;
-  animation-fill-mode: forwards;
-
-}
-
-@keyframes timer_countdown {
-  from {
-    translate: 0px 0px
-  };
-  to {
-    translate: 0px 100%
-  };
-}
-
-.left {
-  left: 130px;
-}
-
-.right {
-  right: 130px;
 }

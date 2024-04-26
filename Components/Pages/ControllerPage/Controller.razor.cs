@@ -104,11 +104,19 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
         }
     }
 
-    public async Task RevealAnswer(int answerIndex)
+    public async Task RevealAnswer(int answerRanking)
     {
         if (hubConnection is not null)
         {
-            await hubConnection.SendAsync("SendRevealAnswer", GameKey, answerIndex);
+            await hubConnection.SendAsync("SendRevealAnswer", GameKey, answerRanking);
+        }
+    }
+    
+    public async Task NewRound()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("SendNewRound", GameKey);
         }
     }
 

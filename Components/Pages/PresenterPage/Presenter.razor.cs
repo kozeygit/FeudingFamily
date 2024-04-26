@@ -70,9 +70,9 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
             
             IsGameConnected = isConnected;
 
-            await hubConnection.SendAsync("SendGetQuestion", GameKey);
             await hubConnection.SendAsync("SendGetRound", GameKey);
             await hubConnection.SendAsync("SendGetTeams", GameKey);
+            await hubConnection.SendAsync("SendGetQuestion", GameKey);
 
             await InvokeAsync(StateHasChanged);
         });
@@ -106,6 +106,14 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
         if (hubConnection is not null)
         {
             await hubConnection.SendAsync("SendRevealQuestion", GameKey);
+        }
+    }
+
+    public async Task RevealAnswer(int answerRanking)
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("SendRevealAnswer", GameKey, answerRanking);
         }
     }
 

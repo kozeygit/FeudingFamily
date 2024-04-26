@@ -9,27 +9,26 @@
 
 @if (!IsGameConnected)
 {
-    <div class="wrapper">
+    <main>
         <h1 class="text-3xl text-white font-bold font-sans">Finding Game...</h1>
-    </div>
+    </main>
 }
 
 else if (Team is null)
 {
-    <div class="wrapper">
+    <main>
         <h1 class="text-3xl text-white font-bold font-sans">Joining Game...</h1>
-    </div>
+    </main>
 }
 
 else
 {
-    <div class="wrapper">
+    <main>
         <dialog open=@IsModalShown>YOUR TEAM BUZZED IN!!</dialog>
         <div class="team-name">
             <h1>Team:<br />@TeamName</h1>
         </div>
         <button class="buzzer" @onmousedown="SendBuzz"></button>
-        <button @onmousedown="NewRound">Buzz</button>
         <h2 class="points">Points: @Team.Points</h2>
-    </div>
+    </main>
 }

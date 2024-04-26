@@ -10,7 +10,9 @@
 
 <main>
   <dialog class="wrong-modal" id="wrong-modal" open=@IsWrongModalShown></dialog>
-  <dialog class="buzzer-modal" id="buzzer-modal" open=@IsBuzzerModalShown></dialog>
+  <dialog class="buzzer-modal" id="buzzer-modal" open=@IsBuzzerModalShown>
+    @BuzzingTeam buzzed in!
+  </dialog>
 
   <div class="game-board">
     
@@ -21,7 +23,7 @@
       {
         var answer = Question.Answers[i];
 
-        <Answer IsRevealed=@Round.IsAnswerRevealed[i] Ranking=@answer.Ranking Content=@answer.Content Points=@answer.Points />
+        <Answer IsRevealed=@Round.IsAnswerRevealed[i] Ranking=@answer.Ranking Content=@answer.Content Points=@answer.Points OnClick=@(() => RevealAnswer(answer.Ranking)) />
       }
     </div>
     
