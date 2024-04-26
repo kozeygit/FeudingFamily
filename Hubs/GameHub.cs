@@ -1,9 +1,4 @@
-using System.Reflection;
-using System.Runtime.InteropServices.Marshalling;
-using System.Runtime.Versioning;
 using FeudingFamily.Logic;
-using FeudingFamily.Models;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.SignalR;
 
 namespace FeudingFamily.Hubs;
@@ -97,8 +92,13 @@ public class GameHub : Hub
         }
 
         var game = joinGameResult.Game!;
-        
+
         var team = game.GetTeam(connection);
+
+        if (team is null)
+        {
+            return;
+        }
 
         if (game.Buzz(team) is false)
         {
@@ -134,7 +134,7 @@ public class GameHub : Hub
             return;
         }
 
-        var game = joinGameResult.Game;
+        var game = joinGameResult.Game!;
         var question = game.CurrentQuestion.MapToDto();
 
         await Clients.Caller.SendAsync("receiveQuestion", question);
@@ -158,7 +158,7 @@ public class GameHub : Hub
             return;
         }
 
-        var game = joinGameResult.Game;
+        var game = joinGameResult.Game!;
         var team = game.GetTeam(connection);
         
         await Clients.Caller.SendAsync("receiveTeam", team);
@@ -182,7 +182,7 @@ public class GameHub : Hub
             return;
         }
 
-        var game = joinGameResult.Game;
+        var game = joinGameResult.Game!;
         var teams = game.Teams.Select(t => t.MapToDto()).ToList();
         
         await Clients.Caller.SendAsync("receiveTeams", teams);
@@ -206,7 +206,7 @@ public class GameHub : Hub
             return;
         }
 
-        var game = joinGameResult.Game;
+        var game = joinGameResult.Game!;
         var round = game.CurrentRound.MapToDto();
 
         await Clients.Caller.SendAsync("receiveRound", round);
@@ -224,7 +224,7 @@ public class GameHub : Hub
 
         var connection = _gameManager.GetConnection(gameKey, Context.ConnectionId);
 
-        var game = joinGameResult.Game;
+        var game = joinGameResult.Game!;
         await game.NewRound();
 
         var conns = _gameManager.GetConnections(gameKey).Select(c => c.ConnectionId);
@@ -252,7 +252,7 @@ public class GameHub : Hub
 
         var connection = _gameManager.GetConnection(gameKey, Context.ConnectionId);
 
-        var game = joinGameResult.Game;
+        var game = joinGameResult.Game!;
 
         var round = game.CurrentRound;
 
@@ -306,7 +306,7 @@ public class GameHub : Hub
 
         var connection = _gameManager.GetConnection(gameKey, Context.ConnectionId);
 
-        var game = joinGameResult.Game;
+        var game = joinGameResult.Game!;
 
         game.GiveIncorrectAnswer();
 

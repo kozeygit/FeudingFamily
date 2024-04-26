@@ -17,7 +17,7 @@
 </style>
 
 @code {
-    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter] public EventCallback OnClick { get; set; }
-    [Parameter] public string TailwindStyle { get; set; }
+    [Parameter] public string TailwindStyle { get; set; } = string.Empty;
 }

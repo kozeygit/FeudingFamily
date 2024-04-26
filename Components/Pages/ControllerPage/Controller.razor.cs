@@ -8,7 +8,7 @@ namespace FeudingFamily.Components;
 public class ControllerPageBase : ComponentBase, IAsyncDisposable
 {
     [Inject]
-    NavigationManager Navigation { get; set; }
+    NavigationManager Navigation { get; set; } = default!;
 
     [Parameter]
     public string? GameKey { get; set; }
