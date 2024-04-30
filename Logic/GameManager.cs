@@ -174,6 +174,24 @@ public class GameManager : IGameManager
         return gameKey;
     }
 
+    public (Game? game, GameConnection? connection) ValidateGameConnection(string gameKey, string connectionId)
+    {
+        var joinGameResult = GetGame(gameKey);
+
+        if (joinGameResult.Success is false)
+        {
+            return default;
+        }
+
+        var connection = GetConnection(gameKey, connectionId);
+
+        if (HasConnection(gameKey, connection) is false)
+        {
+            return default;
+        }
+
+        return (joinGameResult.Game, connection);
+    }
 
     public bool HasConnection(string gameKey, GameConnection connection)
     {
@@ -246,4 +264,5 @@ public interface IGameManager
     List<GameConnection> GetPresenterConnections(string gameKey);
     List<GameConnection> GetControllerConnections(string gameKey);
     List<GameConnection> GetBuzzerConnections(string gameKey);
+    (Game? game, GameConnection? connection) ValidateGameConnection(string gameKey, string connectionId);
 }
