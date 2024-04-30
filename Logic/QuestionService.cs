@@ -30,17 +30,14 @@ public class QuestionService : IQuestionService
     {
         const string sql = "SELECT * FROM Questions;";
 
-        var results = await _connection.QueryAsync<Question>(sql);
+        var questions = await _connection.QueryAsync<Question>(sql);
 
-        var questions = results.Select(async q => new Question
+        foreach (var question in questions)
         {
-            Id = q.Id,
-            Content = q.Content,
-            Answers = await GetAnswersForQuestionAsync(q.Id)
-        })
-        .ToList();
+            question.Answers = await GetAnswersForQuestionAsync(question.Id);
+        }
 
-        return results.ToList();
+        return questions.ToList();
     }
 
     public async Task<List<Question>> GetShuffledQuestionsAsync()

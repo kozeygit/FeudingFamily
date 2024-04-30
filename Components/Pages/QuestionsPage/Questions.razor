@@ -5,25 +5,34 @@
 <PageTitle>FeudingFamily - Questions</PageTitle>
 
 <h1 class="border-cyan-300 bg-red-200">Questions</h1>
+<div class="px-4 py-2 grid grid-cols-5">
 
-<table class="questions">
-@foreach (var question in QuestionsList) {
-    <h2 class="font-semibold font-">Question: @question.Content</h2>
-    <h3>@question.Answers[0].Content - @question.Answers[0].Points</h3>
-    <h3>@question.Answers[1].Content - @question.Answers[1].Points</h3>
-    <h3>@question.Answers[2].Content - @question.Answers[2].Points</h3>
-    <h3>@question.Answers[3].Content - @question.Answers[3].Points</h3>
-    <h3>@question.Answers[4].Content - @question.Answers[4].Points</h3>
-    <h2>-----------------------------------------------</h2>
-}
-</table>
+    @if (QuestionsList.Count == 0)
+    {
+        <p>Loading...</p>
+        <p>@QuestionsList.Count</p>
+    }
+    else
+    {
+        @foreach (var question in QuestionsList)
+        {
+            <div class="max-w-min pl-4 border-gray-500 border-l-4">
+                <h2 class="font-semibold font-">Question @question.Id: @question.Content</h2>
+                <h3>@question.Answers[0].Content - @question.Answers[0].Points</h3>
+                <h3>@question.Answers[1].Content - @question.Answers[1].Points</h3>
+                <h3>@question.Answers[2].Content - @question.Answers[2].Points</h3>
+                <h3>@question.Answers[3].Content - @question.Answers[3].Points</h3>
+                <h3>@question.Answers[4].Content - @question.Answers[4].Points</h3>
+                <h2>-----------------------------------------------</h2>
+            </div>
+        }
+    }
+</div>
 
 @code {
-    public List<QuestionDto> QuestionsList { get; set; } = [];
-
-        protected async override Task OnInitializedAsync()
-        {
-            var questions = await questionSevice.GetShuffledQuestionsAsync();
-            QuestionsList = questions.Select(q => q.MapToDto()).ToList();
-        }
+    public List<Models.Question> QuestionsList { get; set; } = [];
+    protected async override Task OnInitializedAsync()
+    {
+        QuestionsList = await questionSevice.GetShuffledQuestionsAsync();
+    }
 }
