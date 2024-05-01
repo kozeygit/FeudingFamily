@@ -5,12 +5,13 @@ main {
   align-items: center;
   font-family: "Oswald", sans-serif;
   text-transform: uppercase;
+  background-color: grey;
+  height: 100vh;
 }
 
 .game-board {
-  background-color: grey;
+  flex: auto;
   width: 100vw;
-  height: 100vh;
   padding: 2vw;
   display: flex;
   flex-direction: column;
@@ -28,42 +29,7 @@ main {
   gap: 1rem;
 }
 
-.wrong-modal {
-  z-index: 998;
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  margin: auto;
-  height: 500px;
-  width: 1500px;
-  display: flex;
-  justify-content: space-evenly;
-  gap: 5%;
-  background: none;
-  border: none;
-}
-
-.wrong-modal::backdrop {
-  z-index: 999;
-  background-color: black;
-  opacity: 50%;
-}
-
-.wrong-modal > div {
-  background: url(../images/wrong-answer-icon.png);
-  background-repeat: repeat-x;
-  background-size: contain;
-  width: 450px;
-  height: 450px;
-  opacity: 100%;
-}
-
-.wrong-modal:not([open]) {
-  display: none;
-}
-
+.wrong-modal,
 .buzzer-modal {
   z-index: 999;
   overflow: hidden;
@@ -72,6 +38,21 @@ main {
   margin: auto;
   width: clamp(500px, 80%, 1000px);
   aspect-ratio: 3/2;
+}
+
+.wrong-modal:not([open]),
+.buzzer-modal:not([open]) {
+  display: none;
+}
+
+.wrong-modal {
+  background: url(../images/wrong-answer-icon.png);
+  background-size: contain;
+  background-repeat:no-repeat;
+  background-position: center center;
+}
+
+.buzzer-modal {
   display: grid;
   place-items: center;
   font-size: 2rem;
@@ -118,8 +99,4 @@ main {
     white 330deg 345deg,
     lightyellow 345deg 360deg
   );
-}
-
-.buzzer-modal:not([open]) {
-  display: none;
 }

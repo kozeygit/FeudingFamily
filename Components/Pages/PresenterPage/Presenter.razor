@@ -9,24 +9,47 @@
 <PageTitle>FeudingFamily - Presenter</PageTitle>
 
 <main>
-  <dialog class="wrong-modal" id="wrong-modal" open=@IsWrongModalShown></dialog>
-  <dialog class="buzzer-modal" id="buzzer-modal" open=@IsBuzzerModalShown>
-    @BuzzingTeam buzzed in!
-  </dialog>
+    <dialog class="wrong-modal" id="wrong-modal" open=@IsWrongModalShown></dialog>
+    <dialog class="buzzer-modal" id="buzzer-modal" open=@IsBuzzerModalShown>
+        @BuzzingTeam buzzed in!
+    </dialog>
 
-  <div class="game-board">
-    
-    <Question IsRevealed=@Round.IsQuestionRevealed Content=@Question.Content OnClick=@RevealQuestion />
+    <div class="game-board">
 
-    <div class="answers">
-      @for (int i = 0; i < 5; i++)
-      {
-        var answer = Question.Answers[i];
+        <Question IsRevealed=@Round.IsQuestionRevealed Content=@Question.Content OnClick=@RevealQuestion />
 
-        <Answer IsRevealed=@Round.IsAnswerRevealed[i] Ranking=@answer.Ranking Content=@answer.Content Points=@answer.Points OnClick=@(() => RevealAnswer(answer.Ranking)) />
-      }
+        <div class="answers">
+            @for (int i = 0; i < 5; i++)
+            {
+                var answer = Question.Answers[i];
+
+                <Answer IsRevealed=@Round.IsAnswerRevealed[i] Ranking=@answer.Ranking Content=@answer.Content
+                    Points=@answer.Points OnClick=@(() => RevealAnswer(answer.Ranking)) />
+            }
+        </div>
+
     </div>
-    
-  </div>
+
+    <div class="wrong-answers">
+        @for (int i = 0; i < Round.WrongAnswers; i++)
+        {
+            <img src="/images/wrong-answer-icon.png">
+        }
+    </div>
+
+    @* Move to css file *@
+    <style>
+        .wrong-answers {
+            display: flex;
+            gap: 1rem;
+            margin: 0 3rem 1rem 3rem;
+
+            img {
+                aspect-ratio: 1/1;
+                width: 5%;
+                height: inherit;
+            }
+        }
+    </style>
 
 </main>

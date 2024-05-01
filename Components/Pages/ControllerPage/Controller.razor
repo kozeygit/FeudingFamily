@@ -22,56 +22,60 @@
     </div>
 
     <div class="stats">
-        <div id="wrong-answer">0</div>
-        <div id="buzzer-active">❌</div>
-        <div id="round-points">9</div>
+        <div id="wrong-answer">@Round.WrongAnswers</div>
+        <div id="buzzer-active">@(Round.IsBuzzersEnabled ? "✔️" : "❌")</div>
+        <div id="round-points">@Round.Points</div>
     </div>
 
     <div class="answer-btns">
-        <ControllerButton TailwindStyle="bg-blue-300" OnClick=@(() => Console.WriteLine("DidShit"))>
-            Wrong Answer
-        </ControllerButton>
-
-        <ControllerButton TailwindStyle="" OnClick=@(() => Console.WriteLine("DidShit"))>
-            reveal question
-        </ControllerButton>
-    </div>
-    <div class="buzzer-btns">
-        <ControllerButton TailwindStyle="" OnClick=@(() => Console.WriteLine("DidShit"))>
-            BUZZERS ON
-        </ControllerButton>
-
-        <ControllerButton TailwindStyle="" OnClick=@(() => Console.WriteLine("DidShit"))>
-            BUZZERS OFF
-        </ControllerButton>
-    </div>
-
-    <div class="btn-pair">
         <ControllerButton TailwindStyle="" OnClick=NewRound>
             New Round
         </ControllerButton>
 
         <ControllerButton TailwindStyle="" OnClick=@(() => Console.WriteLine("DidShit"))>
-            WRONG BUZZER
+            Reveal Question
+        </ControllerButton>
+    </div>
+    <div class="buzzer-btns">
+        <ControllerButton TailwindStyle="" OnClick=EnableBuzzers>
+            Buzzers On
+        </ControllerButton>
+
+        <ControllerButton TailwindStyle="" OnClick=DisableBuzzers>
+            Buzzers Off
+        </ControllerButton>
+    </div>
+
+    <div class="btn-pair">
+        <ControllerButton TailwindStyle="bg-blue-300" OnClick=@(() => WrongAnswer(false))>
+            Wrong Answer
+        </ControllerButton>
+
+        <ControllerButton TailwindStyle="" OnClick=@(() => WrongAnswer(true))>
+            Show Wrong Modal
         </ControllerButton>
     </div>
 
     <div class="sound-btns">
-        <button class="sound-btn" onclick="play_sound('timer')" type="button">
-            <p>Timer</p>
-        </button>
-        <button class="sound-btn" onclick="play_sound('intro')" type="button">
-            <p>Intro</p>
-        </button>
-        <button class="sound-btn" onclick="play_sound('laugh')" type="button">
-            <p>Laugh</p>
-        </button>
-        <button class="sound-btn" onclick="play_sound('hold')" type="button">
-            <p>Hold</p>
-        </button>
-        <button class="sound-btn" onclick="countdown()" type="button">
-            <p>Countdown</p>
-        </button>
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => Console.WriteLine("Timer"))>
+            Timer
+        </ControllerSoundButton>
+
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => Console.WriteLine("Intro"))>
+            Intro
+        </ControllerSoundButton>
+
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => Console.WriteLine("Laugh"))>
+            Laugh
+        </ControllerSoundButton>
+
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => Console.WriteLine("Hold"))>
+            Hold
+        </ControllerSoundButton>
+
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => Console.WriteLine("Countdown"))>
+            Countdown
+        </ControllerSoundButton>
     </div>
-    <div id="connection-status"></div>
+    <div id="connection-status">@(IsGameConnected && IsHubConnected ? "✔️" : "❌")</div>
 </main>

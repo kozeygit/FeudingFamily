@@ -1,0 +1,38 @@
+﻿@page "/Rounds"
+@page "/Rounds/{GameKey}"
+@layout Layout.EmptyLayout
+@using FeudingFamily.Logic
+@inject IGameManager gameManager
+@attribute [StreamRendering]
+
+<PageTitle>FeudingFamily - Rounds</PageTitle>
+
+@if (GameKey is null)
+{
+    <h1>no game key</h1>
+}
+else
+{
+    <h1>@PrevRounds.Count</h1>
+    foreach (var round in PrevRounds)
+    {
+        <h1>@round.Points</h1>
+        <h1>@round.IsQuestionRevealed</h1>
+        <h1>@round.RoundWinner</h1>
+        <h1>--------------------------</h1>
+    }
+}
+
+@code {
+    [Parameter]
+    public string? GameKey { get; set; }
+    public List<RoundDto> PrevRounds { get; set; } = [];
+    protected override void OnParametersSet()
+    {
+        var jgr = gameManager.GetGame(GameKey);
+        if (jgr.Success is true)
+        {
+            PrevRounds = jgr.Game.PreviousRounds;
+        }
+    }
+}

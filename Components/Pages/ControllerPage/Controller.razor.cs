@@ -96,6 +96,22 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
         GC.SuppressFinalize(this);
     }
 
+    public async Task EnableBuzzers()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("SendEnableBuzzers", GameKey);
+        }
+    }
+
+    public async Task DisableBuzzers()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("SendDisableBuzzers", GameKey);
+        }
+    }
+
     public async Task RevealQuestion()
     {
         if (hubConnection is not null)
@@ -109,6 +125,14 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
         if (hubConnection is not null)
         {
             await hubConnection.SendAsync("SendRevealAnswer", GameKey, answerRanking);
+        }
+    }
+
+    public async Task WrongAnswer(bool onlyShow=false)
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("SendWrongAnswer", GameKey, onlyShow);
         }
     }
     

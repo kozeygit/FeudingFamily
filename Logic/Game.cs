@@ -6,14 +6,13 @@ public class Game
 {
     private readonly IQuestionService _questionService;
     private bool isQuestionManual = false;
-    private bool isBuzzersEnabled = false;
-
+    
     public DateTime CreatedOn { get; init; }
     public List<Team> Teams { get; set; } = [];
     public Team? TeamPlaying { get; set; } = null;
     public Round CurrentRound { get; set; }
     public Question CurrentQuestion { get; set; }
-    public List<Round> PreviousRounds { get; set; } = [];
+    public List<RoundDto> PreviousRounds { get; set; } = [];
     
 
 
@@ -30,7 +29,7 @@ public class Game
 
     public bool Buzz(Team team)
     {
-        if (!isBuzzersEnabled)
+        if (!CurrentRound.IsBuzzersEnabled)
         {
             return false;
         }
@@ -40,7 +39,7 @@ public class Game
             return false;
         }
 
-        isBuzzersEnabled = false;
+        CurrentRound.IsBuzzersEnabled = false;
         TeamPlaying = team;
         return true;
     }
@@ -92,16 +91,14 @@ public class Game
 
     public async Task NewRound()
     {
-        //! REMOVE THIS
+        PreviousRounds.Add(CurrentRound.MapToDto());
+        Console.WriteLine($"Rounds = {PreviousRounds.Count}");
 
-        Teams.ForEach(team => team.Points+=10);
+        CurrentRound = new Round
+        {
+            IsBuzzersEnabled = true
+        };
 
-        //!^^^^^^^^^^^^^^^^^^^^^^^^^
-
-        isBuzzersEnabled = true;
-
-        CurrentRound = new Round();
-        
         if (!isQuestionManual)
             CurrentQuestion = await _questionService.GetRandomQuestionAsync();
 
@@ -119,7 +116,6 @@ public class Game
             TeamPlaying.AddPoints(CurrentRound.Points);
             TeamPlaying.AddRoundWin();
             CurrentRound.RoundWinner = TeamPlaying;
-            PreviousRounds.Add(CurrentRound);
         }
     }
 
@@ -131,7 +127,7 @@ public class Game
 
     public void GiveCorrectAnswer(int answerRanking)
     {
-        isBuzzersEnabled = false;
+        CurrentRound.IsBuzzersEnabled = false;
 
         var answer = CurrentQuestion.Answers[answerRanking-1];
         
@@ -151,6 +147,11 @@ public class Game
 
     public void GiveIncorrectAnswer()
     {
+        if (CurrentRound.WrongAnswers >= 4)
+        {
+            return;
+        }
+
         CurrentRound.WrongAnswers++;
         
         if (CurrentRound.WrongAnswers == 3)
@@ -171,6 +172,11 @@ public class Game
     }
     public void SwapTeamPlaying()
     {
+        if (Teams.Count < 2)
+        {
+            return;
+        }
+
         TeamPlaying = TeamPlaying == Teams[0] ? Teams[1] : Teams[0];
     }
 

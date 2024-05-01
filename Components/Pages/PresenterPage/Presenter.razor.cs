@@ -38,7 +38,7 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
             .Build();
 
         hubConnection.On<string>("receiveBuzz", ShowBuzzerModal);
-
+        
         hubConnection.On("receiveWrong", ShowWrongModal);
 
         hubConnection.On<QuestionDto>("receiveQuestion", async (question) =>
@@ -140,14 +140,10 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
         try
         {
             IsWrongModalShown = true;
-
             await InvokeAsync(StateHasChanged);
 
-            // non blocking wait for 2 seconds
             await Task.Delay(2000);
-
             IsWrongModalShown = false;
-
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)

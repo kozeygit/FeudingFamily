@@ -133,6 +133,11 @@ public class GameManager : IGameManager
     
     public void LeaveGame(string gameKey, string connectionId)
     {
+        if (gameKey is null || connectionId is null)
+        {
+            return;
+        }
+
         if (games.TryGetValue(gameKey, out Game? game) is false)
         {
             return;
