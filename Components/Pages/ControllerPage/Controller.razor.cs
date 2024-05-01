@@ -144,4 +144,15 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
         }
     }
 
+    public async Task PlaySound(string soundName)
+    {
+        Console.Write("Client: ");
+        Console.WriteLine(DateTime.UtcNow.ToLocalTime());
+
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("SendPlaySound", GameKey, soundName);
+        }
+    }
+
 }

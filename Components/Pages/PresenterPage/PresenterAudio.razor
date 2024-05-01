@@ -1,0 +1,40 @@
+﻿@namespace FeudingFamily.Components
+@inject IJSRuntime JS
+
+<script type="text/javascript">
+    const sounds = {
+        "buzz-in": new Audio("/Sounds/buzz-in.mp3"),
+        "correct-answer": new Audio("/Sounds/correct-answer.mp3"),
+        "hold-music": new Audio("/Sounds/hold-music.mp3"),
+        "intro-music": new Audio("/Sounds/intro-music.mp3"),
+        "laugh-track": new Audio("/Sounds/laugh-track.mp3"),
+        "long-countdown": new Audio("/Sounds/long-countdown.mp3"),
+        "round-end": new Audio("/Sounds/round-end.mp3"),
+        "round-start": new Audio("/Sounds/round-start.mp3"),
+        "short-countdown": new Audio("/Sounds/short-countdown.mp3"),
+        "top-answer": new Audio("/Sounds/top-answer.mp3"),
+        "wrong-answer": new Audio("/Sounds/wrong-answer.mp3"),
+    };
+
+    window.playSound = (sound) => {
+        var time = new Date().getSeconds();
+        console.log(time);
+        const s = sounds[sound];
+        if (s.paused) {
+            s.play();
+        } else {
+            s.pause();
+        }
+        s.currentTime = 0;
+    };
+</script>
+
+@code {
+    public async Task PlaySound(string soundName)
+    {
+        Console.Write("Presenter: ");
+        Console.WriteLine(DateTime.UtcNow.ToLocalTime());
+
+        await JS.InvokeVoidAsync("playSound", soundName);
+    }
+}

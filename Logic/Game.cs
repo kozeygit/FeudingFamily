@@ -147,29 +147,30 @@ public class Game
 
     public void GiveIncorrectAnswer()
     {
-        if (CurrentRound.WrongAnswers >= 4)
-        {
-            return;
-        }
-
-        CurrentRound.WrongAnswers++;
-        
-        if (CurrentRound.WrongAnswers == 3)
+        if (CurrentRound.WrongAnswers == 2)
         {
             SwapTeamPlaying();
+            CurrentRound.WrongAnswers++;
         }
-
-        if (CurrentRound.WrongAnswers == 4)
+        
+        else if (CurrentRound.WrongAnswers == 3)
         {
             SwapTeamPlaying();
             EndRound();
         }
+
+        else
+        {
+            CurrentRound.WrongAnswers++;
+        }
+        
     }
 
     public void SetTeamPlaying(string teamName)
     {
         TeamPlaying = GetTeam(teamName);
     }
+
     public void SwapTeamPlaying()
     {
         if (Teams.Count < 2)
@@ -179,7 +180,6 @@ public class Game
 
         TeamPlaying = TeamPlaying == Teams[0] ? Teams[1] : Teams[0];
     }
-
 }
 
 /*

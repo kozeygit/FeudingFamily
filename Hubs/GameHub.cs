@@ -133,8 +133,8 @@ public class GameHub : Hub
 
         var conns = _gameManager.GetConnections(gameKey).Select(c => c.ConnectionId);
 
-        await Clients.Clients(conns).SendAsync("receiveQuestion", game.CurrentQuestion.MapToDto());
         await Clients.Clients(conns).SendAsync("receiveRound", game.CurrentRound.MapToDto());
+        await Clients.Clients(conns).SendAsync("receiveQuestion", game.CurrentQuestion.MapToDto());
         await Clients.Clients(conns).SendAsync("receiveTeams", game.Teams.Select(t => t.MapToDto()));
 
         foreach (var team in game.Teams)
@@ -287,9 +287,23 @@ public class GameHub : Hub
         await Clients.Groups("Presenters", "Buzzers").SendAsync("receiveShowWinner", winningTeam);
     }
 
-    public async Task SendPlaySound(string soundName)
+    public async Task SendPlaySound(string gameKey, string soundName)
     {
-        await Clients.Group("Presenters").SendAsync("receivePlaySound", soundName);
+        var (game, connection) = _gameManager.ValidateGameConnection(gameKey, Context.ConnectionId);
+
+        if (game is null || connection is null)
+        {
+            return;
+        }
+
+        var pConns = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
+
+        Console.Write("Hub: ");
+        Console.WriteLine(DateTime.UtcNow.ToLocalTime());
+
+        Console.WriteLine($"--Hub-- SendPlaySound - gameKey: {gameKey}, soundName: {soundName}, sender: {Context.ConnectionId}");
+
+        await Clients.Clients(pConns).SendAsync("receivePlaySound", soundName);
     }
 
     public async Task SendCountdown()
@@ -302,20 +316,9 @@ public class GameHub : Hub
 Needed:
 
 Controller:
-TODO: new question -> controller
 TODO: send question (question) -> presenter, controller
-TODO: send answer (list of answers (answer + point)) -> presenter, controller
-TODO: send reveal question () -> presenter
-TODO: send reveal answer (index of ans) -> presenter
-TODO: send wrong answer (how many wrong/how many Xs to show) -> presenter
 TODO: send round over (winner of round)? -> presenter
     * maybe split into show winner and have the page reload for a new round instead
 TODO: send countdown () -> presenter
-TODO: send sound (sound name) -> presenter
-! send close buzzer model () -> presenter
-    * Probably will just have the buzzer modal close after a time span instead. Maybe add an indicator on the page to show the answering team.
-
-Buzzer:
-send buzzer call (team who buzzed) -> presenter
 */
 

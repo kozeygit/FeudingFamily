@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using FeudingFamily.Logic;
 using FeudingFamily.Models;
 using Microsoft.AspNetCore.SignalR.Client;
+using FeudingFamily.Components.Pages.PresenterPage;
 
 namespace FeudingFamily.Components;
 
@@ -40,6 +41,8 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
         hubConnection.On<string>("receiveBuzz", ShowBuzzerModal);
         
         hubConnection.On("receiveWrong", ShowWrongModal);
+
+        hubConnection.On<string>("receivePlaySound", PlaySound);
 
         hubConnection.On<QuestionDto>("receiveQuestion", async (question) =>
         {
@@ -135,22 +138,24 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
             Console.WriteLine($"An error has occurred: {ex}");
         }
     }
+
     public async Task ShowWrongModal()
     {
-        try
-        {
             IsWrongModalShown = true;
             await InvokeAsync(StateHasChanged);
 
-            await Task.Delay(2000);
+            await Task.Delay(2000).ConfigureAwait(false);
             IsWrongModalShown = false;
             await InvokeAsync(StateHasChanged);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"An error has occurred: {ex}");
-        }
     }
 
+    protected PresenterAudio? presenterAudio;
 
+    public async Task PlaySound(string soundName)
+    {
+        if (presenterAudio is not null)
+        {
+            await presenterAudio.PlaySound(soundName);
+        }
+    }
 }

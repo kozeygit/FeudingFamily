@@ -33,7 +33,7 @@
         </ControllerButton>
 
         <ControllerButton TailwindStyle="" OnClick=@(() => Console.WriteLine("DidShit"))>
-            Reveal Question
+            Something
         </ControllerButton>
     </div>
     <div class="buzzer-btns">
@@ -57,25 +57,47 @@
     </div>
 
     <div class="sound-btns">
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => Console.WriteLine("Timer"))>
-            Timer
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("buzz-in")) >
+            buzz-in
         </ControllerSoundButton>
 
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => Console.WriteLine("Intro"))>
-            Intro
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("correct-answer")) >
+            correct-answer
         </ControllerSoundButton>
 
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => Console.WriteLine("Laugh"))>
-            Laugh
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("hold-music")) >
+            hold-music
         </ControllerSoundButton>
 
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => Console.WriteLine("Hold"))>
-            Hold
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("intro-music")) >
+            intro-music
         </ControllerSoundButton>
 
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => Console.WriteLine("Countdown"))>
-            Countdown
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("laugh-track"))  >
+            laugh-track
         </ControllerSoundButton>
+
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("long-countdown")) >
+            long-countdown
+        </ControllerSoundButton>
+
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("round-end")) >
+            round-end
+        </ControllerSoundButton>
+
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("round-start")) >
+            round-start
+        </ControllerSoundButton>
+
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("short-countdown")) >
+            short-countdown
+        </ControllerSoundButton>
+
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("top-answer")) >
+            top-answer
+        </ControllerSoundButton>
+
     </div>
+
     <div id="connection-status">@(IsGameConnected && IsHubConnected ? "✔️" : "❌")</div>
 </main>

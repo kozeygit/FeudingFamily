@@ -9,6 +9,8 @@
 <PageTitle>FeudingFamily - Presenter</PageTitle>
 
 <main>
+    <PresenterAudio @ref=presenterAudio />
+
     <dialog class="wrong-modal" id="wrong-modal" open=@IsWrongModalShown></dialog>
     <dialog class="buzzer-modal" id="buzzer-modal" open=@IsBuzzerModalShown>
         @BuzzingTeam buzzed in!
@@ -36,20 +38,5 @@
             <img src="/images/wrong-answer-icon.png">
         }
     </div>
-
-    @* Move to css file *@
-    <style>
-        .wrong-answers {
-            display: flex;
-            gap: 1rem;
-            margin: 0 3rem 1rem 3rem;
-
-            img {
-                aspect-ratio: 1/1;
-                width: 5%;
-                height: inherit;
-            }
-        }
-    </style>
 
 </main>
