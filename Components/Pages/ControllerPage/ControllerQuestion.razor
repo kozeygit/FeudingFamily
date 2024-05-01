@@ -1,12 +1,12 @@
 ﻿@if (IsRevealed)
 {
-    <button class="question" @onclick=Reveal>
+    <button class="question" @onmousedown=MouseDown @onmouseup=MouseUp>
         <h1 class="question-content">@Content</h1>
     </button>
 }
 else
 {
-    <button class="question hidden" @onclick=Reveal>
+    <button class="question hidden" @onmousedown=MouseDown @onmouseup=MouseUp>
         <h1 class="question-content">@Content</h1>
     </button>
 }
@@ -46,9 +46,30 @@ else
     [Parameter]
     public EventCallback OnClick { get; set; }
 
-    public async Task Reveal()
+    [Parameter]
+    public EventCallback OnHold { get; set; }
+
+    private bool released;
+    private int holdDuration = 800;
+
+    public async Task MouseDown()
     {
-        await OnClick.InvokeAsync();
+        released = false;
+        await Task.Delay(holdDuration);
+
+        if (released == false) {
+            await OnHold.InvokeAsync();
+            released = true;
+        }
+    }
+
+    public async Task MouseUp()
+    {
+        if (released is false)
+        {
+            await OnClick.InvokeAsync();
+            released = true;
+        }
     }
 }
 

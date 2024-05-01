@@ -174,7 +174,7 @@ public class GameHub : Hub
         Console.WriteLine($"--Hub-- SendBuzz - teamName: {team.Name}, gameKey: {gameKey}, sender: {Context.ConnectionId}");
 
         await Clients.Clients(conns).SendAsync("receiveRound", game.CurrentRound.MapToDto());
-        await Clients.Clients(conns).SendAsync("receiveBuzz", team.Name);
+        await Clients.Clients(conns).SendAsync("receiveBuzz", team.MapToDto());
     }
 
     public async Task SendEnableBuzzers(string gameKey)

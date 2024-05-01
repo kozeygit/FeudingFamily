@@ -38,8 +38,12 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
             .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
             .Build();
 
-        hubConnection.On<string>("receiveBuzz", ShowBuzzerModal);
-        
+        hubConnection.On<TeamDto>("receiveBuzz", async (teamDto) =>
+        {
+            await PlaySound("buzz-in");
+            await ShowBuzzerModal(teamDto);
+        });
+
         hubConnection.On("receiveWrong", ShowWrongModal);
 
         hubConnection.On<string>("receivePlaySound", PlaySound);
@@ -70,7 +74,7 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
             {
                 Navigation.NavigateTo($"/?ErrorCode={(int)JoinErrorCode.GameNotFound}");
             }
-            
+
             IsGameConnected = isConnected;
 
             await hubConnection.SendAsync("SendGetRound", GameKey);
@@ -120,33 +124,31 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
         }
     }
 
-    public async Task ShowBuzzerModal(string teamName)
+    public async Task ShowBuzzerModal(TeamDto teamDto)
     {
-        try
-        {
-            BuzzingTeam = teamName;
+        var team = Teams.SingleOrDefault(s => s == teamDto);
 
-            IsBuzzerModalShown = true;
-            await InvokeAsync(StateHasChanged);
-
-            await Task.Delay(2000);
-            IsBuzzerModalShown = false;
-            await InvokeAsync(StateHasChanged);
-        }
-        catch (Exception ex)
+        if (team is not null)
         {
-            Console.WriteLine($"An error has occurred: {ex}");
+            BuzzingTeam = team.Name;
         }
+
+        IsBuzzerModalShown = true;
+        await InvokeAsync(StateHasChanged);
+
+        await Task.Delay(2000);
+        IsBuzzerModalShown = false;
+        await InvokeAsync(StateHasChanged);
     }
 
     public async Task ShowWrongModal()
     {
-            IsWrongModalShown = true;
-            await InvokeAsync(StateHasChanged);
+        IsWrongModalShown = true;
+        await InvokeAsync(StateHasChanged);
 
-            await Task.Delay(2000).ConfigureAwait(false);
-            IsWrongModalShown = false;
-            await InvokeAsync(StateHasChanged);
+        await Task.Delay(2000).ConfigureAwait(false);
+        IsWrongModalShown = false;
+        await InvokeAsync(StateHasChanged);
     }
 
     protected PresenterAudio? presenterAudio;

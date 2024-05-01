@@ -9,7 +9,11 @@
 
 <main>
 
-    <ControllerQuestion Content="@Question.Content" IsRevealed="@Round.IsQuestionRevealed" OnClick="@RevealQuestion" />
+    <ControllerQuestion Content="@Question.Content"
+        IsRevealed="@Round.IsQuestionRevealed"
+        OnClick="@RevealQuestion"
+        OnHold="@ShowQuestionPicker"
+    />
 
     <div class="answers" id="answers">
         @for (int i = 0; i < Question.Answers.Count; i++)
@@ -97,6 +101,14 @@
             top-answer
         </ControllerSoundButton>
 
+    </div>
+
+    <div class="team-display grid grid-cols-2">
+        @foreach (var team in Teams)
+        {
+            var buzzing = IsTeamPlaying[team] ? "text-red-500" : "text-black-500";
+            <div class="team @buzzing">@team</div>
+        }
     </div>
 
     <div id="connection-status">@(IsGameConnected && IsHubConnected ? "✔️" : "❌")</div>
