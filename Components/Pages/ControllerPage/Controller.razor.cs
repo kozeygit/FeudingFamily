@@ -16,6 +16,7 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
     public RoundDto Round { get; set; } = new RoundDto();
     public QuestionDto Question { get; set; } = new QuestionDto();
     public List<TeamDto> Teams { get; set; } = [new TeamDto(), new TeamDto()];
+    public Dictionary<TeamDto, bool> IsTeamPlaying = [];
 
     protected bool IsBuzzerModalShown { get; set; }
     protected string BuzzingTeam { get; set; } = string.Empty;
@@ -27,6 +28,11 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
     {
         Question = QuestionService.GetDefaultQuestion().MapToDto();
 
+        foreach (var team in Teams)
+        {
+            IsTeamPlaying.TryAdd(team, false);
+        }
+
         if (GameKey is null)
         {
             Navigation.NavigateTo($"/?ErrorCode={(int)JoinErrorCode.KeyEmpty}");
@@ -35,6 +41,8 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
         hubConnection = new HubConnectionBuilder()
             .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
             .Build();
+
+        hubConnection.On<TeamDto>("receiveBuzz", BuzzIn);
 
         hubConnection.On<QuestionDto>("receiveQuestion", async (question) =>
         {
@@ -51,6 +59,11 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
         hubConnection.On<List<TeamDto>>("receiveTeams", async (teams) =>
         {
             Teams = teams;
+            foreach (var team in Teams)
+            {
+                IsTeamPlaying.Add(team, false);
+            }
+
             await InvokeAsync(StateHasChanged);
         });
 
@@ -96,6 +109,26 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
         GC.SuppressFinalize(this);
     }
 
+    public async Task BuzzIn(TeamDto teamDto)
+    {
+        var team = Teams.SingleOrDefault(t => t == teamDto);
+
+        if (team is not null)
+        {
+            foreach (var tk in IsTeamPlaying.Keys)
+            {
+                IsTeamPlaying[tk] = false;
+            }
+
+            IsTeamPlaying[team] = true;
+            await InvokeAsync(StateHasChanged);
+        }
+        else
+        {
+            Console.WriteLine("null :(");
+        }
+    }
+
     public async Task EnableBuzzers()
     {
         if (hubConnection is not null)
@@ -111,6 +144,17 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
             await hubConnection.SendAsync("SendDisableBuzzers", GameKey);
         }
     }
+
+    public async Task ShowQuestionPicker()
+    {
+        await NewRound();
+
+        // if (hubConnection is not null)
+        // {
+        //     await hubConnection.SendAsync("SendPlaySound", GameKey, "buzz-in");
+        // }
+    }
+
 
     public async Task RevealQuestion()
     {
@@ -128,14 +172,14 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
         }
     }
 
-    public async Task WrongAnswer(bool onlyShow=false)
+    public async Task WrongAnswer(bool onlyShow = false)
     {
         if (hubConnection is not null)
         {
             await hubConnection.SendAsync("SendWrongAnswer", GameKey, onlyShow);
         }
     }
-    
+
     public async Task NewRound()
     {
         if (hubConnection is not null)

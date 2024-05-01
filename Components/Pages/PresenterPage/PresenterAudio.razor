@@ -13,12 +13,10 @@
         "round-start": new Audio("/Sounds/round-start.mp3"),
         "short-countdown": new Audio("/Sounds/short-countdown.mp3"),
         "top-answer": new Audio("/Sounds/top-answer.mp3"),
-        "wrong-answer": new Audio("/Sounds/wrong-answer.mp3"),
+        "wrong-answer": new Audio("/Sounds/wrong-answer.mp3")
     };
 
     window.playSound = (sound) => {
-        var time = new Date().getSeconds();
-        console.log(time);
         const s = sounds[sound];
         if (s.paused) {
             s.play();
