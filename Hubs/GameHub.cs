@@ -50,6 +50,20 @@ public class GameHub : Hub
 
         await Groups.AddToGroupAsync(Context.ConnectionId, gameKey);
         await Clients.Caller.SendAsync("receiveGameConnected", true);
+
+        if (teamName is not null)
+        {
+            var teams = joinGame.Game!.Teams;
+            var teamsDto = teams.Select(t => t.MapToDto());
+
+            var presenterConnections = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
+            var controllerConnections = _gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
+            var conns = presenterConnections.Concat(controllerConnections);
+
+            Console.WriteLine($"--Hub-- SendWrongAnswer - gameKey: {gameKey}, sender: {Context.ConnectionId}");
+
+            await Clients.Clients(conns).SendAsync("receiveTeams", teamsDto);
+        }
     }
 
     public async Task SendLeaveGame(string gameKey)
@@ -76,9 +90,8 @@ public class GameHub : Hub
         await Clients.Caller.SendAsync("receiveQuestion", question);
     }
 
-    public async Task SendGetTeam(string gameKey)
+    public async Task SendTeamPlaying(string gameKey)
     {
-
         var (game, connection) = _gameManager.ValidateGameConnection(gameKey, Context.ConnectionId);
 
         if (game is null || connection is null)
@@ -86,11 +99,14 @@ public class GameHub : Hub
             return;
         }
 
-        var team = game.GetTeam(connection);
+        var team = game.TeamPlaying?.MapToDto();
 
-        await Clients.Caller.SendAsync("receiveTeam", team);
+        var presenterConnections = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
+        var controllerConnections = _gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
+        var conns = presenterConnections.Concat(controllerConnections);
+
+        await Clients.Clients(conns).SendAsync("receiveTeamPlaying", team);
     }
-
     public async Task SendGetTeams(string gameKey)
     {
         var (game, connection) = _gameManager.ValidateGameConnection(gameKey, Context.ConnectionId);
@@ -103,6 +119,7 @@ public class GameHub : Hub
         var teams = game.Teams.Select(t => t.MapToDto()).ToList();
 
         await Clients.Caller.SendAsync("receiveTeams", teams);
+        await SendTeamPlaying(gameKey);
     }
 
     public async Task SendGetRound(string gameKey)
@@ -136,6 +153,7 @@ public class GameHub : Hub
         await Clients.Clients(conns).SendAsync("receiveRound", game.CurrentRound.MapToDto());
         await Clients.Clients(conns).SendAsync("receiveQuestion", game.CurrentQuestion.MapToDto());
         await Clients.Clients(conns).SendAsync("receiveTeams", game.Teams.Select(t => t.MapToDto()));
+        await SendTeamPlaying(gameKey);
 
         foreach (var team in game.Teams)
         {
@@ -175,6 +193,8 @@ public class GameHub : Hub
 
         await Clients.Clients(conns).SendAsync("receiveRound", game.CurrentRound.MapToDto());
         await Clients.Clients(conns).SendAsync("receiveBuzz", team.MapToDto());
+        await Clients.Clients(presenterConnections).SendAsync("receivePlaySound", "buzz-in");
+        await SendTeamPlaying(gameKey);
     }
 
     public async Task SendEnableBuzzers(string gameKey)
@@ -222,9 +242,9 @@ public class GameHub : Hub
 
         round.IsQuestionRevealed = true;
 
-        var pConns = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
-        var cConns = _gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
-        var conns = pConns.Concat(cConns);
+        var presenterConnections = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
+        var controllerConnections = _gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
+        var conns = presenterConnections.Concat(controllerConnections);
 
         Console.WriteLine($"--Hub-- SendRevealQuestion - gameKey: {gameKey}, sender: {Context.ConnectionId}");
 
@@ -244,13 +264,15 @@ public class GameHub : Hub
 
         var round = game.CurrentRound;
 
-        var pConns = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
-        var cConns = _gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
-        var conns = pConns.Concat(cConns);
+        var presenterConnections = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
+        var controllerConnections = _gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
+        var conns = presenterConnections.Concat(controllerConnections);
 
         Console.WriteLine($"--Hub-- SendRevealAnswer - gameKey: {gameKey}, answer: {answerRanking}, sender: {Context.ConnectionId}");
 
         await Clients.Clients(conns).SendAsync("receiveRound", round.MapToDto());
+        await Clients.Clients(presenterConnections).SendAsync("receivePlaySound", "correct-answer");
+        await SendTeamPlaying(gameKey);
     }
 
     public async Task SendWrongAnswer(string gameKey, bool onlyShow)
@@ -269,22 +291,16 @@ public class GameHub : Hub
 
         var round = game.CurrentRound;
 
-        var pConns = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
-        var cConns = _gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
-        var conns = pConns.Concat(cConns);
+        var presenterConnections = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
+        var controllerConnections = _gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
+        var conns = presenterConnections.Concat(controllerConnections);
 
         Console.WriteLine($"--Hub-- SendWrongAnswer - gameKey: {gameKey}, sender: {Context.ConnectionId}");
 
+        await Clients.Clients(presenterConnections).SendAsync("receivePlaySound", "wrong-answer");
         await Clients.Clients(conns).SendAsync("receiveRound", round.MapToDto());
-        await Clients.Clients(pConns).SendAsync("receiveWrong");
-
-    }
-
-    //!-----------------------not implemented yet-----------------------!\\
-
-    public async Task SendShowWinner(Team winningTeam)
-    {
-        await Clients.Groups("Presenters", "Buzzers").SendAsync("receiveShowWinner", winningTeam);
+        await Clients.Clients(presenterConnections).SendAsync("receiveWrong");
+        await SendTeamPlaying(gameKey);
     }
 
     public async Task SendPlaySound(string gameKey, string soundName)
@@ -296,14 +312,21 @@ public class GameHub : Hub
             return;
         }
 
-        var pConns = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
+        var presenterConnections = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
 
         Console.Write("Hub: ");
         Console.WriteLine(DateTime.UtcNow.ToLocalTime());
 
         Console.WriteLine($"--Hub-- SendPlaySound - gameKey: {gameKey}, soundName: {soundName}, sender: {Context.ConnectionId}");
 
-        await Clients.Clients(pConns).SendAsync("receivePlaySound", soundName);
+        await Clients.Clients(presenterConnections).SendAsync("receivePlaySound", soundName);
+    }
+
+    //!-----------------------not implemented yet-----------------------!\\
+
+    public async Task SendShowWinner(Team winningTeam)
+    {
+        await Clients.Groups("Presenters", "Buzzers").SendAsync("receiveShowWinner", winningTeam);
     }
 
     public async Task SendCountdown()

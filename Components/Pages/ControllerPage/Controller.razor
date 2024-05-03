@@ -81,8 +81,8 @@
             laugh-track
         </ControllerSoundButton>
 
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("long-countdown")) >
-            long-countdown
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("timer-long")) >
+            timer-long
         </ControllerSoundButton>
 
         <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("round-end")) >
@@ -93,8 +93,8 @@
             round-start
         </ControllerSoundButton>
 
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("short-countdown")) >
-            short-countdown
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("timer-short")) >
+            timer-short
         </ControllerSoundButton>
 
         <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("top-answer")) >
@@ -103,11 +103,15 @@
 
     </div>
 
-    <div class="team-display grid grid-cols-2">
+    <div class="pt-2 grid grid-cols-2">
         @foreach (var team in Teams)
         {
             var buzzing = IsTeamPlaying[team] ? "text-red-500" : "text-black-500";
-            <div class="team @buzzing">@team</div>
+            <div class="team @buzzing flex justify-evenly">
+                <span>@team.Name</span>
+                <span>Points: @team.Points</span>
+                <span>Rounds Won: @team.RoundsWon</span>
+            </div>
         }
     </div>
 

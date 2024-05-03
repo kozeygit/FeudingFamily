@@ -1,12 +1,13 @@
 ﻿@if (IsRevealed)
 {
-    <button class="question" @onmousedown=MouseDown @onmouseup=MouseUp>
+    <button class="question" @onmousedown=MouseDown @onmouseup=MouseUp @onkeydown=MouseDown @onkeyup=MouseUp>
         <h1 class="question-content">@Content</h1>
     </button>
 }
 else
 {
-    <button class="question hidden" @onmousedown=MouseDown @onmouseup=MouseUp>
+    <button class="question hidden" @onmousedown=MouseDown @onmouseup=MouseUp @onkeydown=MouseDown @onkeyup=MouseUp>
+
         <h1 class="question-content">@Content</h1>
     </button>
 }
@@ -27,7 +28,6 @@ else
         place-items: center;
 
         h1 {
-            font-family: "Oswald", sans-serif;
             font-weight: 600;
             text-transform: uppercase;
             text-align: center;

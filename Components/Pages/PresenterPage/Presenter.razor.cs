@@ -18,6 +18,7 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
     public RoundDto Round { get; set; } = new RoundDto();
     public QuestionDto Question { get; set; } = new QuestionDto();
     public List<TeamDto> Teams { get; set; } = [new TeamDto(), new TeamDto()];
+    public Dictionary<TeamDto, bool> IsTeamPlaying = [];
 
     protected bool IsBuzzerModalShown { get; set; }
     protected string BuzzingTeam { get; set; } = string.Empty;
@@ -29,6 +30,11 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
     {
         Question = QuestionService.GetDefaultQuestion().MapToDto();
 
+        foreach (var team in Teams)
+        {
+            IsTeamPlaying.TryAdd(team, false);
+        }
+
         if (GameKey is null)
         {
             Navigation.NavigateTo($"/?ErrorCode={(int)JoinErrorCode.KeyEmpty}");
@@ -38,11 +44,7 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
             .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
             .Build();
 
-        hubConnection.On<TeamDto>("receiveBuzz", async (teamDto) =>
-        {
-            await PlaySound("buzz-in");
-            await ShowBuzzerModal(teamDto);
-        });
+        hubConnection.On<TeamDto>("receiveBuzz", ShowBuzzerModal);
 
         hubConnection.On("receiveWrong", ShowWrongModal);
 
@@ -63,7 +65,28 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
         hubConnection.On<List<TeamDto>>("receiveTeams", async (teams) =>
         {
             Teams = teams;
+            foreach (var team in Teams)
+            {
+                IsTeamPlaying.TryAdd(team, false);
+            }
+
             await InvokeAsync(StateHasChanged);
+        });
+        
+        hubConnection.On<TeamDto?>("receiveTeamPlaying", async (teamPlaying) =>
+        {
+            foreach (var team in IsTeamPlaying.Keys)
+            {
+                IsTeamPlaying[team] = false;
+            }
+
+            if (teamPlaying is not null)
+            {
+                IsTeamPlaying[teamPlaying] = true;
+            }
+
+            await InvokeAsync(StateHasChanged);
+
         });
 
         hubConnection.On<bool>("receiveGameConnected", async (isConnected) =>

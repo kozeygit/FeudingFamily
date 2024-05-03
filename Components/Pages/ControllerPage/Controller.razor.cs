@@ -18,9 +18,6 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
     public List<TeamDto> Teams { get; set; } = [new TeamDto(), new TeamDto()];
     public Dictionary<TeamDto, bool> IsTeamPlaying = [];
 
-    protected bool IsBuzzerModalShown { get; set; }
-    protected string BuzzingTeam { get; set; } = string.Empty;
-    protected bool IsWrongModalShown { get; set; }
 
     public bool IsGameConnected { get; set; }
     protected HubConnection? hubConnection;
@@ -42,7 +39,7 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
             .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
             .Build();
 
-        hubConnection.On<TeamDto>("receiveBuzz", BuzzIn);
+        // hubConnection.On<TeamDto>("receiveBuzz", BuzzIn);
 
         hubConnection.On<QuestionDto>("receiveQuestion", async (question) =>
         {
@@ -61,10 +58,26 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
             Teams = teams;
             foreach (var team in Teams)
             {
-                IsTeamPlaying.Add(team, false);
+                IsTeamPlaying.TryAdd(team, false);
             }
 
             await InvokeAsync(StateHasChanged);
+        });
+
+        hubConnection.On<TeamDto?>("receiveTeamPlaying", async (teamPlaying) =>
+        {
+            foreach (var team in IsTeamPlaying.Keys)
+            {
+                IsTeamPlaying[team] = false;
+            }
+
+            if (teamPlaying is not null)
+            {
+                IsTeamPlaying[teamPlaying] = true;
+            }
+
+            await InvokeAsync(StateHasChanged);
+
         });
 
         hubConnection.On<bool>("receiveGameConnected", async (isConnected) =>
@@ -109,25 +122,25 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
         GC.SuppressFinalize(this);
     }
 
-    public async Task BuzzIn(TeamDto teamDto)
-    {
-        var team = Teams.SingleOrDefault(t => t == teamDto);
+    // public async Task BuzzIn(TeamDto teamDto)
+    // {
+    //     var team = Teams.SingleOrDefault(t => t == teamDto);
 
-        if (team is not null)
-        {
-            foreach (var tk in IsTeamPlaying.Keys)
-            {
-                IsTeamPlaying[tk] = false;
-            }
+    //     if (team is not null)
+    //     {
+    //         foreach (var tk in IsTeamPlaying.Keys)
+    //         {
+    //             IsTeamPlaying[tk] = false;
+    //         }
 
-            IsTeamPlaying[team] = true;
-            await InvokeAsync(StateHasChanged);
-        }
-        else
-        {
-            Console.WriteLine("null :(");
-        }
-    }
+    //         IsTeamPlaying[team] = true;
+    //         await InvokeAsync(StateHasChanged);
+    //     }
+    //     else
+    //     {
+    //         Console.WriteLine("null :(");
+    //     }
+    // }
 
     public async Task EnableBuzzers()
     {

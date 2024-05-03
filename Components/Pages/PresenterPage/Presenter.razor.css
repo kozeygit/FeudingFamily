@@ -80,12 +80,11 @@ main {
 .buzzer-modal::before {
   content: "";
   position: absolute;
-  z-index: -2;
+  z-index: -1;
   left: -100%;
   top: -100%;
   width: 300%;
   height: 300%;
-  animation: buzzer-lights 3s;
   background: conic-gradient(
     white 0deg 15deg,
     lightyellow 15deg 30deg,
