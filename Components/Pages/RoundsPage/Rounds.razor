@@ -29,10 +29,15 @@ else
     public List<RoundDto> PrevRounds { get; set; } = [];
     protected override void OnParametersSet()
     {
+        if (GameKey is null)
+        {
+            return;
+        }
+
         var jgr = gameManager.GetGame(GameKey);
         if (jgr.Success is true)
         {
-            PrevRounds = jgr.Game.PreviousRounds;
+            PrevRounds = jgr.Game!.PreviousRounds;
         }
     }
 }
