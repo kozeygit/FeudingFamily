@@ -42,6 +42,11 @@ public class DatabaseBuilder
         {
             var questions = ReadAndParseJsonFile(jsonFilePath);
 
+            if (questions is null)
+            {
+                return;
+            }
+
             foreach (var question in questions)
             {
                 if (CheckIfQuestionInDatabase(question))
@@ -110,7 +115,7 @@ public class DatabaseBuilder
         return rowsReturned != 0;
 
     }
-    public List<QuestionDto> ReadAndParseJsonFile(string jsonFilePath)
+    public List<QuestionDto>? ReadAndParseJsonFile(string jsonFilePath)
     {
         using var json = new StreamReader(jsonFilePath).BaseStream;
 
@@ -134,34 +139,34 @@ public class DatabaseBuilder
                 new QuestionDto
                 {
                     Content = q.Question,
-                    Answers = new List<AnswerDto>
-                    {
+                    Answers =
+                    [
                         new() {
-                            Content = q.Answer1.Text,
-                            Points = q.Answer1.Points,
+                            Content = q.Answer1?.Text ?? string.Empty,
+                            Points = q.Answer1?.Points ?? 0,
                             Ranking = 1
                         },
                         new() {
-                            Content = q.Answer2.Text,
-                            Points = q.Answer2.Points,
+                            Content = q.Answer2?.Text ?? string.Empty,
+                            Points = q.Answer2?.Points ?? 0,
                             Ranking = 2
                         },
                         new() {
-                            Content = q.Answer3.Text,
-                            Points = q.Answer3.Points,
+                            Content = q.Answer3?.Text ?? string.Empty,
+                            Points = q.Answer3?.Points ?? 0,
                             Ranking = 3
                         },
                         new() {
-                            Content = q.Answer4.Text,
-                            Points = q.Answer4.Points,
+                            Content = q.Answer4?.Text ?? string.Empty,
+                            Points = q.Answer4?.Points ?? 0,
                             Ranking = 4
                         },
                         new() {
-                            Content = q.Answer5.Text,
-                            Points = q.Answer5.Points,
+                            Content = q.Answer5?.Text ?? string.Empty,
+                            Points = q.Answer5?.Points ?? 0,
                             Ranking = 5
                         },
-                    }
+                    ]
                 }
             ).ToList();
 
@@ -170,7 +175,7 @@ public class DatabaseBuilder
         catch (Exception ex)
         {
             Console.WriteLine("ERROR: " + ex);
-            return null;
+            return default;
         }
 
     }

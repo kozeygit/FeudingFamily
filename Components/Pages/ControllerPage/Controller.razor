@@ -64,10 +64,11 @@
         @foreach (var team in Teams)
         {
             var buzzing = IsTeamPlaying[team] ? "text-red-500" : "text-black-500";
+            if (Round.RoundWinner == team.Name) { buzzing = "text-green-600"; }
+            
             <div class="team @buzzing flex justify-evenly">
-                <span>Team @team.Name:</span>
-                <span>Points: @team.Points</span>
-                <span>Rounds Won: @team.RoundsWon</span>
+                <span>@team.Name:</span>
+                <span>@team.Points • @team.RoundsWon</span>
             </div>
         }
     </div>

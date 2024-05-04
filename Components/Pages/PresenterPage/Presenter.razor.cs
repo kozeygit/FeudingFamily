@@ -181,9 +181,16 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
 
     public async Task PlaySound(string soundName)
     {
+        bool overdub = false;
+
+        if (soundName is "correct-answer" or "wrong-answer")
+        {
+            overdub = true;
+        }
+        
         if (presenterAudio is not null)
         {
-            await presenterAudio.PlaySound(soundName);
+            await presenterAudio.PlaySound(soundName, overdub);
         }
     }
 }

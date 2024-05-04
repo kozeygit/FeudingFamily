@@ -6,6 +6,7 @@ public class Game
 {
     private readonly IQuestionService _questionService;
     private bool isQuestionManual = false;
+    private bool isRoundPlaying = false;
     
     public DateTime CreatedOn { get; init; }
     public List<Team> Teams { get; set; } = [];
@@ -14,7 +15,6 @@ public class Game
     public Question CurrentQuestion { get; set; }
     public List<RoundDto> PreviousRounds { get; set; } = [];
     
-
 
     public Game(IQuestionService questionService)
     {
@@ -81,16 +81,17 @@ public class Game
     // Then call NewRound
     // Otherwise, just call NewRound directly
     
-    public async Task<Question> NewQuestion(int id)
+    public async Task<Question> SetQuestion(int id)
     {
         CurrentQuestion = await _questionService.GetQuestionAsync(id);
         isQuestionManual = true;
         return CurrentQuestion;
     }
 
-
     public async Task NewRound()
     {
+        isRoundPlaying = true;
+
         PreviousRounds.Add(CurrentRound.MapToDto());
         Console.WriteLine($"Rounds = {PreviousRounds.Count}");
 
@@ -108,24 +109,24 @@ public class Game
         
     }
 
-
     public void EndRound()
     {
+        if (isRoundPlaying is false)
+        {
+            return;
+        }
+
         if (TeamPlaying != null)
         {
             TeamPlaying.AddPoints(CurrentRound.Points);
             TeamPlaying.AddRoundWin();
             CurrentRound.RoundWinner = TeamPlaying;
         }
+        
+        isRoundPlaying = false;
     }
 
-    public void GiveCorrectAnswer(int answerRanking, string teamName)
-    {
-        GiveCorrectAnswer(answerRanking);
-        SetTeamPlaying(teamName);
-    }
-
-    public void GiveCorrectAnswer(int answerRanking)
+    public bool GiveCorrectAnswer(int answerRanking)
     {
         CurrentRound.IsBuzzersEnabled = false;
 
@@ -133,15 +134,35 @@ public class Game
         
         if (CurrentRound.IsAnswerRevealed[answer.Ranking-1])
         {
-            return;
+            return false;
         }
 
-        CurrentRound.Points += answer.Points;
+        AddRoundPoints(answer);
         CurrentRound.IsAnswerRevealed[answer.Ranking-1] = true;
 
         if (CurrentRound.IsAnswerRevealed.All(x => x == true))
         {
             EndRound();
+        }
+
+        if (CurrentRound.WrongAnswers == 3)
+        {
+            EndRound();
+        }
+
+        if (isRoundPlaying is false)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    public void AddRoundPoints(Answer answer)
+    {
+        if (isRoundPlaying)
+        {
+            CurrentRound.Points += answer.Points;
         }
     }
 
@@ -166,11 +187,6 @@ public class Game
         
     }
 
-    public void SetTeamPlaying(string teamName)
-    {
-        TeamPlaying = GetTeam(teamName);
-    }
-
     public void SwapTeamPlaying()
     {
         if (Teams.Count < 2)
@@ -185,18 +201,18 @@ public class Game
 /*
 
 when redirected to buzzer/presenter/controller page. 
-Send join game signalr method to join the game with the game key.
+Send join game SignalR method to join the game with the game key.
 show loading game screen until the game is loaded.
 
 if the game is not loaded, then show a loading screen until the game is loaded.
-if join game signalr method returns false, then show an error message.
+if join game SignalR method returns false, then show an error message.
 and a button to go back to the home page.
 
 then i can encapsulate the whole page in an if block, if the game is not loaded, it wont need to render the things that require a game connection
 so there is no null reference exception.
 
-Add signalr method to join game on initialised for each page, if the game key is valid, then join the game and render the usual page.
-If not render an error message or a blankish page until the signalr recieves the game key.
+Add SignalR method to join game on initialized for each page, if the game key is valid, then join the game and render the usual page.
+If not render an error message or a blank-ish page until the SignalR receives the game key.
 
 if game is null, then show a loading screen 
 

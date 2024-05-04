@@ -26,9 +26,13 @@ else
     <main>
         <dialog open=@IsModalShown>YOUR TEAM BUZZED IN!!</dialog>
         <div class="team-name">
-            <h1>Team:<br />@TeamName</h1>
+            <h1>Team: @TeamName</h1>
         </div>
         <button class="buzzer" @onmousedown="SendBuzz"></button>
-        <h2 class="points">Points: @Team.Points</h2>
+
+        <div class="stats">
+            <h2 class="points">Points: @Team.Points</h2>
+            <h2 class="wins">Wins: @Team.RoundsWon</h2>
+        </div>
     </main>
 }

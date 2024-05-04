@@ -47,14 +47,15 @@ public class BuzzerPageBase : ComponentBase, IAsyncDisposable
             await InvokeAsync(StateHasChanged);
         });
 
-        hubConnection.On<string>("receiveBuzz", async (teamName) =>
+        hubConnection.On<TeamDto>("receiveBuzz", async (team) =>
         {
+            Team = team;
+
             IsModalShown = true;
             await InvokeAsync(StateHasChanged);
             await Task.Delay(2000);
             IsModalShown = false;
             await InvokeAsync(StateHasChanged);
-            
         });
 
         hubConnection.On<bool>("receiveGameConnected", async (isConnected) =>

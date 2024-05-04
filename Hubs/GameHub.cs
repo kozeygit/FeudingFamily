@@ -212,9 +212,12 @@ public class GameHub : Hub
         Console.WriteLine($"--Hub-- SendBuzz - teamName: {team.Name}, gameKey: {gameKey}, sender: {Context.ConnectionId}");
 
         await Clients.Clients(conns).SendAsync("receiveRound", game.CurrentRound.MapToDto());
-        await Clients.Clients(conns).SendAsync("receiveBuzz", team.MapToDto());
-        await Clients.Clients(presenterConnections).SendAsync("receivePlaySound", "buzz-in");
+        await Clients.Clients(conns).SendAsync("receiveTeams", game.Teams.Select(t => t.MapToDto()));
         await SendTeamPlaying(gameKey);
+
+        await Clients.Clients(presenterConnections).SendAsync("receivePlaySound", "buzz-in");
+        
+        await Clients.Clients(conns).SendAsync("receiveBuzz", team.MapToDto());
     }
 
     public async Task SendEnableBuzzers(string gameKey)
@@ -267,6 +270,8 @@ public class GameHub : Hub
         var conns = presenterConnections.Concat(controllerConnections);
 
         Console.WriteLine($"--Hub-- SendRevealQuestion - gameKey: {gameKey}, sender: {Context.ConnectionId}");
+            
+        await Clients.Clients(presenterConnections).SendAsync("receivePlaySound", "reveal-question");
 
         await Clients.Clients(conns).SendAsync("receiveRound", round.MapToDto());
     }
@@ -280,7 +285,7 @@ public class GameHub : Hub
             return;
         }
 
-        game.GiveCorrectAnswer(answerRanking);
+        var playSound = game.GiveCorrectAnswer(answerRanking);
 
         var round = game.CurrentRound;
 
@@ -290,8 +295,21 @@ public class GameHub : Hub
 
         Console.WriteLine($"--Hub-- SendRevealAnswer - gameKey: {gameKey}, answer: {answerRanking}, sender: {Context.ConnectionId}");
 
+        if (playSound)
+        {
+            if (answerRanking == 1)
+            {
+                await Clients.Clients(presenterConnections).SendAsync("receivePlaySound", "top-answer");
+            }
+            else
+            {
+                await Clients.Clients(presenterConnections).SendAsync("receivePlaySound", "correct-answer");
+            }
+        }
+
         await Clients.Clients(conns).SendAsync("receiveRound", round.MapToDto());
-        await Clients.Clients(presenterConnections).SendAsync("receivePlaySound", "correct-answer");
+
+        await Clients.Clients(conns).SendAsync("receiveTeams", game.Teams.Select(t => t.MapToDto()));
         await SendTeamPlaying(gameKey);
     }
 
@@ -318,8 +336,11 @@ public class GameHub : Hub
         Console.WriteLine($"--Hub-- SendWrongAnswer - gameKey: {gameKey}, sender: {Context.ConnectionId}");
 
         await Clients.Clients(presenterConnections).SendAsync("receivePlaySound", "wrong-answer");
+
         await Clients.Clients(conns).SendAsync("receiveRound", round.MapToDto());
         await Clients.Clients(presenterConnections).SendAsync("receiveWrong");
+
+        await Clients.Clients(conns).SendAsync("receiveTeams", game.Teams.Select(t => t.MapToDto()));
         await SendTeamPlaying(gameKey);
     }
 

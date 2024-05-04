@@ -2,7 +2,7 @@
 @inject IJSRuntime JS
 
 <script type="text/javascript">
-    const sounds = {
+    var sounds = {
         "buzz-in": new Audio("/Sounds/buzz-in.mp3"),
         "correct-answer": new Audio("/Sounds/correct-answer.mp3"),
         "hold-music": new Audio("/Sounds/hold-music.mp3"),
@@ -13,14 +13,18 @@
         "round-start": new Audio("/Sounds/round-start.mp3"),
         "timer-short": new Audio("/Sounds/timer-short.mp3"),
         "top-answer": new Audio("/Sounds/top-answer.mp3"),
-        "wrong-answer": new Audio("/Sounds/wrong-answer.mp3")
+        "wrong-answer": new Audio("/Sounds/wrong-answer.mp3"),
+        "reveal-question": new Audio("/Sounds/reveal-question.mp3")
     };
 
-    window.playSound = (sound) => {
-        const s = sounds[sound];
-        if (s.paused) {
+    window.playSound = (sound, overdub) => {
+        let s = sounds[sound];
+        if (s.paused)
+        {
             s.play();
-        } else {
+        } 
+        else if (overdub == false)
+        {
             s.pause();
         }
         s.currentTime = 0;
@@ -28,11 +32,11 @@
 </script>
 
 @code {
-    public async Task PlaySound(string soundName)
+    public async Task PlaySound(string soundName, bool overdub=false)
     {
-        Console.Write("Presenter: ");
+        Console.Write($"--Presenter--  Sound: {soundName}, Time:");
         Console.WriteLine(DateTime.UtcNow.ToLocalTime());
 
-        await JS.InvokeVoidAsync("playSound", soundName);
+        await JS.InvokeVoidAsync("playSound", soundName, overdub);
     }
 }

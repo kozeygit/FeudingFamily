@@ -19,7 +19,12 @@ public class QuestionService : IQuestionService
     {
         const string sql = "SELECT * FROM Questions WHERE Id = @questionId;";
 
-        var result = await _connection.QuerySingleAsync<Question>(sql, new { questionId });
+        var result = await _connection.QuerySingleOrDefaultAsync<Question>(sql, new { questionId });
+
+        if (result is null)
+        {
+            return GetDefaultQuestion();
+        }
 
         result.Answers = await GetAnswersForQuestionAsync(questionId);
 
