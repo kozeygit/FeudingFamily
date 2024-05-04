@@ -36,8 +36,8 @@
             New Round
         </ControllerButton>
 
-        <ControllerButton TailwindStyle="" OnClick=@(() => Console.WriteLine("DidShit"))>
-            Something
+        <ControllerButton TailwindStyle="" OnClick=SwapTeamPlaying>
+            Swap Team
         </ControllerButton>
     </div>
     <div class="buzzer-btns">
@@ -58,6 +58,18 @@
         <ControllerButton TailwindStyle="" OnClick=@(() => WrongAnswer(true))>
             Show Wrong Modal
         </ControllerButton>
+    </div>
+
+    <div class="team-display">
+        @foreach (var team in Teams)
+        {
+            var buzzing = IsTeamPlaying[team] ? "text-red-500" : "text-black-500";
+            <div class="team @buzzing flex justify-evenly">
+                <span>Team @team.Name:</span>
+                <span>Points: @team.Points</span>
+                <span>Rounds Won: @team.RoundsWon</span>
+            </div>
+        }
     </div>
 
     <div class="sound-btns">
@@ -101,18 +113,6 @@
             top-answer
         </ControllerSoundButton>
 
-    </div>
-
-    <div class="pt-2 grid grid-cols-2">
-        @foreach (var team in Teams)
-        {
-            var buzzing = IsTeamPlaying[team] ? "text-red-500" : "text-black-500";
-            <div class="team @buzzing flex justify-evenly">
-                <span>@team.Name</span>
-                <span>Points: @team.Points</span>
-                <span>Rounds Won: @team.RoundsWon</span>
-            </div>
-        }
     </div>
 
     <div id="connection-status">@(IsGameConnected && IsHubConnected ? "✔️" : "❌")</div>

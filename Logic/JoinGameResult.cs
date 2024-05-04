@@ -30,8 +30,8 @@ public enum JoinErrorCode
     [Description("Team name must be provided.")]
     TeamNameEmpty,
 
-    [Description("Team name is already in use.")]
-    TeamNameTaken,
+    [Description("Team name is invalid for some reason lol.")]
+    TeamNameInvalid,
 
     [Description("The requested game already has two teams playing.")]
     GameHasTwoTeams

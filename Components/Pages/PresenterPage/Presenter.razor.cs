@@ -95,7 +95,7 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
 
             if (isConnected is false)
             {
-                Navigation.NavigateTo($"/?ErrorCode={(int)JoinErrorCode.GameNotFound}");
+                Navigation.NavigateTo($"/");
             }
 
             IsGameConnected = isConnected;
@@ -147,9 +147,12 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
         }
     }
 
-    public async Task ShowBuzzerModal(TeamDto teamDto)
+    public async Task ShowBuzzerModal(TeamDto team)
     {
-        var team = Teams.SingleOrDefault(s => s == teamDto);
+        if (Teams.Contains(team) is false)
+        {
+            return;
+        }
 
         if (team is not null)
         {
@@ -159,7 +162,7 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
         IsBuzzerModalShown = true;
         await InvokeAsync(StateHasChanged);
 
-        await Task.Delay(2000);
+        await Task.Delay(2000).ConfigureAwait(false);
         IsBuzzerModalShown = false;
         await InvokeAsync(StateHasChanged);
     }

@@ -104,9 +104,28 @@ app.MapGet("/form", (IGameManager GameManager, string gameKey, string teamName, 
         }
     }
 
+    if (joinResult.Game is null)
+    {
+        return default;
+    }
+
     switch(page)
     {
         case "Join":
+
+            if (teamName.Contains(' ') || teamName.Length > 10)
+            {
+                return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.TeamNameInvalid}");
+            }
+
+            if (joinResult.Game.Teams.Select(s => s.Name).Contains(teamName) is false)
+            {
+                if (joinResult.Game.Teams.Count >= 2)
+                {
+                    return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.GameHasTwoTeams}");
+                }
+            }
+
             Console.WriteLine("Join");
             return Results.Redirect($"/Buzzer/{gameKey}?TeamName={teamName}");
             

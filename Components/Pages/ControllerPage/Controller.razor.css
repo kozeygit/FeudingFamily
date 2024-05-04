@@ -14,6 +14,29 @@ main {
   font-family: "Oswald", sans-serif;
 }
 
+.team-display {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding-top: 1rem;
+  margin-top: 1rem;
+  border-top: 2px black solid;
+}
+
+.team {
+
+  &:first-child {
+    margin-left: 1rem;
+    border-left: 2px black solid;
+    border-right: 1px black solid;
+  }
+  
+  &:last-child {
+    margin-right: 1rem;
+    border-right: 2px black solid;
+    border-left: 1px black solid;
+  }
+
+}
 .answers {
   margin-top: 1rem;
   display: flex;

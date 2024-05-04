@@ -90,6 +90,26 @@ public class GameHub : Hub
         await Clients.Caller.SendAsync("receiveQuestion", question);
     }
 
+    public async Task SendSwapTeamPlaying(string gameKey)
+    {
+        var (game, connection) = _gameManager.ValidateGameConnection(gameKey, Context.ConnectionId);
+
+        if (game is null || connection is null)
+        {
+            return;
+        }
+
+        game.SwapTeamPlaying();
+
+        var team = game.TeamPlaying?.MapToDto();
+
+        var presenterConnections = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
+        var controllerConnections = _gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
+        var conns = presenterConnections.Concat(controllerConnections);
+
+        await Clients.Clients(conns).SendAsync("receiveTeamPlaying", team);
+    }
+
     public async Task SendTeamPlaying(string gameKey)
     {
         var (game, connection) = _gameManager.ValidateGameConnection(gameKey, Context.ConnectionId);

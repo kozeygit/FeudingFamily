@@ -86,7 +86,7 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
 
             if (isConnected is false)
             {
-                Navigation.NavigateTo($"/?ErrorCode={(int)JoinErrorCode.GameNotFound}");
+                Navigation.NavigateTo($"/");
             }
 
             IsGameConnected = isConnected;
@@ -168,6 +168,13 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
         // }
     }
 
+    public async Task SwapTeamPlaying()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("SendSwapTeamPlaying", GameKey);
+        }
+    }
 
     public async Task RevealQuestion()
     {

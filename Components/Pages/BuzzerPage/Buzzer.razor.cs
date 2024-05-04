@@ -61,7 +61,7 @@ public class BuzzerPageBase : ComponentBase, IAsyncDisposable
         {
             if (isConnected is false)
             {
-                Navigation.NavigateTo($"/?ErrorCode={(int)JoinErrorCode.GameNotFound}");
+                Navigation.NavigateTo($"/");
             }
 
             await hubConnection.SendAsync("SendGetTeam", GameKey);
