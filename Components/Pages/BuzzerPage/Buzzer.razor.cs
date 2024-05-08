@@ -1,7 +1,6 @@
-using Microsoft.AspNetCore.Components;
 using FeudingFamily.Logic;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
-using System.Runtime.CompilerServices;
 
 
 namespace FeudingFamily.Components;
@@ -17,9 +16,9 @@ public class BuzzerPageBase : ComponentBase, IAsyncDisposable
     [SupplyParameterFromQuery]
     public string TeamName { get; set; } = string.Empty;
 
-    
+
     public TeamDto? Team { get; set; } = new TeamDto();
-    
+
     public bool IsGameConnected { get; set; }
     public bool IsModalShown { get; set; }
     protected HubConnection? hubConnection;

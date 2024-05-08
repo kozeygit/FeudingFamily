@@ -1,8 +1,6 @@
 using Dapper;
 using FeudingFamily.Models;
-using SQLitePCL;
 using System.Data;
-using System.Runtime.InteropServices;
 
 namespace FeudingFamily.Logic;
 
@@ -30,7 +28,7 @@ public class QuestionService : IQuestionService
 
         return result;
     }
-    
+
     public async Task<List<Question>> GetQuestionsAsync()
     {
         const string sql = "SELECT * FROM Questions;";

@@ -20,13 +20,13 @@ public enum JoinErrorCode
 
     [Description("Key must contain only alphanumeric characters.")]
     KeyNotAlphanumeric,
-    
+
     [Description("Key is already in use.")]
     KeyInUse,
 
     [Description("Game does not exist.")]
     GameNotFound,
-    
+
     [Description("Team name must be provided.")]
     TeamNameEmpty,
 
@@ -35,6 +35,6 @@ public enum JoinErrorCode
 
     [Description("The requested game already has two teams playing.")]
     GameHasTwoTeams
-    
+
 
 }

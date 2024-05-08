@@ -60,7 +60,7 @@ public class GameManager : IGameManager
         {
             return new JoinGameResult { ErrorCode = GameKeyValidator(gameKey).ErrorCode };
         }
-        
+
         if (!games.TryGetValue(gameKey, out Game? game))
         {
             return new JoinGameResult { ErrorCode = JoinErrorCode.GameNotFound };
@@ -123,14 +123,14 @@ public class GameManager : IGameManager
         }
 
         game.AddTeam(TeamName);
-        
+
         team = game.GetTeam(TeamName)!;
         team.AddMember(connection);
         gameRooms[gameKey].AddConnection(connection);
 
         return new JoinGameResult { Game = game };
     }
-    
+
     public void LeaveGame(string gameKey, string connectionId)
     {
         if (gameKey is null || connectionId is null)
@@ -142,14 +142,14 @@ public class GameManager : IGameManager
         {
             return;
         }
-        
+
         if (gameRooms.TryGetValue(gameKey, out GameRoom? gameRoom) is false)
         {
             return;
         }
 
         var connection = gameRoom.Connections.SingleOrDefault(c => c.ConnectionId == connectionId);
-        
+
         if (connection is null)
         {
             return;
@@ -175,7 +175,7 @@ public class GameManager : IGameManager
             gr => gr.Value.Connections.Any(
                 c => c.ConnectionId == connectionId)
             ).Key;
-        
+
         return gameKey;
     }
 
@@ -221,19 +221,19 @@ public class GameManager : IGameManager
     }
     public List<GameConnection> GetPresenterConnections(string gameKey)
     {
-        var connections = GetConnections(gameKey); 
+        var connections = GetConnections(gameKey);
         var presenterConnections = connections.Where(c => c.ConnectionType == ConnectionType.Presenter).ToList();
         return presenterConnections;
     }
     public List<GameConnection> GetControllerConnections(string gameKey)
     {
-        var connections = GetConnections(gameKey); 
+        var connections = GetConnections(gameKey);
         var controllerConnections = connections.Where(c => c.ConnectionType == ConnectionType.Controller).ToList();
         return controllerConnections;
     }
     public List<GameConnection> GetBuzzerConnections(string gameKey)
     {
-        var connections = GetConnections(gameKey); 
+        var connections = GetConnections(gameKey);
         var buzzerConnections = connections.Where(c => c.ConnectionType == ConnectionType.Buzzer).ToList();
         return buzzerConnections;
     }

@@ -74,12 +74,20 @@
     </div>
 
     <div class="sound-btns">
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("buzz-in")) >
-            buzz-in
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("round-start")) >
+            round-start
         </ControllerSoundButton>
 
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("correct-answer")) >
-            correct-answer
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("round-end")) >
+            round-end
+        </ControllerSoundButton>
+
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("timer-long")) >
+            timer-long
+        </ControllerSoundButton>
+
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("timer-short")) >
+            timer-short
         </ControllerSoundButton>
 
         <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("hold-music")) >
@@ -90,28 +98,20 @@
             intro-music
         </ControllerSoundButton>
 
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("laugh-track"))  >
-            laugh-track
-        </ControllerSoundButton>
-
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("timer-long")) >
-            timer-long
-        </ControllerSoundButton>
-
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("round-end")) >
-            round-end
-        </ControllerSoundButton>
-
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("round-start")) >
-            round-start
-        </ControllerSoundButton>
-
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("timer-short")) >
-            timer-short
-        </ControllerSoundButton>
-
         <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("top-answer")) >
             top-answer
+        </ControllerSoundButton>
+
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("correct-answer")) >
+            correct-answer
+        </ControllerSoundButton>
+
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("buzz-in")) >
+            buzz-in
+        </ControllerSoundButton>
+
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("laugh-track"))  >
+            laugh-track
         </ControllerSoundButton>
 
     </div>

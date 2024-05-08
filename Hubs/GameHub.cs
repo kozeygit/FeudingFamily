@@ -216,7 +216,7 @@ public class GameHub : Hub
         await SendTeamPlaying(gameKey);
 
         await Clients.Clients(presenterConnections).SendAsync("receivePlaySound", "buzz-in");
-        
+
         await Clients.Clients(conns).SendAsync("receiveBuzz", team.MapToDto());
     }
 
@@ -235,7 +235,7 @@ public class GameHub : Hub
 
         await Clients.Clients(conns).SendAsync("receiveRound", game.CurrentRound.MapToDto());
     }
-    
+
     public async Task SendDisableBuzzers(string gameKey)
     {
         var (game, connection) = _gameManager.ValidateGameConnection(gameKey, Context.ConnectionId);
@@ -263,15 +263,24 @@ public class GameHub : Hub
 
         var round = game.CurrentRound;
 
-        round.IsQuestionRevealed = true;
+        bool playSound = false;
+
+        if (round.IsQuestionRevealed == false)
+        {
+            round.IsQuestionRevealed = true;
+            playSound = true;
+        }
 
         var presenterConnections = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
         var controllerConnections = _gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
         var conns = presenterConnections.Concat(controllerConnections);
 
         Console.WriteLine($"--Hub-- SendRevealQuestion - gameKey: {gameKey}, sender: {Context.ConnectionId}");
-            
-        await Clients.Clients(presenterConnections).SendAsync("receivePlaySound", "reveal-question");
+
+        if (playSound)
+        {
+            await Clients.Clients(presenterConnections).SendAsync("receivePlaySound", "reveal-question");
+        }
 
         await Clients.Clients(conns).SendAsync("receiveRound", round.MapToDto());
     }
