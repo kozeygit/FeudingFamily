@@ -1,6 +1,6 @@
 using FeudingFamily.Components;
-using FeudingFamily.Logic;
 using FeudingFamily.Hubs;
+using FeudingFamily.Logic;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Data.Sqlite;
 using System.Data;
@@ -41,7 +41,7 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
-    
+
     app.UseResponseCompression();
 }
 
@@ -86,7 +86,7 @@ app.MapGet("/form", (IGameManager GameManager, string gameKey, string teamName, 
     }
 
     JoinGameResult joinResult = GameManager.GameKeyValidator(gameKey);
-    
+
     if (!joinResult.Success)
     {
         return Results.Redirect($"/?ErrorCode={(int)joinResult.ErrorCode!}");
@@ -109,7 +109,7 @@ app.MapGet("/form", (IGameManager GameManager, string gameKey, string teamName, 
         return default;
     }
 
-    switch(page)
+    switch (page)
     {
         case "Join":
 
@@ -128,7 +128,7 @@ app.MapGet("/form", (IGameManager GameManager, string gameKey, string teamName, 
 
             Console.WriteLine("Join");
             return Results.Redirect($"/Buzzer/{gameKey}?TeamName={teamName}");
-            
+
         case "Presenter":
             Console.WriteLine("Presenter");
             return Results.Redirect($"/Presenter/{gameKey}");
@@ -136,7 +136,7 @@ app.MapGet("/form", (IGameManager GameManager, string gameKey, string teamName, 
         case "Controller":
             Console.WriteLine("Controller");
             return Results.Redirect($"/Controller/{gameKey}");
-            
+
         default:
             return Results.Redirect("/");
     }

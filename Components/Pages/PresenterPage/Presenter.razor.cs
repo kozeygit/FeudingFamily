@@ -1,8 +1,7 @@
-using Microsoft.AspNetCore.Components;
 using FeudingFamily.Logic;
 using FeudingFamily.Models;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
-using FeudingFamily.Components.Pages.PresenterPage;
 
 namespace FeudingFamily.Components;
 
@@ -72,7 +71,7 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
 
             await InvokeAsync(StateHasChanged);
         });
-        
+
         hubConnection.On<TeamDto?>("receiveTeamPlaying", async (teamPlaying) =>
         {
             foreach (var team in IsTeamPlaying.Keys)
@@ -187,7 +186,7 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
         {
             overdub = true;
         }
-        
+
         if (presenterAudio is not null)
         {
             await presenterAudio.PlaySound(soundName, overdub);

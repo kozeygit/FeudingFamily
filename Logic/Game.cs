@@ -7,19 +7,19 @@ public class Game
     private readonly IQuestionService _questionService;
     private bool isQuestionManual = false;
     private bool isRoundPlaying = false;
-    
+
     public DateTime CreatedOn { get; init; }
     public List<Team> Teams { get; set; } = [];
     public Team? TeamPlaying { get; set; } = null;
     public Round CurrentRound { get; set; }
     public Question CurrentQuestion { get; set; }
     public List<RoundDto> PreviousRounds { get; set; } = [];
-    
+
 
     public Game(IQuestionService questionService)
     {
         _questionService = questionService;
-        
+
         CurrentQuestion = QuestionService.GetDefaultQuestion();
 
         CurrentRound = new Round();
@@ -69,7 +69,7 @@ public class Game
     {
         return Teams.FirstOrDefault(team => team.Name == teamName);
     }
-    
+
     public Team? GetTeam(GameConnection connection)
     {
         return Teams.FirstOrDefault(team => team.Members.Contains(connection));
@@ -80,7 +80,7 @@ public class Game
     // Then call NewQuestion with the id first
     // Then call NewRound
     // Otherwise, just call NewRound directly
-    
+
     public async Task<Question> SetQuestion(int id)
     {
         CurrentQuestion = await _questionService.GetQuestionAsync(id);
@@ -106,7 +106,7 @@ public class Game
         isQuestionManual = false;
 
         TeamPlaying = null;
-        
+
     }
 
     public void EndRound()
@@ -122,23 +122,30 @@ public class Game
             TeamPlaying.AddRoundWin();
             CurrentRound.RoundWinner = TeamPlaying;
         }
-        
+
         isRoundPlaying = false;
     }
 
     public bool GiveCorrectAnswer(int answerRanking)
     {
+        var playSound = true;
+
+        if (isRoundPlaying is false)
+        {
+            playSound = false;
+        }
+
         CurrentRound.IsBuzzersEnabled = false;
 
-        var answer = CurrentQuestion.Answers[answerRanking-1];
-        
-        if (CurrentRound.IsAnswerRevealed[answer.Ranking-1])
+        var answer = CurrentQuestion.Answers[answerRanking - 1];
+
+        if (CurrentRound.IsAnswerRevealed[answer.Ranking - 1])
         {
             return false;
         }
 
         AddRoundPoints(answer);
-        CurrentRound.IsAnswerRevealed[answer.Ranking-1] = true;
+        CurrentRound.IsAnswerRevealed[answer.Ranking - 1] = true;
 
         if (CurrentRound.IsAnswerRevealed.All(x => x == true))
         {
@@ -150,12 +157,7 @@ public class Game
             EndRound();
         }
 
-        if (isRoundPlaying is false)
-        {
-            return false;
-        }
-
-        return true;
+        return playSound;
     }
 
     public void AddRoundPoints(Answer answer)
@@ -168,33 +170,42 @@ public class Game
 
     public void GiveIncorrectAnswer()
     {
-        if (CurrentRound.WrongAnswers == 2)
+        if (CurrentRound.WrongAnswers < 2)
+        {
+            CurrentRound.WrongAnswers++;
+        }
+
+        else if (CurrentRound.WrongAnswers == 2)
         {
             SwapTeamPlaying();
             CurrentRound.WrongAnswers++;
         }
-        
+
         else if (CurrentRound.WrongAnswers == 3)
         {
+            CurrentRound.WrongAnswers++;
             SwapTeamPlaying();
             EndRound();
         }
 
-        else
-        {
-            CurrentRound.WrongAnswers++;
-        }
-        
     }
 
     public void SwapTeamPlaying()
     {
-        if (Teams.Count < 2)
+        if (Teams.Count == 0)
         {
             return;
         }
 
-        TeamPlaying = TeamPlaying == Teams[0] ? Teams[1] : Teams[0];
+        else if (Teams.Count == 1)
+        {
+            TeamPlaying = Teams[0];
+        }
+
+        else
+        {
+            TeamPlaying = TeamPlaying == Teams[0] ? Teams[1] : Teams[0];
+        }
     }
 }
 

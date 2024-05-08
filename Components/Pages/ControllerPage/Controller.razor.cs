@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.Components;
 using FeudingFamily.Logic;
 using FeudingFamily.Models;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 
 namespace FeudingFamily.Components;

@@ -33,6 +33,6 @@
     public List<Models.Question> QuestionsList { get; set; } = [];
     protected async override Task OnInitializedAsync()
     {
-        QuestionsList = await questionSevice.GetShuffledQuestionsAsync();
+        QuestionsList = await questionSevice.GetQuestionsAsync();
     }
 }

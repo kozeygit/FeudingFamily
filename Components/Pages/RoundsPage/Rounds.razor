@@ -7,21 +7,32 @@
 
 <PageTitle>FeudingFamily - Rounds</PageTitle>
 
-@if (GameKey is null)
-{
-    <h1>no game key</h1>
-}
-else
-{
-    <h1>@PrevRounds.Count</h1>
-    foreach (var round in PrevRounds)
+<main class="p-4 grid grid-cols-5">
+
+    @if (GameKey is null)
     {
-        <h1>@round.Points</h1>
-        <h1>@round.IsQuestionRevealed</h1>
-        <h1>@round.RoundWinner</h1>
-        <h1>--------------------------</h1>
+        <h1>no game key</h1>
     }
-}
+    else if (PrevRounds.Count == 0)
+    {
+        <h1>No Rounds Found</h1>
+    }
+    else
+    {
+        var count = 1;
+        @foreach (var round in PrevRounds)
+        {
+            <div class="w-min">
+                <h1>Round: @count</h1>
+                <h1>Points: @round.Points</h1>
+                <h1>Winner: @round.RoundWinner</h1>
+                <h1>--------------------------</h1>
+            </div>
+            count++;
+        }
+    }
+
+</main>
 
 @code {
     [Parameter]

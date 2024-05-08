@@ -1,12 +1,12 @@
 ﻿@if (IsRevealed)
 {
-    <button class="question" @onmousedown=MouseDown @onmouseup=MouseUp @onkeydown=MouseDown @onkeyup=MouseUp>
+    <button class="question" @onmousedown=MouseDown @onmouseup=MouseUp @ontouchstart=MouseDown @ontouchend=MouseUp>
         <h1 class="question-content">@Content</h1>
     </button>
 }
 else
 {
-    <button class="question hidden" @onmousedown=MouseDown @onmouseup=MouseUp @onkeydown=MouseDown @onkeyup=MouseUp>
+    <button class="question hidden" @onmousedown=MouseDown @onmouseup=MouseUp @ontouchstart=MouseDown @ontouchend=MouseUp>
 
         <h1 class="question-content">@Content</h1>
     </button>
