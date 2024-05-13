@@ -1,0 +1,57 @@
+﻿@if (Team is not null)
+{
+    <div class="team-container @(IsTeamPlaying ? "playing" : "")">
+        <h3>@Team.Name:</h3>
+        <div class="team-stats">
+            <h4>Points: @Team.Points</h4>
+            <h4>Rounds: @Team.RoundsWon</h4>
+        </div>
+    </div>
+}
+
+<style>
+    .playing {
+        background-image: linear-gradient(to left,
+            rgb(252, 195, 157),
+            rgb(252, 189, 157)
+        );
+        color: white;
+        text-shadow: 2px 2px 5px black;
+    }
+
+    .team-container {
+        display: flex;
+        border: white solid 3px;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 5px 5px 10px rgb(0, 0, 0, 0.3);
+        padding-inline: 1rem;
+        
+
+        h3 {
+            font-size: x-large;
+            text-align: center;
+            text-justify: newspaper;
+            margin-block: auto;
+            padding-right: 1rem;
+        }
+    }
+
+    .team-stats {
+        font-size: larger;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+        line-height: 0.5rem;
+    }
+
+</style>
+
+@code {
+    [Parameter]
+    public TeamDto? Team { get; set; }
+
+    [Parameter]
+    public bool IsTeamPlaying { get; set; } = false;
+
+}

@@ -47,10 +47,10 @@ main {
 .answer-btns,
 .buzzer-btns,
 .btn-pair {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .sound-btns {
@@ -59,7 +59,7 @@ main {
   border-top: black 2px solid;  
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .sound-btn {
@@ -78,6 +78,7 @@ main {
   display: flex;
   justify-content: space-evenly;
   margin-top: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 #wrong-answer {
@@ -110,11 +111,7 @@ main {
 
 #connection-status {
   text-align: center;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding-block: 1rem;
+  translate: 0 1rem;
   background-color: white;
 }
 

@@ -164,6 +164,7 @@ public class GameManager : IGameManager
 
         if (gameRoom.Connections.Count == 0 && game.CreatedOn.AddMinutes(1) < DateTime.Now)
         {
+            Console.WriteLine($"Removing game: {gameKey}");
             games.Remove(gameKey);
             gameRooms.Remove(gameKey);
         }
@@ -200,8 +201,8 @@ public class GameManager : IGameManager
 
     public bool HasConnection(string gameKey, GameConnection connection)
     {
-        var conns = GetConnections(gameKey);
-        return conns.Contains(connection);
+        var connections = GetConnections(gameKey);
+        return connections.Contains(connection);
     }
 
     public List<GameConnection> GetConnections(string gameKey)
@@ -215,7 +216,7 @@ public class GameManager : IGameManager
         var connection = connections.SingleOrDefault(c => c.ConnectionId == connectionId);
         if (connection is null)
         {
-            return new GameConnection { ConnectionId = connectionId };
+            throw new Exception("Error, no connection found");
         }
         return connection;
     }
@@ -231,11 +232,17 @@ public class GameManager : IGameManager
         var controllerConnections = connections.Where(c => c.ConnectionType == ConnectionType.Controller).ToList();
         return controllerConnections;
     }
-    public List<GameConnection> GetBuzzerConnections(string gameKey)
+    public List<GameConnection> GetBuzzerConnections(string gameKey, Team? team=null)
     {
-        var connections = GetConnections(gameKey);
-        var buzzerConnections = connections.Where(c => c.ConnectionType == ConnectionType.Buzzer).ToList();
-        return buzzerConnections;
+        if (team is null)
+        {
+            var connections = GetConnections(gameKey);
+            var buzzerConnections = connections.Where(c => c.ConnectionType == ConnectionType.Buzzer).ToList();
+            return buzzerConnections;
+        }
+
+        return team.Members.ToList();
+
     }
 
 
@@ -268,6 +275,6 @@ public interface IGameManager
     List<GameConnection> GetConnections(string gameKey);
     List<GameConnection> GetPresenterConnections(string gameKey);
     List<GameConnection> GetControllerConnections(string gameKey);
-    List<GameConnection> GetBuzzerConnections(string gameKey);
+    List<GameConnection> GetBuzzerConnections(string gameKey, Team? team=null);
     (Game? game, GameConnection? connection) ValidateGameConnection(string gameKey, string connectionId);
 }

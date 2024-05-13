@@ -18,8 +18,8 @@ public class GameRoom
     /// <param name="connection">The game connection to add.</param>
     public void AddConnection(GameConnection connection)
     {
-        Console.WriteLine($"Connections: {Connections.Count}");
         Connections.Add(connection);
+        Console.WriteLine($"Adding Connection, Count: {Connections.Count}");
     }
 
     /// <summary>
@@ -28,8 +28,8 @@ public class GameRoom
     /// <param name="connection">The game connection to remove.</param>
     public void RemoveConnection(GameConnection connection)
     {
-        Console.WriteLine($"Connections: {Connections.Count}");
         Connections.Remove(connection);
+        Console.WriteLine($"Removing Connection, Count: {Connections.Count}");
     }
 
     /// <summary>
