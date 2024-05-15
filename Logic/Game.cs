@@ -46,6 +46,8 @@ public class Game
 
     public bool AddTeam(string teamName)
     {
+        teamName = teamName.ToLower();
+
         if (HasTeam(teamName))
         {
             return false;
@@ -62,12 +64,12 @@ public class Game
 
     public bool HasTeam(string teamName)
     {
-        return Teams.Any(team => team.Name == teamName);
+        return Teams.Any(team => team.Name == teamName.ToLower());
     }
 
     public Team? GetTeam(string teamName)
     {
-        return Teams.FirstOrDefault(team => team.Name == teamName);
+        return Teams.FirstOrDefault(team => team.Name == teamName.ToLower());
     }
 
     public Team? GetTeam(GameConnection connection)

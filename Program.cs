@@ -70,11 +70,6 @@ app.MapGet("/questions2", async (IQuestionService questionService) =>
 
 });
 
-app.MapGet("/buzz", () =>
-{
-    return Results.Ok();
-});
-
 // just for my local esp buzzers
 app.MapPost("/buzz", async (IGameManager gameManager, IHubContext<GameHub> hubContext, HttpRequest request) =>
 {
@@ -133,6 +128,8 @@ app.MapPost("/buzz", async (IGameManager gameManager, IHubContext<GameHub> hubCo
 
 app.MapGet("/form", (IGameManager gameManager, string gameKey, string teamName, string page) =>
 {
+    teamName = teamName.ToLower();
+
     if (string.IsNullOrWhiteSpace(gameKey))
     {
         return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.KeyEmpty}");
