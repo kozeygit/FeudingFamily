@@ -1,12 +1,10 @@
 using FeudingFamily.Components;
 using FeudingFamily.Hubs;
 using FeudingFamily.Logic;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Sqlite;
 using System.Data;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
