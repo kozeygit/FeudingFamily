@@ -18,6 +18,8 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
     public List<TeamDto> Teams { get; set; } = [new TeamDto(), new TeamDto()];
     public Dictionary<TeamDto, bool> IsTeamPlaying = [];
 
+    public bool IsQuestionPickerOpen { get; set; } = false;
+    public int NextQuestionId { get; set; }
 
     public bool IsGameConnected { get; set; }
     protected HubConnection? hubConnection;
@@ -122,26 +124,6 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
         GC.SuppressFinalize(this);
     }
 
-    // public async Task BuzzIn(TeamDto teamDto)
-    // {
-    //     var team = Teams.SingleOrDefault(t => t == teamDto);
-
-    //     if (team is not null)
-    //     {
-    //         foreach (var tk in IsTeamPlaying.Keys)
-    //         {
-    //             IsTeamPlaying[tk] = false;
-    //         }
-
-    //         IsTeamPlaying[team] = true;
-    //         await InvokeAsync(StateHasChanged);
-    //     }
-    //     else
-    //     {
-    //         Console.WriteLine("null :(");
-    //     }
-    // }
-
     public async Task EnableBuzzers()
     {
         if (hubConnection is not null)
@@ -158,14 +140,20 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
         }
     }
 
-    public async Task ShowQuestionPicker()
+    public void ShowQuestionPicker()
     {
-        await NewRound();
+        IsQuestionPickerOpen = true;
+    }
 
-        // if (hubConnection is not null)
-        // {
-        //     await hubConnection.SendAsync("SendPlaySound", GameKey, "buzz-in");
-        // }
+    public async Task SetQuestion(int id)
+    {
+        Console.WriteLine($"Set question to this: {id}");
+        
+        NextQuestionId = id;
+        if (hubConnection is not null)
+        {
+            await hubConnection.InvokeAsync<bool>("SendSetQuestion", GameKey, id);
+        }
     }
 
     public async Task SwapTeamPlaying()

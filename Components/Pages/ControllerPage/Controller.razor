@@ -8,6 +8,7 @@
 <PageTitle>Feuding Family - Controller</PageTitle>
 
 <main>
+    <ControllerQuestionPicker @bind-IsOpen=@IsQuestionPickerOpen SetQuestion=SetQuestion />
 
     <ControllerQuestion Content="@Question.Content"
         IsRevealed="@Round.IsQuestionRevealed"

@@ -82,6 +82,10 @@ public class Game
     // Then call NewQuestion with the id first
     // Then call NewRound
     // Otherwise, just call NewRound directly
+    
+    // CANT DO THIS BECAUSE IT WOULD CHANGE THE QUESTION IMMEDIATELY,
+    // I NEED A BUFFER THING TO HOLD THE NEXT QUESTION INSTEAD.
+    // so.. in conclusion.. do this ^^
 
     public async Task<Question> SetQuestion(int id)
     {

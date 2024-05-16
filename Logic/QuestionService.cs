@@ -29,6 +29,15 @@ public class QuestionService : IQuestionService
         return result;
     }
 
+    public async Task<List<Question>> GetQuestionsOnlyAsync()
+    {
+        const string sql = "SELECT * FROM Questions;";
+
+        var questions = await _connection.QueryAsync<Question>(sql);
+
+        return questions.ToList();
+    }
+
     public async Task<List<Question>> GetQuestionsAsync()
     {
         const string sql = "SELECT * FROM Questions;";
@@ -119,6 +128,12 @@ public interface IQuestionService
     /// </summary>
     /// <returns>A list of all questions.</returns>
     Task<List<Question>> GetQuestionsAsync();
+
+    /// <summary>
+    /// Retrieves all questions without answers.
+    /// </summary>
+    /// <returns>A list of all questions omitting answers.</returns>
+    Task<List<Question>> GetQuestionsOnlyAsync();
 
     /// <summary>
     /// Retrieves a question by its ID.

@@ -182,8 +182,8 @@ public class GameHub : Hub
 
         foreach (var team in game.Teams)
         {
-            var teamconnections = _gameManager.GetBuzzerConnections(gameKey, team).Select(c => c.ConnectionId);
-            await Clients.Clients(teamconnections).SendAsync("receiveTeam", team.MapToDto());
+            var teamConnections = _gameManager.GetBuzzerConnections(gameKey, team).Select(c => c.ConnectionId);
+            await Clients.Clients(teamConnections).SendAsync("receiveTeam", team.MapToDto());
         }
     }
 
@@ -377,6 +377,24 @@ public class GameHub : Hub
 
         await Clients.Clients(presenterConnections).SendAsync("receivePlaySound", soundName);
     }
+
+    public async Task<bool> SendSetQuestion (string gameKey, int questionId)
+    {
+        var (game, connection) = _gameManager.ValidateGameConnection(gameKey, Context.ConnectionId);
+
+        if (game is null || connection is null)
+        {
+            return false;
+        }
+
+        var connections = _gameManager.GetConnections(gameKey).Select(c => c.ConnectionId);
+
+        await game.SetQuestion(questionId);
+        await SendNewRound(gameKey);
+
+        return true;
+    }
+
 
     //!-----------------------not implemented yet-----------------------!\\
 
