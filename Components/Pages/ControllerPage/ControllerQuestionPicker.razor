@@ -23,7 +23,7 @@
     }
     </div>
     <form class="inset-0 m-auto w-fit flex justify-center gap-2 sticky bottom-4 py-4 px-8 bg-white border-black border-4 rounded-xl shadow-xl shadow-gray-700">
-        <input min=0 max=@QuestionsList.Count type="number" class="rounded-e-none w-32 outline-none border-4 border-gray-500 focus-visible:border-green-500 font-bold py-2 px-4 rounded-xl" @bind-value=@nextQuestionId />
+        <input min=0 max=@QuestionsList.Count type="number" class="rounded-e-none w-32 outline-none border-4 border-gray-500 focus-visible:border-green-500 font-bold py-2 px-4 rounded-xl" @bind-value=@questionId />
         <input type="submit" class="rounded-s-none bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-xl" @onclick=HandleSetQuestion value="Submit" />
         <button class="bg-red-500 float-right hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl" @onclick=Close>Close</button>
     </form>
@@ -40,11 +40,11 @@
     [Parameter]
     public EventCallback<int> SetQuestion { get; set; }
 
-    private int nextQuestionId = 0;
+    private int questionId = 0;
 
     private async Task HandleSetQuestion()
     {
-        await SetQuestion.InvokeAsync(nextQuestionId);
+        await SetQuestion.InvokeAsync(questionId);
         await Close();
     }
 
