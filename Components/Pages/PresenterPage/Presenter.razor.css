@@ -5,9 +5,12 @@ main {
   font-family: "Oswald", sans-serif;
   text-transform: uppercase;
   background-color: grey;
-  height: 100vh;
+  height: 100dvh;
+  width: 100dvw;
   color: white;
+  background-image: url(../images/gta6.jpg);
 }
+
 .footer {
   display: flex;
   justify-content: space-between;
@@ -30,8 +33,9 @@ main {
 
 .game-board {
   flex: auto;
-  width: 100vw;
-  padding: 2vw;
+  width: 100%;
+  padding-block: 2vw;
+  padding-inline: 8vw;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -74,7 +78,7 @@ main {
 .buzzer-modal {
   display: grid;
   place-items: center;
-  font-size: 2rem;
+  font-size: 3rem;
   font-weight: 600;
   text-align: center;
   gap: 5%;
@@ -91,30 +95,5 @@ main {
   top: -100%;
   width: 300%;
   height: 300%;
-  background: conic-gradient(
-    white 0deg 15deg,
-    lightyellow 15deg 30deg,
-    white 30deg 45deg,
-    lightyellow 45deg 60deg,
-    white 60deg 75deg,
-    lightyellow 75deg 90deg,
-    white 90deg 105deg,
-    lightyellow 105deg 120deg,
-    white 120deg 135deg,
-    lightyellow 135deg 150deg,
-    white 150deg 165deg,
-    lightyellow 165deg 180deg,
-    white 180deg 195deg,
-    lightyellow 195deg 210deg,
-    white 210deg 225deg,
-    lightyellow 225deg 240deg,
-    white 240deg 255deg,
-    lightyellow 255deg 270deg,
-    white 270deg 285deg,
-    lightyellow 285deg 300deg,
-    white 300deg 315deg,
-    lightyellow 315deg 330deg,
-    white 330deg 345deg,
-    lightyellow 345deg 360deg
-  );
+  background: lightyellow;
 }

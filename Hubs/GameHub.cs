@@ -378,13 +378,13 @@ public class GameHub : Hub
         await Clients.Clients(presenterConnections).SendAsync("receivePlaySound", soundName);
     }
 
-    public async Task<bool> SendSetQuestion (string gameKey, int questionId)
+    public async Task SendSetQuestion (string gameKey, int questionId)
     {
         var (game, connection) = _gameManager.ValidateGameConnection(gameKey, Context.ConnectionId);
 
         if (game is null || connection is null)
         {
-            return false;
+            return;
         }
 
         var connections = _gameManager.GetConnections(gameKey).Select(c => c.ConnectionId);
@@ -392,16 +392,11 @@ public class GameHub : Hub
         await game.SetQuestion(questionId);
         await SendNewRound(gameKey);
 
-        return true;
+        return;
     }
 
 
     //!-----------------------not implemented yet-----------------------!\\
-
-    public async Task SendShowWinner(Team winningTeam)
-    {
-        await Clients.Groups("Presenters", "Buzzers").SendAsync("receiveShowWinner", winningTeam);
-    }
 
     public async Task SendStartTimer(string gameKey)
     {
@@ -414,7 +409,6 @@ public class GameHub : Hub
 
         var presenterConnections = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
 
-        await Clients.Clients(presenterConnections).SendAsync("receivePlaySound", "timer-long");
         await Clients.Clients(presenterConnections).SendAsync("receiveStartTimer");
     }
 }

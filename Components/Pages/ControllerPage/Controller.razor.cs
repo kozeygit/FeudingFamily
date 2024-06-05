@@ -152,7 +152,7 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
         NextQuestionId = id;
         if (hubConnection is not null)
         {
-            await hubConnection.InvokeAsync<bool>("SendSetQuestion", GameKey, id);
+            await hubConnection.SendAsync("SendSetQuestion", GameKey, id);
         }
     }
 
@@ -206,5 +206,5 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
             await hubConnection.SendAsync("SendPlaySound", GameKey, soundName);
         }
     }
-
+    
 }

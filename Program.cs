@@ -68,6 +68,11 @@ app.MapGet("/questions2", async (IQuestionService questionService) =>
 
 });
 
+app.MapGet("/buzz", (HttpRequest request) => 
+{
+    return Results.Ok();
+});
+
 // just for my local esp buzzers
 app.MapPost("/buzz", async (IGameManager gameManager, IHubContext<GameHub> hubContext, HttpRequest request) =>
 {

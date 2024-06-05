@@ -8,6 +8,11 @@
 
 <PageTitle>FeudingFamily - Presenter</PageTitle>
 
+@* Gets rid of delay when playing audio, or its placebo :? *@
+<audio autoplay loop preload="auto">
+    <source src="/sounds/muted.mp3">
+</audio>
+
 <main>
     <PresenterAudio @ref=presenterAudio />
 
@@ -15,7 +20,6 @@
     <dialog class="buzzer-modal" id="buzzer-modal" open=@IsBuzzerModalShown>
         @BuzzingTeam buzzed in!
     </dialog>
-
 
     <div class="game-board">
 
@@ -32,11 +36,12 @@
         </div>
 
     </div>
+
     <div class="footer">
-        
+
         @if (Teams.Count > 0)
         {
-            <TeamDisplay Team=@Teams[0] IsTeamPlaying=@IsTeamPlaying[Teams[0]]/>
+            <TeamDisplay Team=@Teams[0] IsTeamPlaying=@IsTeamPlaying[Teams[0]] />
         }
 
         <div class="wrong-answers">
@@ -48,10 +53,10 @@
 
         @if (Teams.Count > 1)
         {
-            <TeamDisplay Team=@Teams[1] IsTeamPlaying=@IsTeamPlaying[Teams[1]]/> 
+            <TeamDisplay Team=@Teams[1] IsTeamPlaying=@IsTeamPlaying[Teams[1]] />
         }
     </div>
-    
+
     <h1 class="w-max text-center pb-2">@GameKey</h1>
 
 </main>
