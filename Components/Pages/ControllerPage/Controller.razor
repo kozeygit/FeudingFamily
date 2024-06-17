@@ -32,7 +32,7 @@
         <div id="round-points">@Round.Points</div>
     </div>
 
-    <div class="answer-btns">
+    <div class="control-btns">
         <ControllerButton TailwindStyle="" OnClick=NewRound>
             New Round
         </ControllerButton>
@@ -40,8 +40,7 @@
         <ControllerButton TailwindStyle="" OnClick=SwapTeamPlaying>
             Swap Team
         </ControllerButton>
-    </div>
-    <div class="buzzer-btns">
+        
         <ControllerButton TailwindStyle="" OnClick=EnableBuzzers>
             Buzzers On
         </ControllerButton>
@@ -49,9 +48,7 @@
         <ControllerButton TailwindStyle="" OnClick=DisableBuzzers>
             Buzzers Off
         </ControllerButton>
-    </div>
 
-    <div class="btn-pair">
         <ControllerButton TailwindStyle="bg-blue-300" OnClick=@(() => WrongAnswer(false))>
             Wrong Answer
         </ControllerButton>
@@ -61,13 +58,14 @@
         </ControllerButton>
     </div>
 
+
     <div class="team-display">
         @foreach (var team in Teams)
         {
-            var buzzing = IsTeamPlaying[team] ? "text-red-500" : "text-black-500";
-            if (Round.RoundWinner == team.Name) { buzzing = "text-green-600"; }
+            var fontColor = IsTeamPlaying[team] ? "text-red-500" : "text-black-500";
+            if (Round.RoundWinner == team.Name) { fontColor = "text-green-600"; }
             
-            <div class="team @buzzing flex justify-evenly">
+            <div class="team @fontColor flex justify-evenly">
                 <span>@team.Name:</span>
                 <span>@team.Points • @team.RoundsWon</span>
             </div>
@@ -83,6 +81,10 @@
             round-end
         </ControllerSoundButton>
 
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("intro-music")) >
+            intro-music
+        </ControllerSoundButton>
+
         <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("timer-long")) >
             timer-long
         </ControllerSoundButton>
@@ -93,10 +95,6 @@
 
         <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("hold-music")) >
             hold-music
-        </ControllerSoundButton>
-
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("intro-music")) >
-            intro-music
         </ControllerSoundButton>
 
         <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("top-answer")) >

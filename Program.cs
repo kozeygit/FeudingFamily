@@ -104,7 +104,7 @@ app.MapPost("/buzz", async (IGameManager gameManager, IHubContext<GameHub> hubCo
     {
         return Results.Ok(false);
     };
-        
+
     var presenterConnections = gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
     var controllerConnections = gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
     var teamConnections = gameManager.GetBuzzerConnections(gameKey, team).Select(c => c.ConnectionId);

@@ -30,7 +30,7 @@ public class GameHub : Hub
     {
         JoinGameResult joinGame;
 
-        Console.WriteLine($"--Hub-- JoinGame - gameKey: {gameKey}, connectionType: {connectionType}, teamName: {teamName}, caller: {Context.ConnectionId}");
+        Console.WriteLine($"--Hub-- JoinGame - gameKey: {gameKey}, connectionType: {connectionType}, caller: {Context.ConnectionId}");
 
         if (teamName is null)
             joinGame = _gameManager.JoinGame(gameKey, Context.ConnectionId, connectionType);
@@ -65,7 +65,7 @@ public class GameHub : Hub
             var controllerConnections = _gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
             var connections = presenterConnections.Concat(controllerConnections);
 
-            Console.WriteLine($"--Hub-- SendWrongAnswer - gameKey: {gameKey}, sender: {Context.ConnectionId}");
+            Console.WriteLine($"--Hub-- JoinTeam - gameKey: {gameKey}, team: {teamName}, sender: {Context.ConnectionId}");
 
             await Clients.Clients(connections).SendAsync("receiveTeams", teamsDto);
         }
