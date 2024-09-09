@@ -1,4 +1,6 @@
+using FeudingFamily;
 using FeudingFamily.Components;
+using FeudingFamily.EspBuzzer;
 using FeudingFamily.Hubs;
 using FeudingFamily.Logic;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -29,6 +31,8 @@ builder.Services.AddTransient<IDbConnection>(provider =>
 
 builder.Services.AddSingleton<IQuestionService, QuestionService>();
 builder.Services.AddSingleton<IGameManager, GameManager>();
+
+builder.Services.AddHostedService<TcpServer>();
 
 
 //-------------------------------------------------------------------------------\\
@@ -214,3 +218,4 @@ app.MapGet("/form", (IGameManager gameManager, string gameKey, string teamName, 
 // await dbBuilder.PopulateTablesAsync("Data/dbo/JsonQuestions/ff_questions.json");
 
 app.Run();
+

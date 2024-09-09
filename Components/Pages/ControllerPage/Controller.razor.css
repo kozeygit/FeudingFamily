@@ -44,39 +44,11 @@ main {
   gap: 0.5rem;
 }
 
-.control-btns {
-  margin-top: 0.5rem;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem;
-}
-
-.sound-btns {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: black 2px solid;  
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
-}
-
-.sound-btn {
-  width: 100%;
-  border: black solid 2px;
-  overflow: hidden;
-  background-color: lightgoldenrodyellow;
-}
-
-.sound-btn > p::before {
-  content: "🎵";
-}
-
 .stats {
   padding-inline: 1rem;
   display: flex;
   justify-content: space-evenly;
   margin-top: 1rem;
-  margin-bottom: 0.5rem;
 }
 
 #wrong-answer {
@@ -95,16 +67,20 @@ main {
   border-inline: black 2px solid;
 }
 
-#round-points::before {
-  content: "POINTS: ";
+.control-btns {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
 }
 
-#wrong-answer::before {
-  content: "WRONG: ";
-}
-
-#buzzer-active::before {
-  content: "BUZZER: ";
+.sound-btns {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: black 2px solid;  
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
 }
 
 #connection-status {

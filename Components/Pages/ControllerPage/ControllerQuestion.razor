@@ -1,14 +1,14 @@
 ﻿@if (IsRevealed)
 {
     <button class="question" @onmousedown=MouseDown @onmouseup=MouseUp @ontouchstart=MouseDown @ontouchend=MouseUp>
-        <h1 class="question-content">@Content</h1>
+        <h1 class="question-content">We asked 100 people:<br> @Content</h1>
     </button>
 }
 else
 {
     <button class="question hidden" @onmousedown=MouseDown @onmouseup=MouseUp @ontouchstart=MouseDown @ontouchend=MouseUp>
 
-        <h1 class="question-content">@Content</h1>
+        <h1 class="question-content">We asked 100 people:<br> @Content</h1>
     </button>
 }
 
