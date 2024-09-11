@@ -29,10 +29,13 @@ builder.Services.AddTransient<IDbConnection>(provider =>
 
 });
 
+if (args.Contains("--use-esp-buzzers"))
+{
+    builder.Services.AddSingleton<IEspBuzzer, EspBuzzer>();
+}
+
 builder.Services.AddSingleton<IQuestionService, QuestionService>();
 builder.Services.AddSingleton<IGameManager, GameManager>();
-
-builder.Services.AddHostedService<TcpServer>();
 
 
 //-------------------------------------------------------------------------------\\
@@ -55,10 +58,10 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
+
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.MapHub<GameHub>("/gamehub");
-
 
 
 // Question Endpoint
@@ -97,7 +100,7 @@ app.MapPost("/buzz", async (IGameManager gameManager, IHubContext<GameHub> hubCo
 
     var game = joinResult.Game!;
 
-    if (game.HasTeam(teamName) is false)
+    if (game.HasTeamWithName(teamName) is false)
     {
         return Results.Ok(false);
     }
@@ -133,80 +136,7 @@ app.MapPost("/buzz", async (IGameManager gameManager, IHubContext<GameHub> hubCo
 // FUCK, NOW I NEED TO ADD THE TEAMS BEFORE I CONNECT THE ESPs!!!
 // DOUBLE FUCK, NOW I NEED TO STOP THE TEAMS FROM DISPOSING AUTOMATICALLY UGGGGGHHHH!!!
 
-app.MapGet("/form", (IGameManager gameManager, string gameKey, string teamName, string page) =>
-{
-    teamName = teamName.ToLower();
-
-    if (string.IsNullOrWhiteSpace(gameKey))
-    {
-        return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.KeyEmpty}");
-    }
-
-    if (page == "Join")
-    {
-        if (string.IsNullOrWhiteSpace(teamName))
-        {
-            return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.TeamNameEmpty}");
-        }
-    }
-
-    JoinGameResult joinResult = gameManager.GameKeyValidator(gameKey);
-
-    if (!joinResult.Success)
-    {
-        return Results.Redirect($"/?ErrorCode={(int)joinResult.ErrorCode!}");
-    }
-
-    joinResult = gameManager.GetGame(gameKey);
-
-    if (!joinResult.Success)
-    {
-        joinResult = gameManager.NewGame(gameKey);
-
-        if (!joinResult.Success)
-        {
-            return Results.Redirect($"/?ErrorCode={(int)joinResult.ErrorCode!}");
-        }
-    }
-
-    if (joinResult.Game is null)
-    {
-        return default;
-    }
-
-    switch (page)
-    {
-        case "Join":
-
-            if (teamName.Contains(' ') || teamName.Length > 10)
-            {
-                return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.TeamNameInvalid}");
-            }
-
-            if (joinResult.Game.Teams.Select(s => s.Name).Contains(teamName) is false)
-            {
-                if (joinResult.Game.Teams.Count >= 2)
-                {
-                    return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.GameHasTwoTeams}");
-                }
-            }
-
-            Console.WriteLine("Join");
-            return Results.Redirect($"/Buzzer/{gameKey}?TeamName={teamName}");
-
-        case "Presenter":
-            Console.WriteLine("Presenter");
-            return Results.Redirect($"/Presenter/{gameKey}");
-
-        case "Controller":
-            Console.WriteLine("Controller");
-            return Results.Redirect($"/Controller/{gameKey}");
-
-        default:
-            return Results.Redirect("/");
-    }
-
-});
+app.MapJoinGameEndpoints();
 
 // build db
 
@@ -216,6 +146,12 @@ app.MapGet("/form", (IGameManager gameManager, string gameKey, string teamName, 
 // await dbBuilder.CreateTableAsync(CreateTableSql.Questions);
 // await dbBuilder.CreateTableAsync(CreateTableSql.Answers);
 // await dbBuilder.PopulateTablesAsync("Data/dbo/JsonQuestions/ff_questions.json");
+
+
+if (args.Contains("--use-esp-buzzers"))
+{
+    IEspBuzzer espBuzzerService = app.Services.GetRequiredService<IEspBuzzer>();
+}
 
 app.Run();
 

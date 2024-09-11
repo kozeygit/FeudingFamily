@@ -14,25 +14,26 @@ namespace FeudingFamily.EspBuzzer;
 
 public interface ITcpServer
 {
-    public bool AllowConnections { get; set; }
-    event Action<string> OnClientConnected;
-    event Action<string> OnClientCommand;
-    public void SendMessageToClient(string clientIP);
+    // public bool AllowConnections { get; set; }
+    // event Action<string> OnClientConnected;
+    // event Action<string> OnClientCommand;
+    // public void SendMessageToClient(string clientIP);
 }
 
 public class TcpServer
 {
     public bool Running { get; set; }
-    public event EventHandler<DataReceivedArgs> DataReceived;
+    public event EventHandler<DataReceivedArgs> OnDataReceived;
+    public event EventHandler<string> OnChannelClosed;
     private TcpListener Listener;
     public Channels ConnectedChannels;
 
-    public Server()
+    public TcpServer()
     {
-        Listener = new TcpListener(IPAddress.Parse(Globals.ServerAddress), Globals.ServerPort);
+        Listener = new TcpListener(IPAddress.Any, 5000);
     }
 
-    public async void Start()
+    public async Task Start()
     {
         try
         {
@@ -42,7 +43,7 @@ public class TcpServer
             while (Running)
             {
                 var client = await Listener.AcceptTcpClientAsync();
-                Task.Run(() => new Channel(this).Open(client));
+                _ = Task.Run(() => new Channel(this).Open(client));
             }
 
         }
@@ -50,6 +51,24 @@ public class TcpServer
         {
             throw;
         }
+    }
+
+    public void SendMessageToClient(string clientID, string message)
+    {
+        if (ConnectedChannels.OpenChannels.TryGetValue(clientID, out Channel channel))
+        {
+            channel.Send(message);
+        }
+        else
+        {
+            Console.WriteLine("Client not found.");
+        }
+    }
+
+    public bool TryRemoveChannel(string clientID, out Channel channel)
+    {
+        OnChannelClosed.Invoke(this, clientID);
+        return ConnectedChannels.OpenChannels.TryRemove(clientID, out channel);
     }
 
     public void Stop()
@@ -60,6 +79,6 @@ public class TcpServer
 
     public void OnDataIn(DataReceivedArgs e)
     {
-        DataReceived?.Invoke(this, e);
+        OnDataReceived?.Invoke(this, e);
     }
 }

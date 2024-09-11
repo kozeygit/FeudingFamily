@@ -69,12 +69,8 @@ public class GameManager : IGameManager
         return new JoinGameResult { Game = game };
     }
 
-    public JoinGameResult JoinGame(string gameKey, string connectionId, ConnectionType connectionType)
+    public JoinGameResult JoinGame(string gameKey, string connectionId, ConnectionType connectionType, Guid? teamID)
     {
-        if (!GameKeyValidator(gameKey).Success)
-        {
-            return new JoinGameResult { ErrorCode = GameKeyValidator(gameKey).ErrorCode };
-        }
 
         if (!games.TryGetValue(gameKey, out Game? game))
         {
@@ -83,49 +79,19 @@ public class GameManager : IGameManager
 
         var connection = new GameConnection { ConnectionId = connectionId, ConnectionType = connectionType };
 
-        gameRooms[gameKey].AddConnection(connection);
-
-        return new JoinGameResult { Game = game };
-    }
-
-    public JoinGameResult JoinGame(string gameKey, string connectionId, string TeamName)
-    {
-        Team team;
-
-        if (!GameKeyValidator(gameKey).Success)
+        
+        if (connectionType == ConnectionType.Buzzer && teamID is not null)
         {
-            return new JoinGameResult { ErrorCode = GameKeyValidator(gameKey).ErrorCode };
-        }
+            var team = game.GetTeam((Guid)teamID);
 
-        if (!games.TryGetValue(gameKey, out Game? game))
-        {
-            return new JoinGameResult { ErrorCode = JoinErrorCode.GameNotFound };
-        }
+            if (team is null)
+            {
+                return new JoinGameResult { ErrorCode = JoinErrorCode.TeamNameInvalid };
+            }
 
-        if (string.IsNullOrWhiteSpace(TeamName))
-        {
-            return new JoinGameResult { ErrorCode = JoinErrorCode.TeamNameEmpty };
-        }
-
-        var connection = new GameConnection { ConnectionId = connectionId, ConnectionType = ConnectionType.Buzzer };
-
-        if (game.HasTeam(TeamName))
-        {
-            team = game.GetTeam(TeamName)!;
             team.AddMember(connection);
-            gameRooms[gameKey].AddConnection(connection);
-            return new JoinGameResult { Game = game };
         }
-
-        if (game.Teams.Count >= 2)
-        {
-            return new JoinGameResult { ErrorCode = JoinErrorCode.GameHasTwoTeams };
-        }
-
-        game.AddTeam(TeamName);
-
-        team = game.GetTeam(TeamName)!;
-        team.AddMember(connection);
+        
         gameRooms[gameKey].AddConnection(connection);
 
         return new JoinGameResult { Game = game };
@@ -133,6 +99,8 @@ public class GameManager : IGameManager
 
     public void LeaveGame(string gameKey, string connectionId)
     {
+        Console.WriteLine($"---GameManager---: LeaveGame: {gameKey}, {connectionId}");
+
         if (gameKey is null || connectionId is null)
         {
             return;
@@ -156,15 +124,13 @@ public class GameManager : IGameManager
         }
 
         game.Teams.ForEach(t => t.Members.Remove(connection));
-
-        game.Teams.RemoveAll(t => t.Members.Count == 0);
-
         gameRoom.RemoveConnection(connection);
 
 
         if (gameRoom.Connections.Count == 0 && game.CreatedOn.AddMinutes(1) < DateTime.Now)
         {
             Console.WriteLine($"Removing game: {gameKey}");
+            game.Teams.RemoveAll(t => t.Members.Count == 0);
             games.Remove(gameKey);
             gameRooms.Remove(gameKey);
         }
@@ -232,7 +198,7 @@ public class GameManager : IGameManager
         var controllerConnections = connections.Where(c => c.ConnectionType == ConnectionType.Controller).ToList();
         return controllerConnections;
     }
-    public List<GameConnection> GetBuzzerConnections(string gameKey, Team? team=null)
+    public List<GameConnection> GetBuzzerConnections(string gameKey, Team? team = null)
     {
         if (team is null)
         {
@@ -264,8 +230,7 @@ public class GameManager : IGameManager
 public interface IGameManager
 {
     JoinGameResult NewGame(string gameKey);
-    JoinGameResult JoinGame(string gameKey, string connectionId, ConnectionType connectionType);
-    JoinGameResult JoinGame(string gameKey, string connectionId, string TeamName);
+    JoinGameResult JoinGame(string gameKey, string connectionId, ConnectionType connectionType, Guid? teamID);
     JoinGameResult GetGame(string gameKey);
     void LeaveGame(string gameKey, string connectionId);
     JoinGameResult GameKeyValidator(string? gameKey);
@@ -275,6 +240,6 @@ public interface IGameManager
     List<GameConnection> GetConnections(string gameKey);
     List<GameConnection> GetPresenterConnections(string gameKey);
     List<GameConnection> GetControllerConnections(string gameKey);
-    List<GameConnection> GetBuzzerConnections(string gameKey, Team? team=null);
+    List<GameConnection> GetBuzzerConnections(string gameKey, Team? team = null);
     (Game? game, GameConnection? connection) ValidateGameConnection(string gameKey, string connectionId);
 }

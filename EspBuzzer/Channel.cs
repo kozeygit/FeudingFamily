@@ -1,10 +1,10 @@
 using System.Net.Sockets;
 using System.Text;
 
-namespace FeudingFamily.EspBuzzer
+namespace FeudingFamily.EspBuzzer;
 public class Channel : IDisposable
 {
-    private TcpServer thisServer;
+    private readonly TcpServer thisServer;
     public readonly string Id;
     private TcpClient thisClient;
     private readonly byte[] buffer;
@@ -23,37 +23,36 @@ public class Channel : IDisposable
     {
         thisClient = client;
         isOpen = true;
-        if(!thisServer.ConnectedChannels.OpenChannels.TryAdd(Id, this))
+
+        if (!thisServer.ConnectedChannels.OpenChannels.TryAdd(Id, this))
         {
             isOpen = false;
             throw new Exception("Failed to add channel to connected channels.");
         }
-        string data = "";
+
         using (stream = thisClient.GetStream())
         {
             int position;
 
-            while(isOpen)
+            while (isOpen)
             {
-                if (clientDisconnected())
+                if (IsClientDisconnected())
                 {
                     Close();
+                    continue;
                 }
-                else
+                while ((position = stream.Read(buffer, 0, buffer.Length)) != 0 && isOpen)
                 {
-                    while ((position = stream.Read(buffer, 0, buffer.Length)) != 0 && isOpen)
+                    string data = Encoding.UTF8.GetString(buffer, 0, position);
+                    var args = new DataReceivedArgs()
                     {
-                        data = Encoding.UTF8.GetString(buffer, 0, position);
-                        var args = new DataReceivedArgs()
-                        {
-                            Message = data,
-                            ConnectionId = Id,
-                            ThisChannel = this
-                        };
+                        Message = data,
+                        ConnectionId = Id,
+                        ThisChannel = this
+                    };
 
-                        thisServer.OnDataIn(args);
-                        if(!isOpen) { break; }
-                    }
+                    thisServer.OnDataIn(args);
+                    if (!isOpen) { break; }
                 }
             }
         }
@@ -70,17 +69,13 @@ public class Channel : IDisposable
     {
         Dispose(false);
         isOpen = false;
-        thisServer.ConnectedChannels.OpenChannels.TryRemove(Id, out Channel removedChannel);
+        thisServer.TryRemoveChannel(Id, out _);
     }
 
     protected virtual void Dispose(bool disposing)
     {
         if (!disposed)
         {
-            if (disposing)
-            {
-                // TODO: dispose managed state (managed objects)
-            }
             stream.Close();
             thisClient.Close();
             disposed = true;
@@ -93,8 +88,8 @@ public class Channel : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    private bool clientDisconnected()
+    private bool IsClientDisconnected()
     {
-        return (thisClient.Client.Available == 0 && thisClient.Client.Poll(1, SelectMode.SelectRead));
+        return thisClient.Client.Available == 0 && thisClient.Client.Poll(1, SelectMode.SelectRead);
     }
 }

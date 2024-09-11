@@ -13,8 +13,9 @@ public class BuzzerPageBase : ComponentBase, IAsyncDisposable
     [Parameter]
     public string GameKey { get; set; } = string.Empty;
 
-    [SupplyParameterFromQuery]
-    public string TeamName { get; set; } = string.Empty;
+    [SupplyParameterFromQuery(Name = "TeamID")]
+    public string TeamGuid { get; set; } = string.Empty;
+    public Guid TeamID { get; set; }
 
 
     public TeamDto? Team { get; set; } = new TeamDto();
@@ -31,10 +32,13 @@ public class BuzzerPageBase : ComponentBase, IAsyncDisposable
             Navigation.NavigateTo($"/?ErrorCode={(int)JoinErrorCode.KeyEmpty}");
         }
 
-        if (string.IsNullOrWhiteSpace(TeamName))
+        if (string.IsNullOrWhiteSpace(TeamGuid))
         {
+            Console.WriteLine("\n\n !! 1 !!\n\n");
             Navigation.NavigateTo($"/?ErrorCode={(int)JoinErrorCode.TeamNameEmpty}");
         }
+
+        TeamID = Guid.Parse(TeamGuid);
 
         hubConnection = new HubConnectionBuilder()
             .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
@@ -61,7 +65,7 @@ public class BuzzerPageBase : ComponentBase, IAsyncDisposable
         {
             if (isConnected is false)
             {
-                Navigation.NavigateTo($"/");
+                Navigation.NavigateTo("/");
             }
 
             await hubConnection.SendAsync("SendGetTeam", GameKey);
@@ -70,7 +74,7 @@ public class BuzzerPageBase : ComponentBase, IAsyncDisposable
         });
 
         await hubConnection.StartAsync();
-        await hubConnection.SendAsync("SendJoinGame", GameKey, ConnectionType.Buzzer, TeamName);
+        await hubConnection.SendAsync("SendJoinGame", GameKey, ConnectionType.Buzzer, TeamID);
 
 
     }
@@ -91,7 +95,7 @@ public class BuzzerPageBase : ComponentBase, IAsyncDisposable
     {
         if (hubConnection is not null)
         {
-            await hubConnection.SendAsync("SendLeaveGame", GameKey);
+            // await hubConnection.SendAsync("SendLeaveGame", GameKey);
             Console.WriteLine("Disposing");
             await hubConnection.DisposeAsync();
         }

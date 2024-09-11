@@ -1,4 +1,5 @@
 using FeudingFamily.Logic;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.SignalR;
 
 namespace FeudingFamily.Hubs;
@@ -22,21 +23,19 @@ public class GameHub : Hub
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameKey);
         }
-        
+
         await base.OnDisconnectedAsync(exception);
     }
 
-    public async Task SendJoinGame(string gameKey, ConnectionType connectionType, string? teamName)
+
+    // TODO: Move the logic for joining the game into the form endpoint, only send a simple join game, and receive the detail via signalR, this is so i can use the team id in the url query instead of the name when joining...
+    public async Task SendJoinGame(string gameKey, ConnectionType connectionType, Guid? teamID)
     {
         JoinGameResult joinGame;
 
         Console.WriteLine($"--Hub-- JoinGame - gameKey: {gameKey}, connectionType: {connectionType}, caller: {Context.ConnectionId}");
 
-        if (teamName is null)
-            joinGame = _gameManager.JoinGame(gameKey, Context.ConnectionId, connectionType);
-
-        else
-            joinGame = _gameManager.JoinGame(gameKey, Context.ConnectionId, teamName);
+        joinGame = _gameManager.JoinGame(gameKey, Context.ConnectionId, connectionType, teamID);
 
         if (joinGame.Success is false)
         {
@@ -45,31 +44,30 @@ public class GameHub : Hub
             return;
         }
 
-        joinGame = _gameManager.GetGame(gameKey);
-
-        if (joinGame.Success is false)
-        {
-            await Clients.Caller.SendAsync("receiveGameConnected", false);
-            return;
-        }
-
         await Groups.AddToGroupAsync(Context.ConnectionId, gameKey);
         await Clients.Caller.SendAsync("receiveGameConnected", true);
 
-        if (teamName is not null)
+        if (teamID is not null)
         {
             var teams = joinGame.Game!.Teams;
             var teamsDto = teams.Select(t => t.MapToDto());
 
-            var presenterConnections = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
-            var controllerConnections = _gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
-            var connections = presenterConnections.Concat(controllerConnections);
+            var connections = _gameManager.GetConnections(gameKey).Select(c => c.ConnectionId);
 
-            Console.WriteLine($"--Hub-- JoinTeam - gameKey: {gameKey}, team: {teamName}, sender: {Context.ConnectionId}");
+            Console.WriteLine($"--Hub-- JoinTeam - gameKey: {gameKey}, team: {teamID}, sender: {Context.ConnectionId}");
+
+            if (connectionType == ConnectionType.Buzzer)
+            {
+                var team = joinGame.Game.GetTeam((Guid)teamID);
+                await Clients.Caller.SendAsync("receiveTeam", team.MapToDto());
+            }
 
             await Clients.Clients(connections).SendAsync("receiveTeams", teamsDto);
+
+            await SendTeamPlaying(gameKey);
         }
     }
+
 
     public async Task SendLeaveGame(string gameKey)
     {
@@ -171,7 +169,7 @@ public class GameHub : Hub
             return;
         }
 
-        await game.NewRound();
+        await game.NewRoundAsync();
 
         var connections = _gameManager.GetConnections(gameKey).Select(c => c.ConnectionId);
 
@@ -217,7 +215,7 @@ public class GameHub : Hub
         Console.WriteLine($"--Hub-- SendBuzz - teamName: {team.Name}, gameKey: {gameKey}, sender: {Context.ConnectionId}");
 
         await Clients.Clients(presenterConnections).SendAsync("receivePlaySound", "buzz-in");
-        
+
         await Clients.Clients(connections).SendAsync("receiveRound", game.CurrentRound.MapToDto());
         await Clients.Clients(connections).SendAsync("receiveTeams", game.Teams.Select(t => t.MapToDto()));
         await SendTeamPlaying(gameKey);
@@ -378,7 +376,7 @@ public class GameHub : Hub
         await Clients.Clients(presenterConnections).SendAsync("receivePlaySound", soundName);
     }
 
-    public async Task SendSetQuestion (string gameKey, int questionId)
+    public async Task SendSetQuestion(string gameKey, int questionId)
     {
         var (game, connection) = _gameManager.ValidateGameConnection(gameKey, Context.ConnectionId);
 
@@ -389,10 +387,32 @@ public class GameHub : Hub
 
         var connections = _gameManager.GetConnections(gameKey).Select(c => c.ConnectionId);
 
-        await game.SetQuestion(questionId);
+        await game.SetQuestionAsync(questionId);
         await SendNewRound(gameKey);
 
         return;
+    }
+
+    public async Task SendEditTeamName(string gameKey, string oldTeamName, string newTeamName)
+    {
+        var (game, connection) = _gameManager.ValidateGameConnection(gameKey, Context.ConnectionId);
+
+        if (game is null || connection is null)
+        {
+            return;
+        }
+
+        game.EditTeamName(oldTeamName, newTeamName);
+
+        var teams = game.Teams.Select(t => t.MapToDto()).ToList();
+
+        var presenterConnections = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
+        var controllerConnections = _gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
+        var connections = presenterConnections.Concat(controllerConnections);
+
+        Console.WriteLine($"--Hub-- EditTeamName - gameKey: {gameKey}, team: {oldTeamName}, newTeamName: {newTeamName}, sender: {Context.ConnectionId}");
+
+        await Clients.Clients(connections).SendAsync("receiveTeams", teams);
     }
 
 

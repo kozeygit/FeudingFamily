@@ -2,6 +2,7 @@ namespace FeudingFamily.Logic;
 
 public record TeamDto
 {
+    public Guid ID { get; set; }
     public string Name { get; set; } = string.Empty;
     public int Points { get; set; }
     public int RoundsWon { get; set; }
@@ -9,6 +10,7 @@ public record TeamDto
 
 public class Team(string teamName)
 {
+    public Guid ID { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = teamName;
     public int Points { get; set; } = 0;
     public int RoundsWon { get; set; } = 0;
@@ -51,6 +53,7 @@ public class Team(string teamName)
     {
         return new TeamDto
         {
+            ID = ID,
             Name = Name,
             Points = Points,
             RoundsWon = RoundsWon

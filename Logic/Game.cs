@@ -27,6 +27,19 @@ public class Game
         CreatedOn = DateTime.Now;
     }
 
+    public bool EditTeamName(string oldName, string newName)
+    {
+        var team = GetTeam(oldName);
+
+        if (team is null)
+        {
+            return false;
+        }
+
+        team.Name = newName;
+        return true;
+    }
+
     public bool Buzz(Team team)
     {
         if (!CurrentRound.IsBuzzersEnabled)
@@ -48,7 +61,7 @@ public class Game
     {
         teamName = teamName.ToLower();
 
-        if (HasTeam(teamName))
+        if (HasTeamWithName(teamName))
         {
             return false;
         }
@@ -62,7 +75,7 @@ public class Game
         return true;
     }
 
-    public bool HasTeam(string teamName)
+    public bool HasTeamWithName(string teamName)
     {
         return Teams.Any(team => team.Name == teamName.ToLower());
     }
@@ -71,7 +84,10 @@ public class Game
     {
         return Teams.FirstOrDefault(team => team.Name == teamName.ToLower());
     }
-
+    public Team? GetTeam(Guid ID)
+    {
+        return Teams.FirstOrDefault(team => team.ID == ID);
+    }
     public Team? GetTeam(GameConnection connection)
     {
         return Teams.FirstOrDefault(team => team.Members.Contains(connection));
@@ -87,14 +103,14 @@ public class Game
     // I NEED A BUFFER THING TO HOLD THE NEXT QUESTION INSTEAD.
     // so.. in conclusion.. do this ^^
 
-    public async Task<Question> SetQuestion(int id)
+    public async Task<Question> SetQuestionAsync(int id)
     {
         CurrentQuestion = await _questionService.GetQuestionAsync(id);
         isQuestionManual = true;
         return CurrentQuestion;
     }
 
-    public async Task NewRound()
+    public async Task NewRoundAsync()
     {
         isRoundPlaying = true;
 
