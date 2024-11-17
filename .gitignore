@@ -67,3 +67,5 @@ Components/Figma Designs/
 *.cache
 *.docstates
 *.jfm
+
+/.idea/

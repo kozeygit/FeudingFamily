@@ -23,14 +23,14 @@
 
     <div class="game-board">
 
-        <Question IsRevealed=@Round.IsQuestionRevealed Content=@Question.Content OnClick=@RevealQuestion />
+        <PresenterQuestion IsRevealed=@Round.IsQuestionRevealed Content=@Question.Content OnClick=@RevealQuestion />
 
         <div class="answers">
             @for (int i = 0; i < 5; i++)
             {
                 var answer = Question.Answers[i];
 
-                <Answer IsRevealed=@Round.IsAnswerRevealed[i] Ranking=@answer.Ranking Content=@answer.Content
+                <PresenterAnswer IsRevealed=@Round.IsAnswerRevealed[i] Ranking=@answer.Ranking Content=@answer.Content
                     Points=@answer.Points OnClick=@(() => RevealAnswer(answer.Ranking)) />
             }
         </div>
@@ -41,7 +41,7 @@
 
         @if (Teams.Count > 0)
         {
-            <TeamDisplay Team=@Teams[0] IsTeamPlaying=@IsTeamPlaying[Teams[0]] />
+            <PresenterTeamDisplay Team=@Teams[0] IsTeamPlaying=@IsTeamPlaying[Teams[0]] />
         }
 
         <div class="wrong-answers">
@@ -53,7 +53,7 @@
 
         @if (Teams.Count > 1)
         {
-            <TeamDisplay Team=@Teams[1] IsTeamPlaying=@IsTeamPlaying[Teams[1]] />
+            <PresenterTeamDisplay Team=@Teams[1] IsTeamPlaying=@IsTeamPlaying[Teams[1]] />
         }
     </div>
 

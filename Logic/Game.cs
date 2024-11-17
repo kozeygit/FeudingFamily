@@ -5,9 +5,10 @@ namespace FeudingFamily.Logic;
 public class Game
 {
     private readonly IQuestionService _questionService;
-    private bool isQuestionManual = false;
-    private bool isRoundPlaying = false;
+    private bool _isQuestionManual = false;
+    private bool _isRoundPlaying = false;
 
+    public string GameKey { get; set; }
     public DateTime CreatedOn { get; init; }
     public List<Team> Teams { get; set; } = [];
     public Team? TeamPlaying { get; set; } = null;
@@ -15,9 +16,14 @@ public class Game
     public Question CurrentQuestion { get; set; }
     public List<RoundDto> PreviousRounds { get; set; } = [];
 
+    public delegate Task AsyncEventHandler<TEventArgs>(object? sender, TEventArgs e);
+    public event AsyncEventHandler<(string, Team)> OnBuzz;
 
-    public Game(IQuestionService questionService)
+
+    public Game(string gameKey, IQuestionService questionService)
     {
+        GameKey = gameKey;
+
         _questionService = questionService;
 
         CurrentQuestion = QuestionService.GetDefaultQuestion();
@@ -29,9 +35,28 @@ public class Game
 
     public bool EditTeamName(string oldName, string newName)
     {
+
+        newName = newName.ToLower();
+        
         var team = GetTeam(oldName);
 
         if (team is null)
+        {
+            return false;
+        }
+
+        if (HasTeamWithName(newName))
+        {
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(newName))
+        {
+            return false;
+        }
+        
+        if (newName.Length > 10 ||
+            newName.Length < 3)
         {
             return false;
         }
@@ -42,6 +67,7 @@ public class Game
 
     public bool Buzz(Team team)
     {
+        Console.WriteLine($"Buzzing team {team.Name}");
         if (!CurrentRound.IsBuzzersEnabled)
         {
             return false;
@@ -54,6 +80,8 @@ public class Game
 
         CurrentRound.IsBuzzersEnabled = false;
         TeamPlaying = team;
+        OnBuzz.Invoke(this, (GameKey, team));
+        
         return true;
     }
 
@@ -93,26 +121,16 @@ public class Game
         return Teams.FirstOrDefault(team => team.Members.Contains(connection));
     }
 
-    // On client, when user holds down new question button
-    // Show popup with input field for question id
-    // Then call NewQuestion with the id first
-    // Then call NewRound
-    // Otherwise, just call NewRound directly
-    
-    // CANT DO THIS BECAUSE IT WOULD CHANGE THE QUESTION IMMEDIATELY,
-    // I NEED A BUFFER THING TO HOLD THE NEXT QUESTION INSTEAD.
-    // so.. in conclusion.. do this ^^
-
     public async Task<Question> SetQuestionAsync(int id)
     {
         CurrentQuestion = await _questionService.GetQuestionAsync(id);
-        isQuestionManual = true;
+        _isQuestionManual = true;
         return CurrentQuestion;
     }
 
     public async Task NewRoundAsync()
     {
-        isRoundPlaying = true;
+        _isRoundPlaying = true;
 
         PreviousRounds.Add(CurrentRound.MapToDto());
         Console.WriteLine($"Rounds = {PreviousRounds.Count}");
@@ -122,10 +140,10 @@ public class Game
             IsBuzzersEnabled = true
         };
 
-        if (!isQuestionManual)
+        if (!_isQuestionManual)
             CurrentQuestion = await _questionService.GetRandomQuestionAsync();
 
-        isQuestionManual = false;
+        _isQuestionManual = false;
 
         TeamPlaying = null;
 
@@ -133,7 +151,7 @@ public class Game
 
     public void EndRound()
     {
-        if (isRoundPlaying is false)
+        if (_isRoundPlaying is false)
         {
             return;
         }
@@ -145,14 +163,14 @@ public class Game
             CurrentRound.RoundWinner = TeamPlaying;
         }
 
-        isRoundPlaying = false;
+        _isRoundPlaying = false;
     }
 
     public bool GiveCorrectAnswer(int answerRanking)
     {
         var playSound = true;
 
-        if (isRoundPlaying is false)
+        if (_isRoundPlaying is false)
         {
             playSound = false;
         }
@@ -184,7 +202,7 @@ public class Game
 
     public void AddRoundPoints(Answer answer)
     {
-        if (isRoundPlaying)
+        if (_isRoundPlaying)
         {
             CurrentRound.Points += answer.Points;
         }

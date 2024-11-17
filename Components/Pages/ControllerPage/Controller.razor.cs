@@ -156,6 +156,15 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
         }
     }
 
+    public async Task HandleEditTeamName(TeamDto team, string newName)
+    {
+        Console.WriteLine($"Edit team name: {team.Name} to {newName}");
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("SendEditTeamName", GameKey, team.Name, newName);
+        }
+    } 
+    
     public async Task SwapTeamPlaying()
     {
         if (hubConnection is not null)

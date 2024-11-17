@@ -62,13 +62,8 @@
     <div class="team-display">
         @foreach (var team in Teams)
         {
-            var fontColor = IsTeamPlaying[team] ? "text-red-500" : "text-black-500";
-            if (Round.RoundWinner == team.Name) { fontColor = "text-green-600"; }
-            
-            <div class="team @fontColor flex justify-evenly">
-                <span>@team.Name:</span>
-                <span>@team.Points • @team.RoundsWon</span>
-            </div>
+            var roundWinner = (Round.RoundWinner == team.Name);
+           <ControllerTeamDisplay Team=team IsTeamPlaying=IsTeamPlaying[team] RoundWinner=roundWinner OnEdit=@((newName) => HandleEditTeamName(team, newName))/> 
         }
     </div>
 

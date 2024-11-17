@@ -4,7 +4,8 @@ public enum ConnectionType
 {
     Presenter,
     Controller,
-    Buzzer
+    Buzzer,
+    EspBuzzer
 }
 
 public class GameConnection

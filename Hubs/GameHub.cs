@@ -1,3 +1,4 @@
+using System.Reflection;
 using FeudingFamily.Logic;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.SignalR;
@@ -11,6 +12,12 @@ public class GameHub : Hub
     public GameHub(IGameManager gameManager)
     {
         _gameManager = gameManager;
+        // gameManager.TeamBuzzed += OnBuzzHandler;
+        // The reason it keeps crashing is that i think
+        // i cannot store this on the hub because the hubs are transient and are created for each call??
+        // so i cant do the line above, instead i need to move it to a different class and use the
+        // hub context to call the method i want.
+        // https://stackoverflow.com/questions/55795669/cannot-access-a-disposed-object-crash-in-signalr 
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
@@ -58,7 +65,7 @@ public class GameHub : Hub
 
             if (connectionType == ConnectionType.Buzzer)
             {
-                var team = joinGame.Game.GetTeam((Guid)teamID);
+                var team = joinGame.Game.GetTeam((Guid)teamID) ?? throw new Exception("Team does not exist???");
                 await Clients.Caller.SendAsync("receiveTeam", team.MapToDto());
             }
 
@@ -201,27 +208,8 @@ public class GameHub : Hub
             return;
         }
 
-        if (game.Buzz(team) is false)
-        {
-            return;
-        };
+        game.Buzz(team);
 
-        var presenterConnections = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
-        var controllerConnections = _gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
-        var teamConnections = _gameManager.GetBuzzerConnections(gameKey, team).Select(c => c.ConnectionId);
-
-        var connections = presenterConnections.Concat(controllerConnections).Concat(teamConnections);
-
-        Console.WriteLine($"--Hub-- SendBuzz - teamName: {team.Name}, gameKey: {gameKey}, sender: {Context.ConnectionId}");
-
-        await Clients.Clients(presenterConnections).SendAsync("receivePlaySound", "buzz-in");
-
-        await Clients.Clients(connections).SendAsync("receiveRound", game.CurrentRound.MapToDto());
-        await Clients.Clients(connections).SendAsync("receiveTeams", game.Teams.Select(t => t.MapToDto()));
-        await SendTeamPlaying(gameKey);
-
-
-        await Clients.Clients(connections).SendAsync("receiveBuzz", team.MapToDto());
     }
 
     public async Task SendEnableBuzzers(string gameKey)
@@ -402,10 +390,15 @@ public class GameHub : Hub
             return;
         }
 
-        game.EditTeamName(oldTeamName, newTeamName);
+        var changedTeam = game.GetTeam(oldTeamName) ?? throw new Exception("Team not found");
+
+        if (game.EditTeamName(oldTeamName, newTeamName))
+        {
+            changedTeam = game.GetTeam(newTeamName) ?? throw new Exception("new team name didnt work");
+        }
 
         var teams = game.Teams.Select(t => t.MapToDto()).ToList();
-
+        var changedTeamConnections = _gameManager.GetBuzzerConnections(gameKey, changedTeam).Select(c => c.ConnectionId);
         var presenterConnections = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
         var controllerConnections = _gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
         var connections = presenterConnections.Concat(controllerConnections);
@@ -413,33 +406,7 @@ public class GameHub : Hub
         Console.WriteLine($"--Hub-- EditTeamName - gameKey: {gameKey}, team: {oldTeamName}, newTeamName: {newTeamName}, sender: {Context.ConnectionId}");
 
         await Clients.Clients(connections).SendAsync("receiveTeams", teams);
+        await Clients.Clients(changedTeamConnections).SendAsync("receiveTeam", changedTeam.MapToDto());
     }
 
-
-    //!-----------------------not implemented yet-----------------------!\\
-
-    public async Task SendStartTimer(string gameKey)
-    {
-        var (game, connection) = _gameManager.ValidateGameConnection(gameKey, Context.ConnectionId);
-
-        if (game is null || connection is null)
-        {
-            return;
-        }
-
-        var presenterConnections = _gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
-
-        await Clients.Clients(presenterConnections).SendAsync("receiveStartTimer");
-    }
 }
-
-/*
-Needed:
-
-Controller:
-TODO: send question (question) -> presenter, controller
-TODO: send round over (winner of round)? -> presenter
-    * maybe split into show winner and have the page reload for a new round instead
-TODO: send countdown () -> presenter
-*/
-

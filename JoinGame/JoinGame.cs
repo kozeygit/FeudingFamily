@@ -54,6 +54,56 @@ public static class JoinGame
         return Results.Redirect($"/Controller/{gameKey}");
     }
 
+    public static bool EspJoin(string gameKey, string teamName, IGameManager gameManager)
+    {
+        var gameExists = gameManager.GetGame(gameKey);
+
+        if (!gameExists.Success)
+        {
+            return false;
+        }
+
+        var game = gameExists.Game!;
+
+        // Team name validation
+        if (string.IsNullOrWhiteSpace(teamName))
+        {
+            Console.WriteLine("\n\n !! 2 !!\n\n");
+            return false;
+        }
+
+        if (teamName.Length > 10 ||
+            teamName.Length < 3)
+        {
+            return false;
+        }
+
+        // Join existing team
+        if (game.HasTeamWithName(teamName))
+        {
+            Console.WriteLine("Joining game: gameKey; Joining team: teamName");
+            return false;
+        }
+
+        // If game has two teams, return error
+        if (game.Teams.Count == 2)
+        {
+            return false;
+        }
+
+        // Create new team and join
+        if (game.AddTeam(teamName) is false)
+        {
+            throw new Exception("Error adding team");
+        }
+
+        var team = game.GetTeam(teamName)!;
+        Console.WriteLine($"Added Team: {team.Name} with id: {team.ID}");
+
+
+        return true;
+    }
+
     private static IResult JoinBuzzerPage(string gameKey, string teamName, Game game, IGameManager gameManager)
     {
         // Team name validation
@@ -63,8 +113,7 @@ public static class JoinGame
             return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.TeamNameEmpty}");
         }
 
-        if (teamName.Contains(' ') ||
-            teamName.Length > 10 ||
+        if (teamName.Length > 10 ||
             teamName.Length < 3)
         {
             return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.TeamNameInvalid}");

@@ -9,6 +9,16 @@
       }
     },
     "profiles": {
+      "http-esp": {
+        "commandName": "Project",
+        "dotnetRunMessages": true,
+        "launchBrowser": true,
+        "applicationUrl": "http://*:80",
+        "environmentVariables": {
+          "ASPNETCORE_ENVIRONMENT": "Development"
+        },
+        "commandLineArgs": "--use-esp-buzzers"
+      },
       "http": {
         "commandName": "Project",
         "dotnetRunMessages": true,
