@@ -1,28 +1,25 @@
 @page "/Controller"
 @page "/Controller/{gameKey}"
 @inherits ControllerPageBase
-@using Microsoft.AspNetCore.SignalR.Client
-@using FeudingFamily.Logic
 @rendermode InteractiveServer
 
 <PageTitle>Feuding Family - Controller</PageTitle>
 
 <main>
-    <ControllerQuestionPicker @bind-IsOpen=@IsQuestionPickerOpen SetQuestion=SetQuestion />
+    <ControllerQuestionPicker @bind-IsOpen="@IsQuestionPickerOpen" SetQuestion="SetQuestion"/>
 
     <ControllerQuestion Content="@Question.Content"
-        IsRevealed="@Round.IsQuestionRevealed"
-        OnClick="@RevealQuestion"
-        OnHold="@ShowQuestionPicker"
-    />
+                        IsRevealed="@Round.IsQuestionRevealed"
+                        OnClick="@RevealQuestion"
+                        OnHold="@ShowQuestionPicker"/>
 
     <div class="answers" id="answers">
-        @for (int i = 0; i < Question.Answers.Count; i++)
+        @for (var i = 0; i < Question.Answers.Count; i++)
         {
             var answer = Question.Answers[i];
 
             <ControllerAnswer IsRevealed=Round.IsAnswerRevealed[i] Ranking=answer.Ranking Content=@answer.Content
-                Points=answer.Points OnClick="@(() => RevealAnswer(answer.Ranking))" />
+                              Points=answer.Points OnClick="@(() => RevealAnswer(answer.Ranking))"/>
         }
     </div>
 
@@ -33,27 +30,27 @@
     </div>
 
     <div class="control-btns">
-        <ControllerButton TailwindStyle="" OnClick=NewRound>
+        <ControllerButton TailwindStyle="" OnClick="NewRound">
             New Round
         </ControllerButton>
 
-        <ControllerButton TailwindStyle="" OnClick=SwapTeamPlaying>
+        <ControllerButton TailwindStyle="" OnClick="SwapTeamPlaying">
             Swap Team
         </ControllerButton>
-        
-        <ControllerButton TailwindStyle="" OnClick=EnableBuzzers>
+
+        <ControllerButton TailwindStyle="" OnClick="EnableBuzzers">
             Buzzers On
         </ControllerButton>
 
-        <ControllerButton TailwindStyle="" OnClick=DisableBuzzers>
+        <ControllerButton TailwindStyle="" OnClick="DisableBuzzers">
             Buzzers Off
         </ControllerButton>
 
-        <ControllerButton TailwindStyle="bg-blue-300" OnClick=@(() => WrongAnswer(false))>
+        <ControllerButton TailwindStyle="bg-blue-300" OnClick="@(() => WrongAnswer(false))">
             Wrong Answer
         </ControllerButton>
 
-        <ControllerButton TailwindStyle="" OnClick=@(() => WrongAnswer(true))>
+        <ControllerButton TailwindStyle="" OnClick="@(() => WrongAnswer(true))">
             Show Wrong Modal
         </ControllerButton>
     </div>
@@ -62,49 +59,49 @@
     <div class="team-display">
         @foreach (var team in Teams)
         {
-            var roundWinner = (Round.RoundWinner == team.Name);
-           <ControllerTeamDisplay Team=team IsTeamPlaying=IsTeamPlaying[team] RoundWinner=roundWinner OnEdit=@((newName) => HandleEditTeamName(team, newName))/> 
+            var roundWinner = Round.RoundWinner == team.Name;
+            <ControllerTeamDisplay Team=team IsTeamPlaying=IsTeamPlaying[team] RoundWinner=roundWinner OnEdit=@(newName => HandleEditTeamName(team, newName))/>
         }
     </div>
 
     <div class="sound-btns">
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("round-start")) >
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("round-start"))>
             round-start
         </ControllerSoundButton>
 
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("round-end")) >
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("round-end"))>
             round-end
         </ControllerSoundButton>
 
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("intro-music")) >
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("intro-music"))>
             intro-music
         </ControllerSoundButton>
 
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("timer-long")) >
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("timer-long"))>
             timer-long
         </ControllerSoundButton>
 
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("timer-short")) >
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("timer-short"))>
             timer-short
         </ControllerSoundButton>
 
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("hold-music")) >
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("hold-music"))>
             hold-music
         </ControllerSoundButton>
 
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("top-answer")) >
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("top-answer"))>
             top-answer
         </ControllerSoundButton>
 
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("correct-answer")) >
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("correct-answer"))>
             correct-answer
         </ControllerSoundButton>
 
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("buzz-in")) >
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("buzz-in"))>
             buzz-in
         </ControllerSoundButton>
 
-        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("laugh-track"))  >
+        <ControllerSoundButton TailwindStyle="" OnClick=@(() => PlaySound("laugh-track"))>
             laugh-track
         </ControllerSoundButton>
 

@@ -1,4 +1,4 @@
-﻿@namespace FeudingFamily.Components
+﻿@namespace FeudingFamily.Components.Pages.PresenterPage
 @inject IJSRuntime JS
 
 <script type="text/javascript">
@@ -33,11 +33,13 @@
 </script>
 
 @code {
-    public async Task PlaySound(string soundName, bool overdub=false)
+
+    public async Task PlaySound(string soundName, bool overdub = false)
     {
         Console.Write($"--Presenter--  Sound: {soundName}, Time:");
         Console.WriteLine(DateTime.UtcNow.ToLocalTime());
 
         await JS.InvokeVoidAsync("playSound", soundName, overdub);
     }
+
 }

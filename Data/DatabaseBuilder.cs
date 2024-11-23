@@ -1,16 +1,16 @@
+using System.Data;
+using System.Text.Json;
 using Dapper;
 using FeudingFamily.Models;
 using Microsoft.Data.Sqlite;
-using System.Data;
-using System.Text.Json;
 
 namespace FeudingFamily.Data;
 
 // this sucks, but i only need to use it once soooooo.
 public class DatabaseBuilder
 {
-
     private readonly IDbConnection _connection;
+
     public DatabaseBuilder(IDbConnection connection)
     {
         _connection = connection;
@@ -22,9 +22,7 @@ public class DatabaseBuilder
         {
             var result = await _connection.ExecuteAsync(createTableSql);
             if (result == 0)
-            {
                 Console.WriteLine("$Result is {result} but no error thrown, table probably already exists");
-            }
 
             Console.WriteLine($"Table created successfully. Result: {result}");
         }
@@ -33,7 +31,6 @@ public class DatabaseBuilder
             Console.WriteLine($"Error creating table. Exception: {ex.Message}");
             throw;
         }
-
     }
 
     public async Task PopulateTablesAsync(string jsonFilePath)
@@ -42,10 +39,7 @@ public class DatabaseBuilder
         {
             var questions = ReadAndParseJsonFile(jsonFilePath);
 
-            if (questions is null)
-            {
-                return;
-            }
+            if (questions is null) return;
 
             foreach (var question in questions)
             {
@@ -60,16 +54,12 @@ public class DatabaseBuilder
                     INSERT INTO Questions (Content) VALUES (@Content);
                 ";
 
-                var effectedQuestionRows = await _connection.ExecuteAsync(questionSql, new { Content = question.Content });
+                var effectedQuestionRows = await _connection.ExecuteAsync(questionSql, new { question.Content });
 
                 if (effectedQuestionRows == 1)
-                {
                     Console.WriteLine($"success for {question.Content}");
-                }
                 else
-                {
                     Console.WriteLine($"\n\nFAIL!!!\n{question.Content}, {effectedQuestionRows}");
-                }
 
 
                 var lastInsertedRowId = await _connection.ExecuteScalarAsync("SELECT last_insert_rowid()");
@@ -83,9 +73,9 @@ public class DatabaseBuilder
                 {
                     var parameters = new
                     {
-                        Content = answer.Content,
-                        Points = answer.Points,
-                        Ranking = answer.Ranking,
+                        answer.Content,
+                        answer.Points,
+                        answer.Ranking,
                         QuestionId = lastInsertedRowId
                     };
 
@@ -99,8 +89,6 @@ public class DatabaseBuilder
             Console.WriteLine($"Error populating tables. Exception: {ex}");
             throw;
         }
-
-
     }
 
     public bool CheckIfQuestionInDatabase(QuestionDto question)
@@ -113,8 +101,8 @@ public class DatabaseBuilder
         var rowsReturned = _connection.ExecuteScalar<int>(sql, new { question.Content });
 
         return rowsReturned != 0;
-
     }
+
     public List<QuestionDto>? ReadAndParseJsonFile(string jsonFilePath)
     {
         using var json = new StreamReader(jsonFilePath).BaseStream;
@@ -130,10 +118,7 @@ public class DatabaseBuilder
 
             var jsonQuestions = JsonSerializer.Deserialize<List<JsonQuestionModel>>(json, options);
 
-            if (jsonQuestions is null)
-            {
-                throw new Exception("JsonQuestions is null");
-            }
+            if (jsonQuestions is null) throw new Exception("JsonQuestions is null");
 
             var questions = jsonQuestions.Select(q =>
                 new QuestionDto
@@ -141,31 +126,36 @@ public class DatabaseBuilder
                     Content = q.Question,
                     Answers =
                     [
-                        new() {
+                        new AnswerDto
+                        {
                             Content = q.Answer1?.Text ?? string.Empty,
                             Points = q.Answer1?.Points ?? 0,
                             Ranking = 1
                         },
-                        new() {
+                        new AnswerDto
+                        {
                             Content = q.Answer2?.Text ?? string.Empty,
                             Points = q.Answer2?.Points ?? 0,
                             Ranking = 2
                         },
-                        new() {
+                        new AnswerDto
+                        {
                             Content = q.Answer3?.Text ?? string.Empty,
                             Points = q.Answer3?.Points ?? 0,
                             Ranking = 3
                         },
-                        new() {
+                        new AnswerDto
+                        {
                             Content = q.Answer4?.Text ?? string.Empty,
                             Points = q.Answer4?.Points ?? 0,
                             Ranking = 4
                         },
-                        new() {
+                        new AnswerDto
+                        {
                             Content = q.Answer5?.Text ?? string.Empty,
                             Points = q.Answer5?.Points ?? 0,
                             Ranking = 5
-                        },
+                        }
                     ]
                 }
             ).ToList();
@@ -177,12 +167,10 @@ public class DatabaseBuilder
             Console.WriteLine("ERROR: " + ex);
             return default;
         }
-
     }
 
     public async Task TestAsync()
     {
         await PopulateTablesAsync("Data/dbo/JsonQuestions/ff_questions.json");
     }
-
 }

@@ -1,7 +1,10 @@
 @if (Team is not null)
 {
     var fontColor = IsTeamPlaying ? "text-red-500" : "text-black-500";
-    if (RoundWinner) { fontColor = "text-green-600"; }
+    if (RoundWinner)
+    {
+        fontColor = "text-green-600";
+    }
 
     <form class="team @fontColor flex justify-evenly">
         <input @onkeydown=SubmitEditName type="text" @bind=teamName @bind:event=oninput id="team-name" class="team-name">
@@ -9,7 +12,6 @@
         <span>@Team.Points • @Team.RoundsWon</span>
     </form>
 }
-
 
 
 <style>

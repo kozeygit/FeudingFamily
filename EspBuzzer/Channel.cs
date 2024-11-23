@@ -2,21 +2,28 @@ using System.Net.Sockets;
 using System.Text;
 
 namespace FeudingFamily.EspBuzzer;
+
 public class Channel : IDisposable
 {
-    private readonly TcpServer thisServer;
-    public readonly string Id;
-    private TcpClient thisClient;
     private readonly byte[] buffer;
-    private NetworkStream stream;
-    private bool isOpen;
+    public readonly string Id;
+    private readonly TcpServer thisServer;
     private bool disposed;
+    private bool isOpen;
+    private NetworkStream stream;
+    private TcpClient thisClient;
 
     public Channel(TcpServer myServer)
     {
         thisServer = myServer;
         buffer = new byte[256];
         Id = Guid.NewGuid().ToString();
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 
     public void Open(TcpClient client)
@@ -41,10 +48,11 @@ public class Channel : IDisposable
                     Close();
                     continue;
                 }
+
                 while ((position = stream.Read(buffer, 0, buffer.Length)) != 0 && isOpen)
                 {
-                    string data = Encoding.UTF8.GetString(buffer, 0, position);
-                    var args = new DataReceivedArgs()
+                    var data = Encoding.UTF8.GetString(buffer, 0, position);
+                    var args = new DataReceivedArgs
                     {
                         Message = data,
                         ConnectionId = Id,
@@ -52,7 +60,7 @@ public class Channel : IDisposable
                     };
 
                     thisServer.OnDataIn(args);
-                    if (!isOpen) { break; }
+                    if (!isOpen) break;
                 }
             }
         }
@@ -80,12 +88,6 @@ public class Channel : IDisposable
             thisClient.Close();
             disposed = true;
         }
-    }
-
-    public void Dispose()
-    {
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
     }
 
     private bool IsClientDisconnected()

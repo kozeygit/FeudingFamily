@@ -1,4 +1,5 @@
 using System.ComponentModel;
+
 namespace FeudingFamily.Logic;
 
 public class JoinGameResult
@@ -7,13 +8,11 @@ public class JoinGameResult
     public JoinErrorCode? ErrorCode { get; set; }
     public bool Success => ErrorCode is null;
     public Game? Game { get; set; }
-
 }
 
 public enum JoinErrorCode
 {
-    [Description("Key must be provided.")]
-    KeyEmpty,
+    [Description("Key must be provided.")] KeyEmpty,
 
     [Description("Key must be 4 characters long.")]
     KeyWrongLength,
@@ -24,8 +23,7 @@ public enum JoinErrorCode
     [Description("Key is already in use.")]
     KeyInUse,
 
-    [Description("Game does not exist.")]
-    GameNotFound,
+    [Description("Game does not exist.")] GameNotFound,
 
     [Description("Team name must be provided.")]
     TeamNameEmpty,
@@ -35,6 +33,4 @@ public enum JoinErrorCode
 
     [Description("The requested game already has two teams playing.")]
     GameHasTwoTeams
-
-
 }

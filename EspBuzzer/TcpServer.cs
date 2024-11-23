@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 
 // Make this super simple for now.
 // Listen for connections on a port.
@@ -22,10 +21,7 @@ public interface ITcpServer
 
 public class TcpServer
 {
-    public bool Running { get; set; }
-    public event EventHandler<DataReceivedArgs> OnDataReceived;
-    public event EventHandler<string> OnChannelClosed;
-    private TcpListener Listener;
+    private readonly TcpListener Listener;
     public Channels ConnectedChannels;
 
     public TcpServer()
@@ -33,36 +29,28 @@ public class TcpServer
         Listener = new TcpListener(IPAddress.Any, 5000);
     }
 
+    public bool Running { get; set; }
+    public event EventHandler<DataReceivedArgs> OnDataReceived;
+    public event EventHandler<string> OnChannelClosed;
+
     public async Task Start()
     {
-        try
+        Listener.Start();
+        Running = true;
+        ConnectedChannels = new Channels(this);
+        while (Running)
         {
-            Listener.Start();
-            Running = true;
-            ConnectedChannels = new Channels(this);
-            while (Running)
-            {
-                var client = await Listener.AcceptTcpClientAsync();
-                _ = Task.Run(() => new Channel(this).Open(client));
-            }
-
-        }
-        catch (SocketException)
-        {
-            throw;
+            var client = await Listener.AcceptTcpClientAsync();
+            _ = Task.Run(() => new Channel(this).Open(client));
         }
     }
 
     public void SendMessageToClient(string clientID, string message)
     {
-        if (ConnectedChannels.OpenChannels.TryGetValue(clientID, out Channel channel))
-        {
+        if (ConnectedChannels.OpenChannels.TryGetValue(clientID, out var channel))
             channel.Send(message);
-        }
         else
-        {
             Console.WriteLine("Client not found.");
-        }
     }
 
     public bool TryRemoveChannel(string clientID, out Channel channel)

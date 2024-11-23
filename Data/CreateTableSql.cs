@@ -1,25 +1,15 @@
-namespace FeudingFamily.dbo.Tables;
+namespace FeudingFamily.Data;
 
 public class CreateTableSql
 {
-    public static string Questions
-    {
-        get
-        {
-            return @"CREATE TABLE IF NOT EXISTS Questions (
+    public static string Questions =>
+        @"CREATE TABLE IF NOT EXISTS Questions (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     Content TEXT NOT NULL
                 );";
 
-        }
-
-    }
-
-    public static string Answers
-    {
-        get
-        {
-            return @"CREATE TABLE IF NOT EXISTS Answers (
+    public static string Answers =>
+        @"CREATE TABLE IF NOT EXISTS Answers (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     Content TEXT NOT NULL,
                     Points INTEGER,
@@ -27,6 +17,4 @@ public class CreateTableSql
                     QuestionId INTEGER,
                     FOREIGN KEY (QuestionId) REFERENCES Questions(Id)
                 );";
-        }
-    }
 }

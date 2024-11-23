@@ -1,23 +1,18 @@
-using System;
-using System.Collections.Concurrent;
-using System.Diagnostics;
-using FeudingFamily.Hubs;
 using FeudingFamily.Logic;
+using FeudingFamily.Models;
 
 namespace FeudingFamily.EspBuzzer;
 
 public interface IEspBuzzer
 {
     bool AllowConnections { get; set; }
-
 }
 
 public class EspBuzzer : IEspBuzzer
 {
-    private readonly TcpServer _tcpServer;
     private readonly IGameManager _gameManager;
-    private HashSet<string> ConnectedBuzzers = [];
-    public bool AllowConnections { get; set; }
+    private readonly TcpServer _tcpServer;
+    private readonly HashSet<string> ConnectedBuzzers = [];
 
     public EspBuzzer(IGameManager gameManager)
     {
@@ -31,84 +26,90 @@ public class EspBuzzer : IEspBuzzer
         _tcpServer.OnDataReceived += OnClientCommand;
     }
 
-    public Task OnBuzzHandler(object? sender, (string gameKey, Team team) args)
+    public bool AllowConnections { get; set; }
+
+    public async Task OnTeamChangeHandler(object? sender, (string gameKey, Team? playingTeam) args)
     {
         if (args.gameKey != "1234")
         {
-            return Task.CompletedTask;
+            await Task.CompletedTask;
+            return;
         }
-        
-        var connections = _gameManager.GetEspBuzzerConnections(args.gameKey, args.team);
 
-        var buzzers = connections.Select(c => c.ConnectionId);
+        Console.WriteLine("Changing Team");
 
-        foreach (var buzzer in ConnectedBuzzers)
+        List<GameConnection> connections;
+
+        if (args.playingTeam is null)
         {
-            _tcpServer.SendMessageToClient(buzzer, "LED=0");
+            connections = _gameManager.GetEspBuzzerConnections(args.gameKey);
+            var buzzers = connections.Select(c => c.ConnectionId).ToList();
+            buzzers.ForEach(b => _tcpServer.SendMessageToClient(b, "LED=0"));
+            return;
         }
-        
-        foreach (var buzzer in buzzers)
-        {
-            _tcpServer.SendMessageToClient(buzzer, "LED=1");
-        }
-        return Task.CompletedTask;
 
+
+        connections = _gameManager.GetEspBuzzerConnections(args.gameKey, args.playingTeam);
+        var playingBuzzers = connections.Select(c => c.ConnectionId);
+        var nonPlayingBuzzers = ConnectedBuzzers.Where(b => !playingBuzzers.Contains(b));
+
+        foreach (var buzzer in nonPlayingBuzzers) _tcpServer.SendMessageToClient(buzzer, "LED=0");
+
+        foreach (var buzzer in playingBuzzers) _tcpServer.SendMessageToClient(buzzer, "LED=1");
+
+        await Task.CompletedTask;
     }
+
+    public async Task OnBuzzHandler(object? sender, (string gameKey, Team team) args)
+    {
+        if (args.gameKey != "1234") await Task.CompletedTask;
+
+        await Task.CompletedTask;
+    }
+
     public void OnClientCommand(object? sender, DataReceivedArgs e)
     {
         var message = e.Message.Trim();
-        if (string.IsNullOrWhiteSpace(message))
-        {
-            return;
-        }
-        
+
+        if (string.IsNullOrWhiteSpace(message)) return;
+
+        Console.Write("Received command: ");
         Console.WriteLine(message);
+
+        var buzzerId = e.ConnectionId;
 
         if (message.Contains("CONNECT"))
         {
-            string buzzerId = e.ConnectionId;
             JoinGame(buzzerId, "1234");
-            return;
         }
 
-        if (message.Contains("BUZZ") || message == "BUZZ")
+        else if (message.Contains("BUZZ") || message == "BUZZ")
         {
-            string buzzerId = e.ConnectionId;
-
-            if (!ConnectedBuzzers.Contains(buzzerId))
-            {
-                JoinGame(buzzerId, "1234");
-                return;
-            }
-            
-            if (SendBuzz(buzzerId, "1234"))
-            {
-                _tcpServer.SendMessageToClient(e.ConnectionId, "LED=1");
-            }
-            else
-            {
-                _tcpServer.SendMessageToClient(e.ConnectionId, "LED=0");
-            }
-
-            return;
+            SendBuzz(buzzerId, "1234");
         }
 
-        Console.Write("Unhandled command: ");
-        Console.WriteLine(message);
+        else
+        {
+            Console.Write("Unhandled command: ");
+            Console.WriteLine(message);
+        }
     }
 
-    private void JoinGame(string buzzerId, string gameKey)
+    private async Task JoinGame(string buzzerId, string gameKey)
     {
-        _tcpServer.SendMessageToClient(buzzerId, "CONNECTED");
-
-        var result = _gameManager.JoinGame(gameKey, buzzerId, ConnectionType.EspBuzzer, null);
+        var result = await _gameManager.JoinGame(gameKey, buzzerId, ConnectionType.EspBuzzer, null);
 
         if (result.Success is false)
         {
-            Console.WriteLine($"Failed to join: {gameKey} because");
+            Console.WriteLine($"Failed to join: {gameKey} because {result.ErrorCode}");
+            _tcpServer.SendMessageToClient(buzzerId, "ERROR");
             return;
         }
 
+        var game = _gameManager.GetGame(gameKey).Game;
+
+        game.OnTeamChange += OnTeamChangeHandler;
+        _tcpServer.SendMessageToClient(buzzerId, "CONNECTED");
         ConnectedBuzzers.Add(buzzerId);
         Console.WriteLine($"Buzzer connected: {buzzerId}");
     }
@@ -123,39 +124,25 @@ public class EspBuzzer : IEspBuzzer
     {
         throw new NotImplementedException();
     }
-    
+
     public bool SendBuzz(string buzzerId, string gameKey)
     {
         var gameResult = _gameManager.GetGame(gameKey);
 
-        if (gameResult.Success is false)
-        {
-            return false;
-        }
+        if (gameResult.Success is false) return false;
 
         var game = gameResult.Game!;
 
-        var connection = _gameManager.GetConnection("1234", buzzerId) ?? throw new Exception("ESPBuzzer not in connection manager list???");
+        var connection = _gameManager.GetConnection("1234", buzzerId) ??
+                         throw new Exception("ESPBuzzer not in connection manager list???");
 
         var team = game.GetTeam(connection);
 
-        if (team is null)
-        {
-            return false;
-        }
+        if (team is null) return false;
 
         return game.Buzz(team);
-
     }
-
 }
-
-
-
-
-
-
-
 
 // Idea, Very stupid one, but still... 
 // When a buzzer wants to join the game

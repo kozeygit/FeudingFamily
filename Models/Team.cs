@@ -1,4 +1,6 @@
-namespace FeudingFamily.Logic;
+using FeudingFamily.Logic;
+
+namespace FeudingFamily.Models;
 
 public record TeamDto
 {
@@ -12,24 +14,18 @@ public class Team(string teamName)
 {
     public Guid ID { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = teamName;
-    public int Points { get; set; } = 0;
-    public int RoundsWon { get; set; } = 0;
+    public int Points { get; set; }
+    public int RoundsWon { get; set; }
     public HashSet<GameConnection> Members { get; set; } = [];
 
     public void AddMember(GameConnection member)
     {
-        if (!Members.Add(member))
-        {
-            Console.WriteLine("Member already part of team.");
-        }
+        if (!Members.Add(member)) Console.WriteLine("Member already part of team.");
     }
 
     public bool HasMember(GameConnection member)
     {
-        if (Members.Contains(member))
-        {
-            return true;
-        }
+        if (Members.Contains(member)) return true;
 
         return false;
     }
@@ -39,6 +35,7 @@ public class Team(string teamName)
         // true if member found and removed; otherwise, false
         return Members.Remove(member);
     }
+
     public void AddPoints(int points)
     {
         Points += points;

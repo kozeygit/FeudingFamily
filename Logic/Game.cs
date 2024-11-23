@@ -5,19 +5,9 @@ namespace FeudingFamily.Logic;
 public class Game
 {
     private readonly IQuestionService _questionService;
-    private bool _isQuestionManual = false;
-    private bool _isRoundPlaying = false;
-
-    public string GameKey { get; set; }
-    public DateTime CreatedOn { get; init; }
-    public List<Team> Teams { get; set; } = [];
-    public Team? TeamPlaying { get; set; } = null;
-    public Round CurrentRound { get; set; }
-    public Question CurrentQuestion { get; set; }
-    public List<RoundDto> PreviousRounds { get; set; } = [];
-
-    public delegate Task AsyncEventHandler<TEventArgs>(object? sender, TEventArgs e);
-    public event AsyncEventHandler<(string, Team)> OnBuzz;
+    private bool _isQuestionManual;
+    private bool _isRoundPlaying;
+    private Team? teamPlaying;
 
 
     public Game(string gameKey, IQuestionService questionService)
@@ -33,33 +23,42 @@ public class Game
         CreatedOn = DateTime.Now;
     }
 
+    public string GameKey { get; set; }
+    public DateTime CreatedOn { get; init; }
+    public List<Team> Teams { get; set; } = [];
+
+    public Team? TeamPlaying
+    {
+        get => teamPlaying;
+        private set
+        {
+            teamPlaying = value;
+            OnTeamChange.Invoke(this, (GameKey, teamPlaying));
+        }
+    }
+
+    public Round CurrentRound { get; set; }
+    public Question CurrentQuestion { get; set; }
+    public List<RoundDto> PreviousRounds { get; set; } = [];
+
+    public event AsyncEventHandler<(string, Team)> OnBuzz;
+    public event AsyncEventHandler<(string, Team?)> OnTeamChange;
+
     public bool EditTeamName(string oldName, string newName)
     {
-
         newName = newName.ToLower();
-        
+
         var team = GetTeam(oldName);
 
-        if (team is null)
-        {
-            return false;
-        }
+        if (team is null) return false;
 
-        if (HasTeamWithName(newName))
-        {
-            return false;
-        }
+        if (HasTeamWithName(newName)) return false;
 
-        if (string.IsNullOrWhiteSpace(newName))
-        {
-            return false;
-        }
-        
+        if (string.IsNullOrWhiteSpace(newName)) return false;
+
         if (newName.Length > 10 ||
             newName.Length < 3)
-        {
             return false;
-        }
 
         team.Name = newName;
         return true;
@@ -68,20 +67,14 @@ public class Game
     public bool Buzz(Team team)
     {
         Console.WriteLine($"Buzzing team {team.Name}");
-        if (!CurrentRound.IsBuzzersEnabled)
-        {
-            return false;
-        }
+        if (!CurrentRound.IsBuzzersEnabled) return false;
 
-        if (!Teams.Contains(team))
-        {
-            return false;
-        }
+        if (!Teams.Contains(team)) return false;
 
         CurrentRound.IsBuzzersEnabled = false;
         TeamPlaying = team;
         OnBuzz.Invoke(this, (GameKey, team));
-        
+
         return true;
     }
 
@@ -89,15 +82,9 @@ public class Game
     {
         teamName = teamName.ToLower();
 
-        if (HasTeamWithName(teamName))
-        {
-            return false;
-        }
+        if (HasTeamWithName(teamName)) return false;
 
-        if (Teams.Count == 2)
-        {
-            return false;
-        }
+        if (Teams.Count == 2) return false;
 
         Teams.Add(new Team(teamName));
         return true;
@@ -112,10 +99,12 @@ public class Game
     {
         return Teams.FirstOrDefault(team => team.Name == teamName.ToLower());
     }
+
     public Team? GetTeam(Guid ID)
     {
         return Teams.FirstOrDefault(team => team.ID == ID);
     }
+
     public Team? GetTeam(GameConnection connection)
     {
         return Teams.FirstOrDefault(team => team.Members.Contains(connection));
@@ -146,15 +135,11 @@ public class Game
         _isQuestionManual = false;
 
         TeamPlaying = null;
-
     }
 
     public void EndRound()
     {
-        if (_isRoundPlaying is false)
-        {
-            return;
-        }
+        if (_isRoundPlaying is false) return;
 
         if (TeamPlaying != null)
         {
@@ -170,42 +155,27 @@ public class Game
     {
         var playSound = true;
 
-        if (_isRoundPlaying is false)
-        {
-            playSound = false;
-        }
+        if (_isRoundPlaying is false) playSound = false;
 
         CurrentRound.IsBuzzersEnabled = false;
 
         var answer = CurrentQuestion.Answers[answerRanking - 1];
 
-        if (CurrentRound.IsAnswerRevealed[answer.Ranking - 1])
-        {
-            return false;
-        }
+        if (CurrentRound.IsAnswerRevealed[answer.Ranking - 1]) return false;
 
         AddRoundPoints(answer);
         CurrentRound.IsAnswerRevealed[answer.Ranking - 1] = true;
 
-        if (CurrentRound.IsAnswerRevealed.All(x => x == true))
-        {
-            EndRound();
-        }
+        if (CurrentRound.IsAnswerRevealed.All(x => x)) EndRound();
 
-        if (CurrentRound.WrongAnswers == 3)
-        {
-            EndRound();
-        }
+        if (CurrentRound.WrongAnswers == 3) EndRound();
 
         return playSound;
     }
 
     public void AddRoundPoints(Answer answer)
     {
-        if (_isRoundPlaying)
-        {
-            CurrentRound.Points += answer.Points;
-        }
+        if (_isRoundPlaying) CurrentRound.Points += answer.Points;
     }
 
     public void GiveIncorrectAnswer()
@@ -227,31 +197,23 @@ public class Game
             SwapTeamPlaying();
             EndRound();
         }
-
     }
 
     public void SwapTeamPlaying()
     {
-        if (Teams.Count == 0)
-        {
-            return;
-        }
+        if (Teams.Count == 0) return;
 
-        else if (Teams.Count == 1)
-        {
+        if (Teams.Count == 1)
             TeamPlaying = Teams[0];
-        }
 
         else
-        {
             TeamPlaying = TeamPlaying == Teams[0] ? Teams[1] : Teams[0];
-        }
     }
 }
 
 /*
 
-when redirected to buzzer/presenter/controller page. 
+when redirected to buzzer/presenter/controller page.
 Send join game SignalR method to join the game with the game key.
 show loading game screen until the game is loaded.
 
@@ -265,6 +227,6 @@ so there is no null reference exception.
 Add SignalR method to join game on initialized for each page, if the game key is valid, then join the game and render the usual page.
 If not render an error message or a blank-ish page until the SignalR receives the game key.
 
-if game is null, then show a loading screen 
+if game is null, then show a loading screen
 
 */

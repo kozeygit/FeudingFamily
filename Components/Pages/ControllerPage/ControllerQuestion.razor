@@ -37,17 +37,13 @@ else
 </style>
 
 @code {
-    [Parameter]
-    public bool IsRevealed { get; set; }
+    [Parameter] public bool IsRevealed { get; set; }
 
-    [Parameter]
-    public string Content { get; set; } = string.Empty;
+    [Parameter] public string Content { get; set; } = string.Empty;
 
-    [Parameter]
-    public EventCallback OnClick { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
 
-    [Parameter]
-    public EventCallback OnHold { get; set; }
+    [Parameter] public EventCallback OnHold { get; set; }
 
     private bool released;
     private int holdDuration = 500;
@@ -57,7 +53,8 @@ else
         released = false;
         await Task.Delay(holdDuration);
 
-        if (released == false) {
+        if (released == false)
+        {
             await OnHold.InvokeAsync();
             released = true;
         }
@@ -71,5 +68,5 @@ else
             released = true;
         }
     }
-}
 
+}

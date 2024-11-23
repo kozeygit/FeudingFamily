@@ -30,9 +30,11 @@
 </div>
 
 @code {
-    public List<Models.Question> QuestionsList { get; set; } = [];
-    protected async override Task OnInitializedAsync()
+    public List<Question> QuestionsList { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
     {
         QuestionsList = await questionSevice.GetQuestionsAsync();
     }
+
 }

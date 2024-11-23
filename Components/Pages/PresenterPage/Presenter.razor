@@ -1,9 +1,8 @@
 ﻿@page "/Presenter"
 @page "/Presenter/{GameKey}"
-@layout Layout.EmptyLayout
+@layout EmptyLayout
+@using FeudingFamily.Components.Layout
 @inherits PresenterPageBase
-@using Microsoft.AspNetCore.SignalR.Client
-@using FeudingFamily.Logic
 @rendermode InteractiveServer
 
 <PageTitle>FeudingFamily - Presenter</PageTitle>
@@ -14,24 +13,24 @@
 </audio>
 
 <main>
-    <PresenterAudio @ref=presenterAudio />
+    <PresenterAudio @ref="presenterAudio"/>
 
-    <dialog class="wrong-modal" id="wrong-modal" open=@IsWrongModalShown></dialog>
-    <dialog class="buzzer-modal" id="buzzer-modal" open=@IsBuzzerModalShown>
+    <dialog class="wrong-modal" id="wrong-modal" open="@IsWrongModalShown"></dialog>
+    <dialog class="buzzer-modal" id="buzzer-modal" open="@IsBuzzerModalShown">
         @BuzzingTeam buzzed in!
     </dialog>
 
     <div class="game-board">
 
-        <PresenterQuestion IsRevealed=@Round.IsQuestionRevealed Content=@Question.Content OnClick=@RevealQuestion />
+        <PresenterQuestion IsRevealed="@Round.IsQuestionRevealed" Content="@Question.Content" OnClick="@RevealQuestion"/>
 
         <div class="answers">
-            @for (int i = 0; i < 5; i++)
+            @for (var i = 0; i < 5; i++)
             {
                 var answer = Question.Answers[i];
 
                 <PresenterAnswer IsRevealed=@Round.IsAnswerRevealed[i] Ranking=@answer.Ranking Content=@answer.Content
-                    Points=@answer.Points OnClick=@(() => RevealAnswer(answer.Ranking)) />
+                                 Points=@answer.Points OnClick=@(() => RevealAnswer(answer.Ranking))/>
             }
         </div>
 
@@ -41,11 +40,11 @@
 
         @if (Teams.Count > 0)
         {
-            <PresenterTeamDisplay Team=@Teams[0] IsTeamPlaying=@IsTeamPlaying[Teams[0]] />
+            <PresenterTeamDisplay Team=@Teams[0] IsTeamPlaying=@IsTeamPlaying[Teams[0]]/>
         }
 
         <div class="wrong-answers">
-            @for (int i = 0; i < Round.WrongAnswers; i++)
+            @for (var i = 0; i < Round.WrongAnswers; i++)
             {
                 <img src="/images/wrong-answer-icon.png">
             }
@@ -53,7 +52,7 @@
 
         @if (Teams.Count > 1)
         {
-            <PresenterTeamDisplay Team=@Teams[1] IsTeamPlaying=@IsTeamPlaying[Teams[1]] />
+            <PresenterTeamDisplay Team=@Teams[1] IsTeamPlaying=@IsTeamPlaying[Teams[1]]/>
         }
     </div>
 

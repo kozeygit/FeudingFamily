@@ -1,12 +1,12 @@
-using FeudingFamily;
+using System.Data;
 using FeudingFamily.Components;
 using FeudingFamily.EspBuzzer;
 using FeudingFamily.Hubs;
+using FeudingFamily.JoinGame;
 using FeudingFamily.Logic;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Sqlite;
-using System.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +17,7 @@ builder.Services.AddSignalR();
 builder.Services.AddResponseCompression(opts =>
 {
     opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-          ["application/octet-stream"]);
+        ["application/octet-stream"]);
 });
 
 builder.Services.AddTransient<IDbConnection>(provider =>
@@ -26,13 +26,9 @@ builder.Services.AddTransient<IDbConnection>(provider =>
     var configuration = provider.GetRequiredService<IConfiguration>();
     var connectionString = configuration.GetConnectionString("DefaultConnection");
     return new SqliteConnection(connectionString);
-
 });
 
-if (args.Contains("--use-esp-buzzers"))
-{
-    builder.Services.AddSingleton<IEspBuzzer, EspBuzzer>();
-}
+if (args.Contains("--use-esp-buzzers")) builder.Services.AddSingleton<IEspBuzzer, EspBuzzer>();
 
 builder.Services.AddSingleton<IQuestionService, QuestionService>();
 builder.Services.AddSingleton<IGameManager, GameManager>();
@@ -46,7 +42,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    app.UseExceptionHandler("/Error", true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 
@@ -67,25 +63,21 @@ app.MapHub<GameHub>("/gamehub");
 // Question Endpoint
 app.MapGet("/questions2", async (IQuestionService questionService) =>
 {
-    IQuestionService _questionService = questionService;
+    var _questionService = questionService;
 
     var questions = await _questionService.GetQuestionsAsync();
 
     return Results.Ok(questions.Select(q => q.MapToDto().Content));
-
 });
 
-app.MapGet("/buzz", (HttpRequest request) => 
-{
-    return Results.Ok();
-});
+app.MapGet("/buzz", (HttpRequest request) => { return Results.Ok(); });
 
 // just for my local esp buzzers
 app.MapPost("/buzz", async (IGameManager gameManager, IHubContext<GameHub> hubContext, HttpRequest request) =>
 {
     var stream = new StreamReader(request.Body);
     var body = await stream.ReadToEndAsync();
-    string[] vars = body.Split("&");
+    var vars = body.Split("&");
     var gameKey = vars[0].Split("=")[1];
     var teamName = vars[1].Split("=")[1];
 
@@ -93,24 +85,16 @@ app.MapPost("/buzz", async (IGameManager gameManager, IHubContext<GameHub> hubCo
 
     var joinResult = gameManager.GetGame(gameKey);
 
-    if (joinResult.Success is false)
-    {
-        return Results.Ok(false);
-    }
+    if (joinResult.Success is false) return Results.Ok(false);
 
     var game = joinResult.Game!;
 
-    if (game.HasTeamWithName(teamName) is false)
-    {
-        return Results.Ok(false);
-    }
+    if (game.HasTeamWithName(teamName) is false) return Results.Ok(false);
 
     var team = game.GetTeam(teamName)!;
 
-    if (game.Buzz(team) is false)
-    {
-        return Results.Ok(false);
-    };
+    if (game.Buzz(team) is false) return Results.Ok(false);
+    ;
 
     var presenterConnections = gameManager.GetPresenterConnections(gameKey).Select(c => c.ConnectionId);
     var controllerConnections = gameManager.GetControllerConnections(gameKey).Select(c => c.ConnectionId);
@@ -120,7 +104,7 @@ app.MapPost("/buzz", async (IGameManager gameManager, IHubContext<GameHub> hubCo
 
 
     await hubContext.Clients.Clients(presenterConnections).SendAsync("receivePlaySound", "buzz-in");
-    
+
     await hubContext.Clients.Clients(connections).SendAsync("receiveRound", game.CurrentRound.MapToDto());
     await hubContext.Clients.Clients(connections).SendAsync("receiveTeams", game.Teams.Select(t => t.MapToDto()));
 
@@ -150,8 +134,7 @@ app.MapJoinGameEndpoints();
 
 if (args.Contains("--use-esp-buzzers"))
 {
-    IEspBuzzer espBuzzerService = app.Services.GetRequiredService<IEspBuzzer>();
+    var espBuzzerService = app.Services.GetRequiredService<IEspBuzzer>();
 }
 
 app.Run();
-

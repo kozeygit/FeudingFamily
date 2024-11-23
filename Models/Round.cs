@@ -1,10 +1,9 @@
-namespace FeudingFamily.Logic;
-
+namespace FeudingFamily.Models;
 
 public record RoundDto
 {
-    public int Points { get; set; } = 0;
-    public int WrongAnswers { get; set; } = 0;
+    public int Points { get; set; }
+    public int WrongAnswers { get; set; }
     public bool IsQuestionRevealed { get; set; }
     public bool[] IsAnswerRevealed { get; set; } = [false, false, false, false, false];
     public bool IsBuzzersEnabled { get; set; }
@@ -22,12 +21,9 @@ public class Round
 
     public RoundDto MapToDto()
     {
-        string rw = string.Empty;
+        var rw = string.Empty;
 
-        if (RoundWinner is not null)
-        {
-            rw = RoundWinner.Name;
-        }
+        if (RoundWinner is not null) rw = RoundWinner.Name;
 
         return new RoundDto
         {

@@ -1,4 +1,4 @@
-﻿@namespace FeudingFamily.Components
+﻿@namespace FeudingFamily.Components.Pages.PresenterPage
 
 <div class="answer" id="answer-@Ranking" @onclick="Reveal">
     <div class="overlay @(IsRevealed ? "hidden" : "")" id="overlay-@Ranking">
@@ -84,4 +84,5 @@
         await OnClick.InvokeAsync();
         IsRevealed = !IsRevealed;
     }
+
 }

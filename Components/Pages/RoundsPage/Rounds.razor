@@ -1,7 +1,7 @@
 ﻿@page "/Rounds"
 @page "/Rounds/{GameKey}"
-@layout Layout.EmptyLayout
-@using FeudingFamily.Logic
+@using FeudingFamily.Components.Layout
+@layout EmptyLayout
 @inject IGameManager gameManager
 @attribute [StreamRendering]
 
@@ -35,9 +35,9 @@
 </main>
 
 @code {
-    [Parameter]
-    public string? GameKey { get; set; }
+    [Parameter] public string? GameKey { get; set; }
     public List<RoundDto> PrevRounds { get; set; } = [];
+
     protected override void OnParametersSet()
     {
         if (GameKey is null)
@@ -51,4 +51,5 @@
             PrevRounds = jgr.Game!.PreviousRounds;
         }
     }
+
 }

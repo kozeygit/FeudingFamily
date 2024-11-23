@@ -1,6 +1,6 @@
+using System.Data;
 using Dapper;
 using FeudingFamily.Models;
-using System.Data;
 
 namespace FeudingFamily.Logic;
 
@@ -19,10 +19,7 @@ public class QuestionService : IQuestionService
 
         var result = await _connection.QuerySingleOrDefaultAsync<Question>(sql, new { questionId });
 
-        if (result is null)
-        {
-            return GetDefaultQuestion();
-        }
+        if (result is null) return GetDefaultQuestion();
 
         result.Answers = await GetAnswersForQuestionAsync(questionId);
 
@@ -44,10 +41,7 @@ public class QuestionService : IQuestionService
 
         var questions = await _connection.QueryAsync<Question>(sql);
 
-        foreach (var question in questions)
-        {
-            question.Answers = await GetAnswersForQuestionAsync(question.Id);
-        }
+        foreach (var question in questions) question.Answers = await GetAnswersForQuestionAsync(question.Id);
 
         return questions.ToList();
     }
@@ -62,9 +56,9 @@ public class QuestionService : IQuestionService
 
         var shuffledQuestions = await GetQuestionsAsync();
 
-        for (int i = shuffledQuestions.Count - 1; i > 0; i--)
+        for (var i = shuffledQuestions.Count - 1; i > 0; i--)
         {
-            int k = Random.Shared.Next(0, i + 1);
+            var k = Random.Shared.Next(0, i + 1);
             (shuffledQuestions[k], shuffledQuestions[i]) = (shuffledQuestions[i], shuffledQuestions[k]);
         }
 
@@ -111,45 +105,44 @@ public class QuestionService : IQuestionService
                 new Answer { Content = "default-answer-2", Points = 80, Ranking = 2 },
                 new Answer { Content = "default-answer-3", Points = 60, Ranking = 3 },
                 new Answer { Content = "default-answer-4", Points = 40, Ranking = 4 },
-                new Answer { Content = "default-answer-5", Points = 20, Ranking = 5 },
+                new Answer { Content = "default-answer-5", Points = 20, Ranking = 5 }
             ]
         };
     }
-
 }
 
 /// <summary>
-/// Represents a service for managing questions and answers.
+///     Represents a service for managing questions and answers.
 /// </summary>
 public interface IQuestionService
 {
     /// <summary>
-    /// Retrieves all questions.
+    ///     Retrieves all questions.
     /// </summary>
     /// <returns>A list of all questions.</returns>
     Task<List<Question>> GetQuestionsAsync();
 
     /// <summary>
-    /// Retrieves all questions without answers.
+    ///     Retrieves all questions without answers.
     /// </summary>
     /// <returns>A list of all questions omitting answers.</returns>
     Task<List<Question>> GetQuestionsOnlyAsync();
 
     /// <summary>
-    /// Retrieves a question by its ID.
+    ///     Retrieves a question by its ID.
     /// </summary>
     /// <param name="questionId">The ID of the question to retrieve.</param>
     /// <returns>The question with the specified ID.</returns>
     Task<Question> GetQuestionAsync(int questionId);
 
     /// <summary>
-    /// Retrieves all questions in a shuffled order.
+    ///     Retrieves all questions in a shuffled order.
     /// </summary>
     /// <returns>A list of shuffled questions.</returns>
     Task<List<Question>> GetShuffledQuestionsAsync();
 
     /// <summary>
-    /// Retrieves a random question.
+    ///     Retrieves a random question.
     /// </summary>
     /// <returns>A random question.</returns>
     Task<Question> GetRandomQuestionAsync();
@@ -161,4 +154,3 @@ public interface IQuestionService
     /// <returns>A list of answers for the specified question.</returns>
     /// Task<List<Answer>> GetAnswersForQuestionAsync(int questionId);
 }
-
