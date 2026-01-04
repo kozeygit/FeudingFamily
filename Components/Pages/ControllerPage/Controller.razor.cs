@@ -54,7 +54,6 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
             .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
             .Build();
 
-        // hubConnection.On<TeamDto>("receiveBuzz", BuzzIn);
 
         hubConnection.On<QuestionDto>("receiveQuestion", async question =>
         {
@@ -128,12 +127,11 @@ public class ControllerPageBase : ComponentBase, IAsyncDisposable
         if (hubConnection is not null) await hubConnection.SendAsync("SendSetQuestion", GameKey, id);
     }
 
-    public async Task HandleEditTeamName(TeamDto team, string newName)
+    public async Task HandleTeamKill(TeamDto team)
     {
-        Console.WriteLine($"Edit team name: {team.Name} to {newName}");
-        if (hubConnection is not null) await hubConnection.SendAsync("SendEditTeamName", GameKey, team.Name, newName);
+        Console.WriteLine($"Deleting team: {team.Name}");
+        if (hubConnection is not null) await hubConnection.SendAsync("SendRemoveTeam", GameKey, team.ID);
     }
-
     public async Task SwapTeamPlaying()
     {
         if (hubConnection is not null) await hubConnection.SendAsync("SendSwapTeamPlaying", GameKey);

@@ -8,6 +8,7 @@ public record TeamDto
     public string Name { get; set; } = string.Empty;
     public int Points { get; set; }
     public int RoundsWon { get; set; }
+    public int WrongAnswers { get; set; }
 }
 
 public class Team(string teamName)
@@ -16,11 +17,12 @@ public class Team(string teamName)
     public string Name { get; set; } = teamName;
     public int Points { get; set; }
     public int RoundsWon { get; set; }
+    public int WrongAnswers { get; set; } = 0;
     public HashSet<GameConnection> Members { get; set; } = [];
 
     public void AddMember(GameConnection member)
     {
-        if (!Members.Add(member)) Console.WriteLine("Member already part of team.");
+        // Member already part of team - duplicate add ignored
     }
 
     public bool HasMember(GameConnection member)
@@ -53,7 +55,8 @@ public class Team(string teamName)
             ID = ID,
             Name = Name,
             Points = Points,
-            RoundsWon = RoundsWon
+            RoundsWon = RoundsWon,
+            WrongAnswers = WrongAnswers
         };
     }
 }

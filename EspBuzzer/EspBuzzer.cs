@@ -1,5 +1,6 @@
 using FeudingFamily.Logic;
 using FeudingFamily.Models;
+using Microsoft.Extensions.Logging;
 
 namespace FeudingFamily.EspBuzzer;
 
@@ -12,15 +13,19 @@ public class EspBuzzer : IEspBuzzer
 {
     private readonly IGameManager _gameManager;
     private readonly TcpServer _tcpServer;
+    private readonly ILogger<EspBuzzer> _logger;
+    private readonly ILoggerFactory _loggerFactory;
     private readonly HashSet<string> ConnectedBuzzers = [];
 
-    public EspBuzzer(IGameManager gameManager)
+    public EspBuzzer(IGameManager gameManager, ILogger<EspBuzzer> logger, ILoggerFactory loggerFactory)
     {
-        Console.WriteLine("Esp Buzzers Enabled");
+        _logger = logger;
+        _loggerFactory = loggerFactory;
+        _logger.LogInformation("ESP buzzers enabled");
 
         _gameManager = gameManager;
         _gameManager.TeamBuzzed += OnBuzzHandler;
-        _tcpServer = new TcpServer();
+        _tcpServer = new TcpServer(_loggerFactory.CreateLogger<TcpServer>());
         Task.Run(() => _tcpServer.Start());
 
         _tcpServer.OnDataReceived += OnClientCommand;
@@ -35,8 +40,6 @@ public class EspBuzzer : IEspBuzzer
             await Task.CompletedTask;
             return;
         }
-
-        Console.WriteLine("Changing Team");
 
         List<GameConnection> connections;
 
@@ -73,9 +76,6 @@ public class EspBuzzer : IEspBuzzer
 
         if (string.IsNullOrWhiteSpace(message)) return;
 
-        Console.Write("Received command: ");
-        Console.WriteLine(message);
-
         var buzzerId = e.ConnectionId;
 
         if (message.Contains("CONNECT"))
@@ -90,8 +90,7 @@ public class EspBuzzer : IEspBuzzer
 
         else
         {
-            Console.Write("Unhandled command: ");
-            Console.WriteLine(message);
+            _logger.LogWarning("Unhandled command: {Message}", message);
         }
     }
 
@@ -101,7 +100,7 @@ public class EspBuzzer : IEspBuzzer
 
         if (result.Success is false)
         {
-            Console.WriteLine($"Failed to join: {gameKey} because {result.ErrorCode}");
+            _logger.LogError("Buzzer {BuzzerId} failed to join game {GameKey}: {ErrorCode}", buzzerId, gameKey, result.ErrorCode);
             _tcpServer.SendMessageToClient(buzzerId, "ERROR");
             return;
         }
@@ -111,7 +110,7 @@ public class EspBuzzer : IEspBuzzer
         game.OnTeamChange += OnTeamChangeHandler;
         _tcpServer.SendMessageToClient(buzzerId, "CONNECTED");
         ConnectedBuzzers.Add(buzzerId);
-        Console.WriteLine($"Buzzer connected: {buzzerId}");
+        _logger.LogInformation("Buzzer connected: {BuzzerId}", buzzerId);
     }
 
     public void OnClientDisconnected(object? sender, DataReceivedArgs e)
@@ -129,16 +128,39 @@ public class EspBuzzer : IEspBuzzer
     {
         var gameResult = _gameManager.GetGame(gameKey);
 
-        if (gameResult.Success is false) return false;
+        if (gameResult.Success is false)
+        {
+            _logger.LogWarning("Buzz ignored: game {GameKey} not found for buzzer {BuzzerId}", gameKey, buzzerId);
+            return false;
+        }
 
         var game = gameResult.Game!;
-
-        var connection = _gameManager.GetConnection("1234", buzzerId) ??
-                         throw new Exception("ESPBuzzer not in connection manager list???");
+        
+        GameConnection connection;
+        try
+        {
+            connection = _gameManager.GetConnection("1234", buzzerId);
+        }
+        catch (NullReferenceException ex)
+        {
+            _logger.LogWarning("Buzzer {BuzzerId} not found in game. Attempting rejoin", buzzerId);
+            _tcpServer.SendMessageToClient(buzzerId, "ERROR");
+            JoinGame(buzzerId, gameKey);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error getting connection for buzzer {BuzzerId}", buzzerId);
+            return false;
+        }
 
         var team = game.GetTeam(connection);
 
-        if (team is null) return false;
+        if (team is null)
+        {
+            _logger.LogWarning("Buzz ignored: connection not mapped to team for buzzer {BuzzerId}", buzzerId);
+            return false;
+        }
 
         return game.Buzz(team);
     }

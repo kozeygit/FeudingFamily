@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using Microsoft.Extensions.Logging;
 
 // Make this super simple for now.
 // Listen for connections on a port.
@@ -22,10 +23,12 @@ public interface ITcpServer
 public class TcpServer
 {
     private readonly TcpListener Listener;
+    private readonly ILogger<TcpServer> _logger;
     public Channels ConnectedChannels;
 
-    public TcpServer()
+    public TcpServer(ILogger<TcpServer> logger)
     {
+        _logger = logger;
         Listener = new TcpListener(IPAddress.Any, 5000);
     }
 
@@ -35,13 +38,36 @@ public class TcpServer
 
     public async Task Start()
     {
-        Listener.Start();
-        Running = true;
-        ConnectedChannels = new Channels(this);
-        while (Running)
+        try
         {
-            var client = await Listener.AcceptTcpClientAsync();
-            _ = Task.Run(() => new Channel(this).Open(client));
+            Listener.Start();
+            Running = true;
+            ConnectedChannels = new Channels(this);
+            _logger.LogInformation("TCP server started on port 5000");
+            
+            while (Running)
+            {
+                try
+                {
+                    var client = await Listener.AcceptTcpClientAsync();
+                    _logger.LogDebug("New TCP client connection from {RemoteEndPoint}", client.Client.RemoteEndPoint);
+                    _ = Task.Run(() => new Channel(this).Open(client));
+                }
+                catch (ObjectDisposedException)
+                {
+                    _logger.LogInformation("TCP server listener disposed, stopping");
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error accepting TCP client connection");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Fatal error starting TCP server");
+            Running = false;
         }
     }
 
@@ -50,7 +76,7 @@ public class TcpServer
         if (ConnectedChannels.OpenChannels.TryGetValue(clientID, out var channel))
             channel.Send(message);
         else
-            Console.WriteLine("Client not found.");
+            _logger.LogWarning("Client {ClientId} not found when sending message", clientID);
     }
 
     public bool TryRemoveChannel(string clientID, out Channel channel)

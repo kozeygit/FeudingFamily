@@ -6,11 +6,13 @@
         fontColor = "text-green-600";
     }
 
-    <form class="team @fontColor flex justify-evenly">
-        <input @onkeydown=SubmitEditName type="text" @bind=teamName @bind:event=oninput id="team-name" class="team-name">
+    <div class="team @fontColor flex justify-evenly">
+        <span> @Team.Name</span>
         <input hidden=true>
         <span>@Team.Points • @Team.RoundsWon</span>
-    </form>
+        <span>@Team.WrongAnswers/3</span>
+        <button type="button" @onclick=SubmitTeamKill>Delete</button>
+    </div>
 }
 
 
@@ -42,44 +44,15 @@
 
 @code {
 
-    // Make input field readonly, add edit button to change input to not readonly
-    // change css tyles based on if input is readonly
-    // Then when a new name is entered
-    // Add old name to variable,
-    // check if new name is the same as old, if it is, don't send signalr thing
-    // just change input back to readonly
-
     [Parameter] public TeamDto? Team { get; set; }
     [Parameter] public bool IsTeamPlaying { get; set; } = false;
     [Parameter] public bool RoundWinner { get; set; } = false;
     [Parameter] public EventCallback<string> OnEdit { get; set; }
-    private string teamName = string.Empty;
+    [Parameter] public EventCallback OnTeamKill { get; set; }
 
-    protected override void OnParametersSet()
+    private async Task SubmitTeamKill()
     {
-        teamName = Team.Name;
-    }
-
-    private async Task SubmitEditName(KeyboardEventArgs args)
-    {
-        if (args.Code != "Enter")
-        {
-            return;
-        }
-
-        await InvokeAsync(StateHasChanged);
-
-        Console.WriteLine("Changing name to: " + teamName);
-
-        if (teamName == Team.Name)
-        {
-            Console.WriteLine("Name is the same as before");
-            await InvokeAsync(StateHasChanged);
-            return;
-        }
-
-        await OnEdit.InvokeAsync(teamName);
-        await InvokeAsync(StateHasChanged);
+        await OnTeamKill.InvokeAsync();
     }
 
 }

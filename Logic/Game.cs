@@ -1,20 +1,22 @@
 using FeudingFamily.Models;
+using Microsoft.Extensions.Logging;
 
 namespace FeudingFamily.Logic;
 
 public class Game
 {
     private readonly IQuestionService _questionService;
+    private readonly ILogger<Game> _logger;
     private bool _isQuestionManual;
     private bool _isRoundPlaying;
     private Team? teamPlaying;
 
 
-    public Game(string gameKey, IQuestionService questionService)
+    public Game(string gameKey, IQuestionService questionService, ILogger<Game> logger)
     {
         GameKey = gameKey;
-
         _questionService = questionService;
+        _logger = logger;
 
         CurrentQuestion = QuestionService.GetDefaultQuestion();
 
@@ -33,7 +35,7 @@ public class Game
         private set
         {
             teamPlaying = value;
-            OnTeamChange.Invoke(this, (GameKey, teamPlaying));
+            OnTeamChange?.Invoke(this, (GameKey, teamPlaying));
         }
     }
 
@@ -44,36 +46,30 @@ public class Game
     public event AsyncEventHandler<(string, Team)> OnBuzz;
     public event AsyncEventHandler<(string, Team?)> OnTeamChange;
 
-    public bool EditTeamName(string oldName, string newName)
+    public bool RemoveTeam(Team team)
     {
-        newName = newName.ToLower();
-
-        var team = GetTeam(oldName);
-
-        if (team is null) return false;
-
-        if (HasTeamWithName(newName)) return false;
-
-        if (string.IsNullOrWhiteSpace(newName)) return false;
-
-        if (newName.Length > 10 ||
-            newName.Length < 3)
-            return false;
-
-        team.Name = newName;
+        if (!Teams.Contains(team)) return false;
+        team.Members.Clear();
+        Teams.Remove(team);
+        TeamPlaying = null;
+        OnTeamChange?.Invoke(this, (GameKey, team));
         return true;
     }
 
     public bool Buzz(Team team)
     {
-        Console.WriteLine($"Buzzing team {team.Name}");
-        if (!CurrentRound.IsBuzzersEnabled) return false;
+        if (!CurrentRound.IsBuzzersEnabled)
+        {
+            _logger.LogDebug("Buzz attempt ignored: buzzers disabled for {TeamName}", team.Name);
+            return false;
+        }
 
         if (!Teams.Contains(team)) return false;
 
         CurrentRound.IsBuzzersEnabled = false;
         TeamPlaying = team;
-        OnBuzz.Invoke(this, (GameKey, team));
+        _logger.LogInformation("Team {TeamName} buzzed in successfully - GameKey: {GameKey}", team.Name, GameKey);
+        OnBuzz?.Invoke(this, (GameKey, team));
 
         return true;
     }
@@ -112,9 +108,18 @@ public class Game
 
     public async Task<Question> SetQuestionAsync(int id)
     {
-        CurrentQuestion = await _questionService.GetQuestionAsync(id);
-        _isQuestionManual = true;
-        return CurrentQuestion;
+        try
+        {
+            CurrentQuestion = await _questionService.GetQuestionAsync(id);
+            _isQuestionManual = true;
+            _logger.LogDebug("Question set - GameKey: {GameKey}, QuestionId: {QuestionId}", GameKey, id);
+            return CurrentQuestion;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to set question - GameKey: {GameKey}, QuestionId: {QuestionId}", GameKey, id);
+            throw;
+        }
     }
 
     public async Task NewRoundAsync()
@@ -122,7 +127,13 @@ public class Game
         _isRoundPlaying = true;
 
         PreviousRounds.Add(CurrentRound.MapToDto());
-        Console.WriteLine($"Rounds = {PreviousRounds.Count}");
+        _logger.LogInformation("New round started - GameKey: {GameKey}, RoundNumber: {RoundCount}", GameKey, PreviousRounds.Count + 1);
+
+        // Reset team wrong answer counters for the new round
+        foreach (var team in Teams)
+        {
+            team.WrongAnswers = 0;
+        }
 
         CurrentRound = new Round
         {
@@ -178,24 +189,44 @@ public class Game
         if (_isRoundPlaying) CurrentRound.Points += answer.Points;
     }
 
+    /// <summary>
+    /// Determines if we're in the Face-Off phase (no answers revealed yet).
+    /// Once an answer is revealed, the main round begins.
+    /// </summary>
+    private bool IsInFaceOff()
+    {
+        return !CurrentRound.IsAnswerRevealed.Any(x => x);
+    }
+
     public void GiveIncorrectAnswer()
     {
-        if (CurrentRound.WrongAnswers < 2)
+        if (TeamPlaying is null)
         {
-            CurrentRound.WrongAnswers++;
+            _logger.LogWarning("GiveIncorrectAnswer called but no team is playing - GameKey: {GameKey}", GameKey);
+            return;
         }
 
-        else if (CurrentRound.WrongAnswers == 2)
-        {
-            SwapTeamPlaying();
-            CurrentRound.WrongAnswers++;
-        }
+        // During Face-Off, wrong answers don't count as strikes
+        bool isInFaceOff = IsInFaceOff();
 
-        else if (CurrentRound.WrongAnswers == 3)
+        if (!isInFaceOff && !(CurrentRound.WrongAnswers > 3))
         {
-            CurrentRound.WrongAnswers++;
-            SwapTeamPlaying();
-            EndRound();
+            TeamPlaying.WrongAnswers++;
+            CurrentRound.WrongAnswers++;  // Keep in sync for backwards compatibility
+
+            _logger.LogInformation("Team {TeamName} given incorrect answer - Team WrongAnswers: {WrongAnswers} - GameKey: {GameKey}", 
+                TeamPlaying.Name, TeamPlaying.WrongAnswers, GameKey);
+
+            if (TeamPlaying.WrongAnswers >= 3)
+            {
+                SwapTeamPlaying();
+                _logger.LogInformation("Team reached 3 wrong answers, control passed - GameKey: {GameKey}", GameKey);
+            }
+        }
+        else
+        {
+            _logger.LogInformation("Face-Off: Team {TeamName} answered incorrectly (no strike counted) - GameKey: {GameKey}", 
+                TeamPlaying.Name, GameKey);
         }
     }
 

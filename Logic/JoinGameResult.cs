@@ -30,6 +30,10 @@ public enum JoinErrorCode
 
     [Description("Team name is invalid for some reason lol.")]
     TeamNameInvalid,
+    [Description("Team name must be less than 12 characters.")]
+    TeamNameTooLong,
+    [Description("Team name must be more than 3 characters.")]
+    TeamNameTooShort,
 
     [Description("The requested game already has two teams playing.")]
     GameHasTwoTeams

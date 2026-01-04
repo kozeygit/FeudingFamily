@@ -2,6 +2,7 @@ using System.ComponentModel;
 using FeudingFamily.Hubs;
 using FeudingFamily.Models;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 
 namespace FeudingFamily.Logic;
 
@@ -9,13 +10,17 @@ public class GameManager : IGameManager
 {
     private readonly IHubContext<GameHub> _hubContext;
     private readonly IQuestionService _questionService;
+    private readonly ILogger<GameManager> _logger;
+    private readonly ILoggerFactory _loggerFactory;
     private readonly Dictionary<string, GameRoom> gameRooms = [];
     private readonly Dictionary<string, Game> games = [];
 
-    public GameManager(IQuestionService questionService, IHubContext<GameHub> hubContext)
+    public GameManager(IQuestionService questionService, IHubContext<GameHub> hubContext, ILogger<GameManager> logger, ILoggerFactory loggerFactory)
     {
         _questionService = questionService;
         _hubContext = hubContext;
+        _logger = logger;
+        _loggerFactory = loggerFactory;
     }
 
     public event AsyncEventHandler<(string, Team)>? TeamBuzzed;
@@ -36,16 +41,26 @@ public class GameManager : IGameManager
 
     public JoinGameResult NewGame(string gameKey)
     {
-        if (!GameKeyValidator(gameKey).Success)
-            return new JoinGameResult { ErrorCode = GameKeyValidator(gameKey).ErrorCode };
+        var validationResult = GameKeyValidator(gameKey);
+        if (!validationResult.Success)
+        {
+            _logger.LogWarning("Failed to create game with key {GameKey}: {ErrorCode}", gameKey, validationResult.ErrorCode);
+            return new JoinGameResult { ErrorCode = validationResult.ErrorCode };
+        }
 
-        if (games.ContainsKey(gameKey)) return new JoinGameResult { ErrorCode = JoinErrorCode.KeyInUse };
+        if (games.ContainsKey(gameKey))
+        {
+            _logger.LogWarning("Attempted to create duplicate game with key {GameKey}", gameKey);
+            return new JoinGameResult { ErrorCode = JoinErrorCode.KeyInUse };
+        }
 
-        var game = new Game(gameKey, _questionService);
+        var game = new Game(gameKey, _questionService, _loggerFactory.CreateLogger<Game>());
         games.Add(gameKey, game);
         gameRooms.Add(gameKey, new GameRoom { GameKey = gameKey });
 
         game.OnBuzz += OnGameBuzz;
+        
+        _logger.LogInformation("New game created: {GameKey}", gameKey);
 
         return new JoinGameResult { Game = game };
     }
@@ -53,7 +68,7 @@ public class GameManager : IGameManager
 
     public async Task OnGameBuzz(object? sender, (string gameKey, Team team) args)
     {
-        Console.WriteLine($"OnGameBuzz, {args.gameKey}, {args.team}");
+        _logger.LogInformation("Game buzz event - GameKey: {GameKey}, Team: {TeamName}", args.gameKey, args.team.Name);
         var gameKey = args.gameKey;
         var team = args.team;
 
@@ -104,7 +119,7 @@ public class GameManager : IGameManager
 
         if (gameRooms[gameKey].Connections.Contains(connection))
         {
-            Console.WriteLine("Already connected");
+            _logger.LogWarning("Connection {ConnectionId} already exists in game {GameKey}", connectionId, gameKey);
             return new JoinGameResult { Game = game };
         }
 
@@ -174,7 +189,7 @@ public class GameManager : IGameManager
 
     public void LeaveGame(string gameKey, string connectionId)
     {
-        Console.WriteLine($"---GameManager---: LeaveGame: {gameKey}, {connectionId}");
+        _logger.LogInformation("Player leaving game - GameKey: {GameKey}, ConnectionId: {ConnectionId}", gameKey, connectionId);
 
         if (gameKey is null || connectionId is null) return;
 
@@ -192,7 +207,7 @@ public class GameManager : IGameManager
 
         if (gameRoom.Connections.Count == 0 && game.CreatedOn.AddMinutes(1) < DateTime.Now)
         {
-            Console.WriteLine($"Removing game: {gameKey}");
+            _logger.LogInformation("Removing empty game: {GameKey}", gameKey);
             game.Teams.RemoveAll(t => t.Members.Count == 0);
             games.Remove(gameKey);
             gameRooms.Remove(gameKey);
@@ -238,7 +253,7 @@ public class GameManager : IGameManager
     {
         var connections = GetConnections(gameKey);
         var connection = connections.SingleOrDefault(c => c.ConnectionId == connectionId);
-        if (connection is null) throw new Exception("Error, no connection found");
+        if (connection is null) throw new NullReferenceException("Error, no connection found");
         return connection;
     }
 

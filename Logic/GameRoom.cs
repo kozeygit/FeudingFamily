@@ -9,13 +9,11 @@ public class GameRoom
     public void AddConnection(GameConnection connection)
     {
         Connections.Add(connection);
-        Console.WriteLine($"Adding Connection, Count: {Connections.Count}");
     }
 
     public void RemoveConnection(GameConnection connection)
     {
         Connections.Remove(connection);
-        Console.WriteLine($"Removing Connection, Count: {Connections.Count}");
     }
 
     public ConnectionType GetConnectionType(string connectionId)

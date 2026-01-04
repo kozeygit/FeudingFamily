@@ -1,29 +1,44 @@
 using System.Data;
 using Dapper;
 using FeudingFamily.Models;
+using Microsoft.Extensions.Logging;
 
 namespace FeudingFamily.Logic;
 
 public class QuestionService : IQuestionService
 {
     private readonly IDbConnection _connection;
+    private readonly ILogger<QuestionService> _logger;
 
-    public QuestionService(IDbConnection connection)
+    public QuestionService(IDbConnection connection, ILogger<QuestionService> logger)
     {
         _connection = connection;
+        _logger = logger;
     }
 
     public async Task<Question> GetQuestionAsync(int questionId)
     {
         const string sql = "SELECT * FROM Questions WHERE Id = @questionId;";
 
-        var result = await _connection.QuerySingleOrDefaultAsync<Question>(sql, new { questionId });
+        try
+        {
+            var result = await _connection.QuerySingleOrDefaultAsync<Question>(sql, new { questionId });
 
-        if (result is null) return GetDefaultQuestion();
+            if (result is null)
+            {
+                _logger.LogWarning("Question {QuestionId} not found, returning default", questionId);
+                return GetDefaultQuestion();
+            }
 
-        result.Answers = await GetAnswersForQuestionAsync(questionId);
+            result.Answers = await GetAnswersForQuestionAsync(questionId);
 
-        return result;
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving question {QuestionId}", questionId);
+            throw;
+        }
     }
 
     public async Task<List<Question>> GetQuestionsOnlyAsync()
@@ -72,14 +87,23 @@ public class QuestionService : IQuestionService
             ORDER BY RANDOM()
             LIMIT 1;";
 
-        var question = await _connection.QueryFirstOrDefaultAsync<Question>(sql);
+        try
+        {
+            var question = await _connection.QueryFirstOrDefaultAsync<Question>(sql);
 
-        if (question is null)
-            throw new Exception("No questions found in the database.");
+            if (question is null)
+            {
+                throw new InvalidOperationException("No questions found in the database.");
+            }
 
-        question.Answers = await GetAnswersForQuestionAsync(question.Id);
+            question.Answers = await GetAnswersForQuestionAsync(question.Id);
 
-        return question;
+            return question;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Failed to retrieve random question from database", ex);
+        }
     }
 
     public async Task<List<Answer>> GetAnswersForQuestionAsync(int questionId)

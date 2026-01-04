@@ -1,3 +1,4 @@
+using System.Net;
 using FeudingFamily.Logic;
 using FeudingFamily.Models;
 using Microsoft.AspNetCore.Components;
@@ -25,6 +26,7 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
     protected bool IsWrongModalShown { get; set; }
 
     public bool IsGameConnected { get; set; }
+    public string IP { get; set; } = string.Empty;
 
     public bool IsHubConnected =>
         hubConnection?.State == HubConnectionState.Connected;
@@ -47,6 +49,11 @@ public class PresenterPageBase : ComponentBase, IAsyncDisposable
 
     protected override async Task OnInitializedAsync()
     {
+        var ip = Dns.GetHostEntry(Dns.GetHostName()).AddressList[0];
+        var url = $"http://{ip}";
+
+        IP = url;
+
         Question = QuestionService.GetDefaultQuestion().MapToDto();
 
         foreach (var team in Teams) IsTeamPlaying.TryAdd(team, false);

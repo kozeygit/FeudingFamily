@@ -29,89 +29,43 @@ public static class JoinGame
 
             return page switch
             {
-                "Join" => JoinBuzzerPage(gameKey, teamName, joinResult.Game!, gameManager),
-                "Presenter" => JoinPresenterPage(gameKey, gameManager),
-                "Controller" => JoinControllerPage(gameKey, gameManager),
+                "Join" => JoinBuzzerPage(gameKey, teamName, joinResult.Game!),
+                "Presenter" => JoinPresenterPage(gameKey),
+                "Controller" => JoinControllerPage(gameKey),
                 _ => Results.Redirect("/")
             };
         });
     }
 
-    private static IResult JoinPresenterPage(string gameKey, IGameManager gameManager)
+    private static IResult JoinPresenterPage(string gameKey)
     {
         return Results.Redirect($"/Presenter/{gameKey}");
     }
 
-    private static IResult JoinControllerPage(string gameKey, IGameManager gameManager)
+    private static IResult JoinControllerPage(string gameKey)
     {
         return Results.Redirect($"/Controller/{gameKey}");
     }
-
-    public static bool EspJoin(string gameKey, string teamName, IGameManager gameManager)
-    {
-        teamName = teamName.ToLower();
-        gameKey = gameKey.ToLower();
-
-        if (string.IsNullOrWhiteSpace(gameKey)) return false;
-
-        var joinResult = gameManager.GameKeyValidator(gameKey);
-
-        if (!joinResult.Success) return false;
-
-        var gameExists = gameManager.GetGame(gameKey);
-
-        if (!gameExists.Success) return false;
-
-        var game = gameExists.Game!;
-
-        // Team name validation
-        if (string.IsNullOrWhiteSpace(teamName))
-        {
-            Console.WriteLine("\n\n !! 2 !!\n\n");
-            return false;
-        }
-
-        if (teamName.Length > 10 ||
-            teamName.Length < 3)
-            return false;
-
-        // Join existing team
-        if (game.HasTeamWithName(teamName))
-        {
-            Console.WriteLine("Joining game: gameKey; Joining team: teamName");
-            return false;
-        }
-
-        // If game has two teams, return error
-        if (game.Teams.Count == 2) return false;
-
-        // Create new team and join
-        if (game.AddTeam(teamName) is false) throw new Exception("Error adding team");
-
-        var team = game.GetTeam(teamName)!;
-        Console.WriteLine($"Added Team: {team.Name} with id: {team.ID}");
-
-
-        return true;
-    }
-
-    private static IResult JoinBuzzerPage(string gameKey, string teamName, Game game, IGameManager gameManager)
+    
+    private static IResult JoinBuzzerPage(string gameKey, string teamName, Game game)
     {
         // Team name validation
         if (string.IsNullOrWhiteSpace(teamName))
         {
-            Console.WriteLine("\n\n !! 2 !!\n\n");
+            // DEBUG: Checkpoint 2
             return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.TeamNameEmpty}");
         }
 
-        if (teamName.Length > 10 ||
-            teamName.Length < 3)
-            return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.TeamNameInvalid}");
+        if (teamName.Length >= 12)
+            return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.TeamNameTooLong}");
+
+        if (teamName.Length <= 3)
+            return Results.Redirect($"/?ErrorCode={(int)JoinErrorCode.TeamNameTooShort}");
 
         // Join existing team
         if (game.HasTeamWithName(teamName))
         {
-            Console.WriteLine("Joining game: gameKey; Joining team: teamName");
+            // TODO: Join game with team name
             return Results.Redirect($"/Buzzer/{gameKey}?TeamID={game.GetTeam(teamName)!.ID}");
         }
 
@@ -122,7 +76,7 @@ public static class JoinGame
         if (game.AddTeam(teamName) is false) throw new Exception("Error adding team");
 
         var team = game.GetTeam(teamName)!;
-        Console.WriteLine($"Added Team: {team.Name} with id: {team.ID}");
+        // Team added to game
 
 
         return Results.Redirect($"/Buzzer/{gameKey}?TeamID={team.ID}");

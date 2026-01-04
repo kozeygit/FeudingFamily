@@ -36,7 +36,7 @@ main {
     margin-top: 1rem;
 }
 
-#wrong-answer {
+#wrong-answers {
     flex: 1;
     text-align: center;
 }
@@ -57,6 +57,10 @@ main {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 0.5rem;
+}
+
+#wrong-modal-button {
+    flex: 0.5;
 }
 
 .sound-btns {

@@ -17,45 +17,57 @@
 
     <dialog class="wrong-modal" id="wrong-modal" open="@IsWrongModalShown"></dialog>
     <dialog class="buzzer-modal" id="buzzer-modal" open="@IsBuzzerModalShown">
-        @BuzzingTeam buzzed in!
+        @BuzzingTeam BUZZED IN!
     </dialog>
 
-    <div class="game-board">
-
-        <PresenterQuestion IsRevealed="@Round.IsQuestionRevealed" Content="@Question.Content" OnClick="@RevealQuestion"/>
-
-        <div class="answers">
-            @for (var i = 0; i < 5; i++)
-            {
-                var answer = Question.Answers[i];
-
-                <PresenterAnswer IsRevealed=@Round.IsAnswerRevealed[i] Ranking=@answer.Ranking Content=@answer.Content
-                                 Points=@answer.Points OnClick=@(() => RevealAnswer(answer.Ranking))/>
-            }
-        </div>
-
-    </div>
-
-    <div class="footer">
-
+    <div class="main-content">
+        <!-- Left Team -->
         @if (Teams.Count > 0)
         {
             <PresenterTeamDisplay Team=@Teams[0] IsTeamPlaying=@IsTeamPlaying[Teams[0]]/>
         }
 
-        <div class="wrong-answers">
-            @for (var i = 0; i < Round.WrongAnswers; i++)
-            {
-                <img src="/images/wrong-answer-icon.png">
-            }
+        <!-- Game Board -->
+        <div class="game-board">
+            <PresenterQuestion IsRevealed="@Round.IsQuestionRevealed" Content="@Question.Content" OnClick="@RevealQuestion"/>
+
+            <div class="answers">
+                @for (var i = 0; i < 5; i++)
+                {
+                    var answer = Question.Answers[i];
+
+                    <PresenterAnswer IsRevealed=@Round.IsAnswerRevealed[i] Ranking=@answer.Ranking Content=@answer.Content
+                                     Points=@answer.Points OnClick=@(() => RevealAnswer(answer.Ranking))/>
+                }
+            </div>
         </div>
 
+        <!-- Right Team -->
         @if (Teams.Count > 1)
         {
             <PresenterTeamDisplay Team=@Teams[1] IsTeamPlaying=@IsTeamPlaying[Teams[1]]/>
         }
     </div>
 
-    <h1 class="w-max text-center pb-2">@GameKey</h1>
+    <div class="footer">
+        <div class="wrong-answers">
+            @for (var i = 0; i < Round.WrongAnswers; i++)
+            {
+                <img src="/images/wrong-answer-icon.png">
+            }
+        </div>
+    </div>
+
+    <div class="info-bar">
+        <div class="info-item">
+            <span class="info-label">HTTP:</span>
+            <span class="info-value">@IP</span>
+        </div>
+        <div class="info-divider"></div>
+        <div class="info-item">
+            <span class="info-label">GAME KEY:</span>
+            <span class="info-value">@GameKey</span>
+        </div>
+    </div>
 
 </main>
